@@ -1,0 +1,129 @@
+.operators-page {
+  animation: fadeIn 0.4s ease;
+}
+
+.operators-header {
+  margin-bottom: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.operators-header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.35rem;
+}
+
+.operators-header p {
+  color: var(--text-secondary);
+}
+
+.operators-search {
+  padding: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.operators-layout {
+  display: grid;
+  grid-template-columns: 1.1fr 1.4fr;
+  gap: 1rem;
+}
+
+.operators-list,
+.operator-details {
+  padding: 1rem;
+}
+
+.operators-list h2,
+.operator-details h2 {
+  font-size: 1.15rem;
+  margin-bottom: 0.75rem;
+}
+
+.operator-cards {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.operator-card {
+  width: 100%;
+  border: 1px solid var(--surface-border);
+  background: transparent;
+  color: var(--text-primary);
+  border-radius: 10px;
+  padding: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.operator-card.active {
+  border-color: var(--accent-color);
+  background: var(--accent-glow);
+}
+
+.operator-card-title {
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.operator-card p {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  margin-bottom: 0.25rem;
+}
+
+.operator-card span {
+  font-size: 0.82rem;
+  color: var(--accent-color);
+}
+
+.operator-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.operator-meta div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.operator-meta span {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.operator-details h3 {
+  font-size: 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.operator-drivers {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.operator-driver-item {
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  padding: 0.75rem;
+}
+
+.operator-driver-item p {
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  margin-top: 0.2rem;
+}
+
+.operators-state {
+  color: var(--text-secondary);
+}
+
+@media (max-width: 1100px) {
+  .operators-layout {
+    grid-template-columns: 1fr;
+  }
+}

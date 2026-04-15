@@ -1,13 +1,28 @@
 import mongoose from 'mongoose';
 
 const driverSchema = new mongoose.Schema({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-  licenseNo: { type: String, required: true, unique: true },
-  toda: { type: String, required: true },
-  plateNo: { type: String, required: true },
-  contactNo: { type: String },
-  address: { type: String },
+  operator: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Operator',
+    required: true,
+  },
+  cpdoId: { type: String, required: true, unique: true, trim: true },
+  licenseNo: { type: String, required: true, unique: true, trim: true },
+  lastName: { type: String, required: true, trim: true },
+  firstName: { type: String, required: true, trim: true },
+  middleName: { type: String, trim: true },
+  civilStatus: { type: String, trim: true },
+  age: { type: Number, min: 0 },
+  addressNo: { type: String, trim: true },
+  street: { type: String, trim: true },
+  purok: { type: String, trim: true },
+  barangay: { type: String, trim: true },
+  cityMunicipality: { type: String, trim: true },
+  contactNo: { type: String, trim: true },
+  birthMonth: { type: String, trim: true },
+  birthDate: { type: Number, min: 1, max: 31 },
+  birthYear: { type: Number, min: 1900, max: 2100 },
+  photoUrl: { type: String, trim: true },
   status: { type: String, default: 'Active' },
 }, { timestamps: true });
 

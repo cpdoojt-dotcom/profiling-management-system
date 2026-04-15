@@ -1,18 +1,31 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Mail, Lock, LogIn, Shield } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import './Login.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = location.state?.from?.pathname || '/';
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // For demo purposes, we'll just navigate to dashboard
-    console.log('Logging in with:', { email, password });
-    navigate('/');
+    setError('');
+    setIsSubmitting(true);
+
+    try {
+      await login(email, password);
+      navigate(redirectTo, { replace: true });
+    } catch (err) {
+      setError(err.response?.data?.message || 'Unable to login. Please try again.');
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -33,6 +46,11 @@ const Login = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
+          {error && (
+            <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)', color: 'var(--danger)', padding: '0.9rem', borderRadius: '8px', marginBottom: '1rem', border: '1px solid var(--danger)' }}>
+              {error}
+            </div>
+          )}
           <div className="form-group">
             <label htmlFor="email">Email Address</label>
             <div className="input-wrapper">
@@ -74,9 +92,9 @@ const Login = () => {
             <a href="#" className="forgot-password">Forgot password?</a>
           </div>
 
-          <button type="submit" className="btn-primary login-btn">
+          <button type="submit" className="btn-primary login-btn" disabled={isSubmitting}>
             <LogIn size={20} />
-            Sign In
+            {isSubmitting ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
 

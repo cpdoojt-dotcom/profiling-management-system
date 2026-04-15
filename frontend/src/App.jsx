@@ -1,6 +1,8 @@
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
+import DriversList from './pages/DriversList';
+import OperatorsPage from './pages/OperatorsPage';
 import DriverForm from './pages/DriverForm';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -19,6 +21,8 @@ function App() {
         }
       >
         <Route index element={<Dashboard />} />
+        <Route path="operators" element={<OperatorsPage />} />
+        <Route path="drivers" element={<DriversList />} />
         <Route path="drivers/new" element={<DriverForm />} />
       </Route>
     </Routes>
@@ -26,4 +30,3 @@ function App() {
 }
 
 export default App;
- Riverside

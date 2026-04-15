@@ -1,13 +1,22 @@
-import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, UserPlus, Settings } from 'lucide-react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { Building2, LayoutDashboard, List, Users, UserPlus, Settings } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import './Sidebar.css';
 
 const Sidebar = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
+
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
         <Users size={24} />
-        <span>Tricycle Profiler</span>
+        <span>Olongapo PUV Profiler</span>
       </div>
       
       <nav className="sidebar-nav">
@@ -27,13 +36,28 @@ const Sidebar = () => {
           <UserPlus size={20} />
           <span>Add Driver</span>
         </NavLink>
-        <NavLink 
-          to="/login" 
+        <NavLink
+          to="/operators"
+          className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
+        >
+          <Building2 size={20} />
+          <span>Operators</span>
+        </NavLink>
+        <NavLink
+          to="/drivers"
+          className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
+        >
+          <List size={20} />
+          <span>Driver List</span>
+        </NavLink>
+        <button
+          type="button"
           className="nav-item logout-item"
+          onClick={handleLogout}
         >
           <Settings size={20} />
           <span>Logout</span>
-        </NavLink>
+        </button>
       </nav>
     </aside>
   );

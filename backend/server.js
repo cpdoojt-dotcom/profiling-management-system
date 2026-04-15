@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import driverRoutes from './routes/driverRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import operatorRoutes from './routes/operatorRoutes.js';
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ app.use(express.json());
 // Routes
 app.use('/api/drivers', driverRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/operators', operatorRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
