@@ -13,6 +13,12 @@ const OperatorsPage = () => {
   const [addingUnit, setAddingUnit] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedOperatorId, setSelectedOperatorId] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    lastName: '', firstName: '', middleName: '', civilStatus: '', age: '',
+    addressNo: '', street: '', purok: '', barangay: '', cityMunicipality: '',
+    contactNo: '', ltfrbMchCaseNo: ''
+  });
 
   const initialUnit = {
     bodyNo: '', colorCode: '', makeType: '',
@@ -94,6 +100,60 @@ const OperatorsPage = () => {
     }
   };
 
+  const handleEditOperator = () => {
+    if (!selectedOperator) return;
+    setEditForm({
+      lastName: selectedOperator.lastName || '',
+      firstName: selectedOperator.firstName || '',
+      middleName: selectedOperator.middleName || '',
+      civilStatus: selectedOperator.civilStatus || '',
+      age: selectedOperator.age || '',
+      addressNo: selectedOperator.addressNo || '',
+      street: selectedOperator.street || '',
+      purok: selectedOperator.purok || '',
+      barangay: selectedOperator.barangay || '',
+      cityMunicipality: selectedOperator.cityMunicipality || '',
+      contactNo: selectedOperator.contactNo || '',
+      ltfrbMchCaseNo: selectedOperator.ltfrbMchCaseNo || '',
+    });
+    setIsEditing(true);
+    setActionError('');
+  };
+
+  const handleUpdateOperator = async (e) => {
+    e.preventDefault();
+    if (!selectedOperatorId) return;
+    setAddingUnit(true); // Using same loading state
+    setActionError('');
+    try {
+      const res = await axios.put(`http://localhost:5000/api/operators/${selectedOperatorId}`, editForm);
+      setOperators(prev => prev.map(op => op._id === selectedOperatorId ? { ...op, ...res.data } : op));
+      setIsEditing(false);
+    } catch (err) {
+      setActionError(err.response?.data?.message || 'Unable to update operator.');
+    } finally {
+      setAddingUnit(false);
+    }
+  };
+
+  const handleDeleteOperator = async () => {
+    if (!selectedOperatorId) return;
+    if (!window.confirm('Delete this operator profile? All associated units and drivers will be affected.')) return;
+    setAddingUnit(true);
+    setActionError('');
+    try {
+      await axios.delete(`http://localhost:5000/api/operators/${selectedOperatorId}`);
+      const remaining = operators.filter(op => op._id !== selectedOperatorId);
+      setOperators(remaining);
+      setSelectedOperatorId(remaining[0]?._id || '');
+      setIsEditing(false);
+    } catch (err) {
+      setActionError(err.response?.data?.message || 'Unable to delete operator.');
+    } finally {
+      setAddingUnit(false);
+    }
+  };
+
   return (
     <div className="operators-page animate-fade-in">
       <div className="operators-header">
@@ -148,22 +208,92 @@ const OperatorsPage = () => {
           </div>
 
           <div className="glass-panel operator-details">
-            <h2>Operator Details</h2>
-            {actionError && <p className="operators-state">{actionError}</p>}
+            <div className="details-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.6rem' }}>
+              <h2>Operator Details</h2>
+              {selectedOperator && !isEditing && (
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button className="btn-secondary" type="button" style={{ padding: '0.45rem 0.75rem', fontSize: '0.85rem' }} onClick={handleEditOperator}>Edit</button>
+                  <button className="btn-danger" type="button" onClick={handleDeleteOperator}>Delete</button>
+                </div>
+              )}
+            </div>
+
+            {actionError && <p className="operators-state" style={{ color: 'var(--danger)', marginBottom: '1rem' }}>{actionError}</p>}
+            
             {!selectedOperator ? (
               <p className="operators-state">Select an operator to view details and assigned drivers.</p>
+            ) : isEditing ? (
+              <form onSubmit={handleUpdateOperator} className="edit-form">
+                <div className="form-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+                  <div className="edit-form-group">
+                    <label>First Name</label>
+                    <input className="input-field" value={editForm.firstName} onChange={e => setEditForm({ ...editForm, firstName: e.target.value })} required />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Middle Name</label>
+                    <input className="input-field" value={editForm.middleName} onChange={e => setEditForm({ ...editForm, middleName: e.target.value })} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Last Name</label>
+                    <input className="input-field" value={editForm.lastName} onChange={e => setEditForm({ ...editForm, lastName: e.target.value })} required />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Age</label>
+                    <input type="number" className="input-field" value={editForm.age} onChange={e => setEditForm({ ...editForm, age: e.target.value })} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Civil Status</label>
+                    <input className="input-field" value={editForm.civilStatus} onChange={e => setEditForm({ ...editForm, civilStatus: e.target.value })} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Contact No.</label>
+                    <input className="input-field" value={editForm.contactNo} onChange={e => setEditForm({ ...editForm, contactNo: e.target.value })} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Address No.</label>
+                    <input className="input-field" value={editForm.addressNo} onChange={e => setEditForm({ ...editForm, addressNo: e.target.value })} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Street</label>
+                    <input className="input-field" value={editForm.street} onChange={e => setEditForm({ ...editForm, street: e.target.value })} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Purok</label>
+                    <input className="input-field" value={editForm.purok} onChange={e => setEditForm({ ...editForm, purok: e.target.value })} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Barangay</label>
+                    <input className="input-field" value={editForm.barangay} onChange={e => setEditForm({ ...editForm, barangay: e.target.value })} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>City/Municipality</label>
+                    <input className="input-field" value={editForm.cityMunicipality} onChange={e => setEditForm({ ...editForm, cityMunicipality: e.target.value })} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>LTFRB Case No.</label>
+                    <input className="input-field" value={editForm.ltfrbMchCaseNo} onChange={e => setEditForm({ ...editForm, ltfrbMchCaseNo: e.target.value })} />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.25rem' }}>
+                  <button type="button" className="btn-secondary" onClick={() => setIsEditing(false)}>Cancel</button>
+                  <button type="submit" className="btn-primary" disabled={addingUnit}>
+                    {addingUnit ? 'Saving...' : 'Save Changes'}
+                  </button>
+                </div>
+              </form>
             ) : (
               <>
-                <div style={{ marginBottom: '1rem' }}>
+                <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
                   <button className="btn-secondary" type="button" onClick={handleAddUnitClick} disabled={addingUnit}>
                     <Plus size={16} /> Add Unit
                   </button>
                 </div>
                 <div className="operator-meta">
-                  <div><span>Name:</span><strong>{selectedOperator.firstName} {selectedOperator.lastName}</strong></div>
+                  <div><span>Name:</span><strong>{selectedOperator.firstName} {selectedOperator.middleName ? selectedOperator.middleName + ' ' : ''}{selectedOperator.lastName}</strong></div>
                   <div><span>Total Units:</span><strong>{selectedOperator.unitCount || 0}</strong></div>
                   <div><span>Contact:</span><strong>{selectedOperator.contactNo || '-'}</strong></div>
                   <div><span>Area:</span><strong>{selectedOperator.barangay || '-'}, {selectedOperator.cityMunicipality || '-'}</strong></div>
+                  <div><span>LTFRB Case:</span><strong>{selectedOperator.ltfrbMchCaseNo || '-'}</strong></div>
                 </div>
 
                 <h3>Units ({selectedOperator.unitCount || 0})</h3>

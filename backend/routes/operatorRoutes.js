@@ -74,6 +74,23 @@ router.post('/:id/units', async (req, res) => {
   }
 });
 
+// Update operator details
+router.put('/:id', async (req, res) => {
+  try {
+    const operator = await Operator.findById(req.params.id);
+    if (!operator) return res.status(404).json({ message: 'Operator not found' });
+
+    const updatedData = normalizeOperatorData(req.body);
+    Object.assign(operator, updatedData);
+    
+    await operator.save();
+    
+    res.json(operator);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 // Get all operators with linked drivers
 router.get('/', async (_req, res) => {
   try {

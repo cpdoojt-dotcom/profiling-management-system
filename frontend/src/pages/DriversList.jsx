@@ -33,14 +33,11 @@ const DriversList = () => {
   const [page, setPage] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
   const [editImageFile, setEditImageFile] = useState(null);
+  const [operators, setOperators] = useState([]);
   const [editForm, setEditForm] = useState({
     driver: {
-      cpdoId: '',
-      firstName: '',
-      lastName: '',
-      licenseNo: '',
-      contactNo: '',
-      status: 'Active',
+      cpdoId: '', firstName: '', lastName: '', middleName: '', licenseNo: '', contactNo: '', status: 'Active',
+      addressNo: '', street: '', purok: '', barangay: '', cityMunicipality: '', operator: '', unit: ''
     },
   });
   const pageSize = 8;
@@ -55,16 +52,18 @@ const DriversList = () => {
   };
 
   useEffect(() => {
-    const loadDrivers = async () => {
+    const loadDriversAndOperators = async () => {
       try {
         await fetchDrivers();
+        const opRes = await axios.get('http://localhost:5000/api/operators');
+        setOperators(opRes.data);
       } catch (err) {
-        setError(err.response?.data?.message || 'Unable to load drivers.');
+        setError(err.response?.data?.message || 'Unable to load data.');
       } finally {
         setLoading(false);
       }
     };
-    loadDrivers();
+    loadDriversAndOperators();
   }, []);
 
   useEffect(() => {
@@ -133,9 +132,17 @@ const DriversList = () => {
         cpdoId: selectedDriver.cpdoId || '',
         firstName: selectedDriver.firstName || '',
         lastName: selectedDriver.lastName || '',
+        middleName: selectedDriver.middleName || '',
         licenseNo: selectedDriver.licenseNo || '',
         contactNo: selectedDriver.contactNo || '',
         status: selectedDriver.status || 'Active',
+        addressNo: selectedDriver.addressNo || '',
+        street: selectedDriver.street || '',
+        purok: selectedDriver.purok || '',
+        barangay: selectedDriver.barangay || '',
+        cityMunicipality: selectedDriver.cityMunicipality || '',
+        operator: selectedDriver.operator?._id || '',
+        unit: selectedDriver.unit?._id || '',
       },
     });
     setEditImageFile(null);
@@ -344,11 +351,15 @@ const DriversList = () => {
                     <input name="cpdoId" className="input-field" value={editForm.driver.cpdoId} onChange={handleEditChange('driver')} required />
                   </div>
                   <div className="edit-form-group">
-                    <label>Driver First Name</label>
+                    <label>First Name</label>
                     <input name="firstName" className="input-field" value={editForm.driver.firstName} onChange={handleEditChange('driver')} required />
                   </div>
                   <div className="edit-form-group">
-                    <label>Driver Last Name</label>
+                    <label>Middle Name</label>
+                    <input name="middleName" className="input-field" value={editForm.driver.middleName} onChange={handleEditChange('driver')} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Last Name</label>
                     <input name="lastName" className="input-field" value={editForm.driver.lastName} onChange={handleEditChange('driver')} required />
                   </div>
                   <div className="edit-form-group">
@@ -356,8 +367,49 @@ const DriversList = () => {
                     <input name="licenseNo" className="input-field" value={editForm.driver.licenseNo} onChange={handleEditChange('driver')} required />
                   </div>
                   <div className="edit-form-group">
+                    <label>Operator</label>
+                    <select name="operator" className="input-field" value={editForm.driver.operator} onChange={(e) => {
+                      const opId = e.target.value;
+                      const op = operators.find(o => o._id === opId);
+                      const fallbackUnit = op?.units?.[0]?._id || '';
+                      setEditForm(prev => ({ ...prev, driver: { ...prev.driver, operator: opId, unit: fallbackUnit }}));
+                    }}>
+                      <option value="">Select Operator...</option>
+                      {operators.map(op => <option key={op._id} value={op._id}>{op.firstName} {op.lastName}</option>)}
+                    </select>
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Unit (Body # / Plate #)</label>
+                    <select name="unit" className="input-field" value={editForm.driver.unit} onChange={handleEditChange('driver')} disabled={!editForm.driver.operator}>
+                      <option value="">Select Unit...</option>
+                      {(operators.find(o => o._id === editForm.driver.operator)?.units || []).map(u => (
+                        <option key={u._id} value={u._id}>Body #{u.bodyNo} | Plate {u.plateNo || '-'}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="edit-form-group">
                     <label>Contact No.</label>
                     <input name="contactNo" className="input-field" value={editForm.driver.contactNo} onChange={handleEditChange('driver')} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Address No.</label>
+                    <input name="addressNo" className="input-field" value={editForm.driver.addressNo} onChange={handleEditChange('driver')} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Street</label>
+                    <input name="street" className="input-field" value={editForm.driver.street} onChange={handleEditChange('driver')} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Purok</label>
+                    <input name="purok" className="input-field" value={editForm.driver.purok} onChange={handleEditChange('driver')} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Barangay</label>
+                    <input name="barangay" className="input-field" value={editForm.driver.barangay} onChange={handleEditChange('driver')} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>City/Municipality</label>
+                    <input name="cityMunicipality" className="input-field" value={editForm.driver.cityMunicipality} onChange={handleEditChange('driver')} />
                   </div>
                   <div className="edit-form-group">
                     <label>Status</label>
