@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import DriversList from './pages/DriversList';
 import OperatorsPage from './pages/OperatorsPage';
 import DriverForm from './pages/DriverForm';
+import OperatorForm from './pages/OperatorForm';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
@@ -22,6 +23,7 @@ function App() {
       >
         <Route index element={<Dashboard />} />
         <Route path="operators" element={<OperatorsPage />} />
+        <Route path="operators/new" element={<OperatorForm />} />
         <Route path="drivers" element={<DriversList />} />
         <Route path="drivers/new" element={<DriverForm />} />
       </Route>

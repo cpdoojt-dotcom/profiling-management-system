@@ -2,47 +2,25 @@ import express from 'express';
 import multer from 'multer';
 import Driver from '../models/Driver.js';
 import Operator from '../models/Operator.js';
+import Unit from '../models/Unit.js';
 import { uploadImageBuffer } from '../config/cloudinary.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 const parsePayload = (body) => {
-  if (body.driver) {
-    const operatorData = typeof body.operator === 'string' ? JSON.parse(body.operator) : (body.operator || {});
-    const driverData = typeof body.driver === 'string' ? JSON.parse(body.driver) : body.driver;
-    return { operatorData, driverData };
+  if (!body.driver) {
+    return typeof body === 'string' ? JSON.parse(body) : body;
   }
-  return { operatorData: {}, driverData: body };
+  return typeof body.driver === 'string' ? JSON.parse(body.driver) : body.driver;
 };
-
-const normalizeOperatorData = (operatorData) => ({
-  bodyNo: operatorData.bodyNo,
-  lastName: operatorData.lastName,
-  firstName: operatorData.firstName,
-  middleName: operatorData.middleName,
-  civilStatus: operatorData.civilStatus,
-  age: operatorData.age,
-  addressNo: operatorData.addressNo,
-  street: operatorData.street,
-  purok: operatorData.purok,
-  barangay: operatorData.barangay,
-  cityMunicipality: operatorData.cityMunicipality,
-  contactNo: operatorData.contactNo,
-  ltfrbMchCaseNo: operatorData.ltfrbMchCaseNo,
-  colorCode: operatorData.colorCode,
-  makeType: operatorData.makeType,
-  chassisNo: operatorData.chassisNo,
-  motorNo: operatorData.motorNo,
-  plateNo: operatorData.plateNo,
-  yearModel: operatorData.yearModel,
-});
 
 // Get all drivers
 router.get('/', async (req, res) => {
   try {
     const drivers = await Driver.find()
       .populate('operator')
+      .populate('unit')
       .sort({ createdAt: -1 });
     res.json(drivers);
   } catch (err) {
@@ -50,41 +28,24 @@ router.get('/', async (req, res) => {
   }
 });
 
-const upsertOperator = async (operatorData, fallbackOperatorId) => {
-  const normalizedOperator = normalizeOperatorData(operatorData);
-  if (!normalizedOperator.bodyNo && fallbackOperatorId) {
-    await Operator.findByIdAndUpdate(fallbackOperatorId, normalizedOperator, { new: true, runValidators: true });
-    return Operator.findById(fallbackOperatorId);
-  }
-
-  let operator = await Operator.findOne({ bodyNo: normalizedOperator.bodyNo });
-  if (operator) {
-    operator = await Operator.findByIdAndUpdate(operator._id, normalizedOperator, { new: true, runValidators: true });
-  } else {
-    operator = await Operator.create(normalizedOperator);
-  }
-  return operator;
-};
-
 // Create a new driver
 router.post('/', upload.single('driverImage'), async (req, res) => {
   try {
-    const { operatorData, driverData } = parsePayload(req.body);
+    const driverData = parsePayload(req.body);
     if (!driverData || Object.keys(driverData).length === 0) {
       return res.status(400).json({ message: 'Driver data is required.' });
     }
 
-    let operatorId = driverData.operator;
-    if (operatorData && Object.keys(operatorData).length > 0) {
-      if (!operatorData.bodyNo) {
-        return res.status(400).json({ message: 'Body No. is required for operator records.' });
-      }
-      const operator = await upsertOperator(operatorData);
-      operatorId = operator._id;
+    const operatorId = driverData.operator;
+    const unitId = driverData.unit;
+
+    if (!operatorId || !unitId) {
+      return res.status(400).json({ message: 'Please select an operator and unit for this driver.' });
     }
 
-    if (!operatorId) {
-      return res.status(400).json({ message: 'Please select or provide an operator for this driver.' });
+    const unit = await Unit.findById(unitId);
+    if (!unit || String(unit.operator) !== String(operatorId)) {
+      return res.status(400).json({ message: 'Selected unit does not belong to the selected operator.' });
     }
 
     const nextDriverData = { ...driverData };
@@ -97,9 +58,10 @@ router.post('/', upload.single('driverImage'), async (req, res) => {
       ...driverData,
       ...nextDriverData,
       operator: operatorId,
+      unit: unitId,
     });
     const newDriver = await driver.save();
-    const populatedDriver = await newDriver.populate('operator');
+    const populatedDriver = await newDriver.populate('operator unit');
     res.status(201).json(populatedDriver);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -110,12 +72,12 @@ router.post('/', upload.single('driverImage'), async (req, res) => {
 router.get('/meta/summary', async (_req, res) => {
   try {
     const operators = await Operator.countDocuments();
-    const totalVehicles = await Operator.distinct('bodyNo');
+    const totalVehicles = await Unit.countDocuments();
     const totalDrivers = await Driver.countDocuments();
     res.json({
       operators,
       drivers: totalDrivers,
-      vehicles: totalVehicles.length,
+      vehicles: totalVehicles,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -125,7 +87,7 @@ router.get('/meta/summary', async (_req, res) => {
 // Get a single driver
 router.get('/:id', async (req, res) => {
   try {
-    const driver = await Driver.findById(req.params.id).populate('operator');
+    const driver = await Driver.findById(req.params.id).populate('operator unit');
     if (!driver) return res.status(404).json({ message: 'Driver not found' });
     res.json(driver);
   } catch (err) {
@@ -139,10 +101,17 @@ router.put('/:id', upload.single('driverImage'), async (req, res) => {
     const driver = await Driver.findById(req.params.id);
     if (!driver) return res.status(404).json({ message: 'Driver not found' });
 
-    const { operatorData, driverData } = parsePayload(req.body);
-    if (operatorData && Object.keys(operatorData).length > 0) {
-      const operator = await upsertOperator(operatorData, driver.operator);
-      driver.operator = operator._id;
+    const driverData = parsePayload(req.body);
+    if (driverData.operator || driverData.unit) {
+      const nextOperator = driverData.operator || driver.operator;
+      const nextUnit = driverData.unit || driver.unit;
+
+      const unit = await Unit.findById(nextUnit);
+      if (!unit || String(unit.operator) !== String(nextOperator)) {
+        return res.status(400).json({ message: 'Selected unit does not belong to the selected operator.' });
+      }
+      driver.operator = nextOperator;
+      driver.unit = nextUnit;
     }
 
     const nextDriverData = { ...driverData };
@@ -153,7 +122,7 @@ router.put('/:id', upload.single('driverImage'), async (req, res) => {
 
     Object.assign(driver, nextDriverData);
     const savedDriver = await driver.save();
-    const updatedDriver = await Driver.findById(savedDriver._id).populate('operator');
+    const updatedDriver = await Driver.findById(savedDriver._id).populate('operator unit');
     res.json(updatedDriver);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -165,11 +134,6 @@ router.delete('/:id', async (req, res) => {
   try {
     const driver = await Driver.findByIdAndDelete(req.params.id);
     if (!driver) return res.status(404).json({ message: 'Driver not found' });
-
-    const stillAssigned = await Driver.exists({ operator: driver.operator });
-    if (!stillAssigned) {
-      await Operator.findByIdAndDelete(driver.operator);
-    }
 
     res.json({ message: 'Driver deleted successfully' });
   } catch (err) {

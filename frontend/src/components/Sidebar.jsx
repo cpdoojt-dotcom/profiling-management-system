@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Building2, LayoutDashboard, List, Users, UserPlus, Settings } from 'lucide-react';
+import { Building2, LayoutDashboard, List, Users, Settings } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Sidebar.css';
 
@@ -29,13 +29,6 @@ const Sidebar = () => {
           <span>Dashboard</span>
         </NavLink>
         
-        <NavLink 
-          to="/drivers/new" 
-          className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
-        >
-          <UserPlus size={20} />
-          <span>Add Driver</span>
-        </NavLink>
         <NavLink
           to="/operators"
           className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}

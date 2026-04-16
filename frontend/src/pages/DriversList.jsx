@@ -34,13 +34,6 @@ const DriversList = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editImageFile, setEditImageFile] = useState(null);
   const [editForm, setEditForm] = useState({
-    operator: {
-      bodyNo: '',
-      plateNo: '',
-      barangay: '',
-      cityMunicipality: '',
-      contactNo: '',
-    },
     driver: {
       cpdoId: '',
       firstName: '',
@@ -93,8 +86,8 @@ const DriversList = () => {
         || fullName.includes(normalizedQuery)
         || String(driver.cpdoId || '').toLowerCase().includes(normalizedQuery)
         || String(driver.licenseNo || '').toLowerCase().includes(normalizedQuery)
-        || String(driver.operator?.plateNo || '').toLowerCase().includes(normalizedQuery)
-        || String(driver.operator?.bodyNo || '').toLowerCase().includes(normalizedQuery);
+        || String(driver.unit?.plateNo || '').toLowerCase().includes(normalizedQuery)
+        || String(driver.unit?.bodyNo || '').toLowerCase().includes(normalizedQuery);
       const matchesBarangay = barangayFilter === 'all' || driver.operator?.barangay === barangayFilter;
       const matchesStatus = statusFilter === 'all'
         || String(driver.status || 'Active').toLowerCase() === statusFilter;
@@ -136,13 +129,6 @@ const DriversList = () => {
   useEffect(() => {
     if (!selectedDriver) return;
     setEditForm({
-      operator: {
-        bodyNo: selectedDriver.operator?.bodyNo || '',
-        plateNo: selectedDriver.operator?.plateNo || '',
-        barangay: selectedDriver.operator?.barangay || '',
-        cityMunicipality: selectedDriver.operator?.cityMunicipality || '',
-        contactNo: selectedDriver.operator?.contactNo || '',
-      },
       driver: {
         cpdoId: selectedDriver.cpdoId || '',
         firstName: selectedDriver.firstName || '',
@@ -183,7 +169,6 @@ const DriversList = () => {
     setActionError('');
     try {
       const payload = new FormData();
-      payload.append('operator', JSON.stringify(editForm.operator));
       payload.append('driver', JSON.stringify(editForm.driver));
       if (editImageFile) {
         payload.append('driverImage', editImageFile);
@@ -354,11 +339,6 @@ const DriversList = () => {
                   )}
                 </div>
                 <div className="edit-grid">
-                  <input name="bodyNo" placeholder="Body No." className="input-field" value={editForm.operator.bodyNo} onChange={handleEditChange('operator')} required />
-                  <input name="plateNo" placeholder="Plate No." className="input-field" value={editForm.operator.plateNo} onChange={handleEditChange('operator')} />
-                  <input name="barangay" placeholder="Barangay" className="input-field" value={editForm.operator.barangay} onChange={handleEditChange('operator')} />
-                  <input name="cityMunicipality" placeholder="City/Municipality" className="input-field" value={editForm.operator.cityMunicipality} onChange={handleEditChange('operator')} />
-                  <input name="contactNo" placeholder="Operator Contact No." className="input-field" value={editForm.operator.contactNo} onChange={handleEditChange('operator')} />
                   <input name="cpdoId" placeholder="CPDO ID" className="input-field" value={editForm.driver.cpdoId} onChange={handleEditChange('driver')} required />
                   <input name="firstName" placeholder="Driver First Name" className="input-field" value={editForm.driver.firstName} onChange={handleEditChange('driver')} required />
                   <input name="lastName" placeholder="Driver Last Name" className="input-field" value={editForm.driver.lastName} onChange={handleEditChange('driver')} required />
@@ -387,8 +367,8 @@ const DriversList = () => {
                 <div><span>CPDO ID:</span><strong>{selectedDriver.cpdoId}</strong></div>
                 <div><span>Name:</span><strong>{selectedDriver.firstName} {selectedDriver.lastName}</strong></div>
                 <div><span>License:</span><strong>{selectedDriver.licenseNo}</strong></div>
-                <div><span>Body No:</span><strong>{selectedDriver.operator?.bodyNo || '-'}</strong></div>
-                <div><span>Plate No:</span><strong>{selectedDriver.operator?.plateNo || '-'}</strong></div>
+                <div><span>Body No:</span><strong>{selectedDriver.unit?.bodyNo || '-'}</strong></div>
+                <div><span>Plate No:</span><strong>{selectedDriver.unit?.plateNo || '-'}</strong></div>
                 <div><span>Operator:</span><strong>{selectedDriver.operator?.firstName} {selectedDriver.operator?.lastName}</strong></div>
                 <div><span>Operator Area:</span><strong>{selectedDriver.operator?.barangay || '-'}, {selectedDriver.operator?.cityMunicipality || '-'}</strong></div>
                 <div><span>Contact:</span><strong>{selectedDriver.contactNo || '-'}</strong></div>

@@ -6,6 +6,11 @@ const driverSchema = new mongoose.Schema({
     ref: 'Operator',
     required: true,
   },
+  unit: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Unit',
+    required: true,
+  },
   cpdoId: { type: String, required: true, unique: true, trim: true },
   licenseNo: { type: String, required: true, unique: true, trim: true },
   lastName: { type: String, required: true, trim: true },

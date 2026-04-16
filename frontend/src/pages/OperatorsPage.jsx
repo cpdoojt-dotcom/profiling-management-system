@@ -9,6 +9,8 @@ const OperatorsPage = () => {
   const [operators, setOperators] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [actionError, setActionError] = useState('');
+  const [addingUnit, setAddingUnit] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedOperatorId, setSelectedOperatorId] = useState('');
 
@@ -30,15 +32,30 @@ const OperatorsPage = () => {
     fetchOperators();
   }, []);
 
+  const refreshOperators = async (keepSelected = true) => {
+    const res = await axios.get('http://localhost:5000/api/operators');
+    setOperators(res.data);
+    if (!keepSelected) {
+      setSelectedOperatorId(res.data[0]?._id || '');
+      return;
+    }
+    if (!res.data.some((operator) => operator._id === selectedOperatorId)) {
+      setSelectedOperatorId(res.data[0]?._id || '');
+    }
+  };
+
   const filteredOperators = useMemo(() => {
     const query = search.trim().toLowerCase();
     if (!query) return operators;
     return operators.filter((operator) => {
       const fullName = `${operator.firstName} ${operator.lastName}`.toLowerCase();
+      const unitMatches = (operator.units || []).some((unit) => (
+        String(unit.bodyNo || '').toLowerCase().includes(query)
+        || String(unit.plateNo || '').toLowerCase().includes(query)
+      ));
       return (
         fullName.includes(query)
-        || String(operator.bodyNo || '').toLowerCase().includes(query)
-        || String(operator.plateNo || '').toLowerCase().includes(query)
+        || unitMatches
       );
     });
   }, [operators, search]);
@@ -48,16 +65,33 @@ const OperatorsPage = () => {
     [filteredOperators, selectedOperatorId],
   );
 
+  const handleAddUnit = async () => {
+    if (!selectedOperatorId) return;
+    const bodyNo = window.prompt('Enter Body No. for the new unit:');
+    if (!bodyNo) return;
+    const plateNo = window.prompt('Enter Plate No. (optional):') || '';
+    setAddingUnit(true);
+    setActionError('');
+    try {
+      await axios.post(`http://localhost:5000/api/operators/${selectedOperatorId}/units`, { bodyNo, plateNo });
+      await refreshOperators(true);
+    } catch (err) {
+      setActionError(err.response?.data?.message || 'Unable to add unit.');
+    } finally {
+      setAddingUnit(false);
+    }
+  };
+
   return (
     <div className="operators-page animate-fade-in">
       <div className="operators-header">
         <div>
           <h1>Operators</h1>
-          <p>Manage operators and all drivers assigned under each operator.</p>
+          <p>Manage operators, their units, and all assigned drivers.</p>
         </div>
-        <button className="btn-primary" type="button" onClick={() => navigate('/drivers/new')}>
+        <button className="btn-primary" type="button" onClick={() => navigate('/operators/new')}>
           <Plus size={18} />
-          Add Driver/Operator
+          Add Operator
         </button>
       </div>
 
@@ -93,8 +127,8 @@ const OperatorsPage = () => {
                     <div className="operator-card-title">
                       {operator.firstName} {operator.lastName}
                     </div>
-                    <p>Body #{operator.bodyNo} | Plate {operator.plateNo || '-'}</p>
-                    <span>{operator.driverCount} driver(s)</span>
+                    <p>{operator.unitCount || 0} unit(s) | {operator.driverCount} driver(s)</p>
+                    <span>Contact: {operator.contactNo || '-'}</span>
                   </button>
                 ))}
               </div>
@@ -103,18 +137,37 @@ const OperatorsPage = () => {
 
           <div className="glass-panel operator-details">
             <h2>Operator Details</h2>
+            {actionError && <p className="operators-state">{actionError}</p>}
             {!selectedOperator ? (
               <p className="operators-state">Select an operator to view details and assigned drivers.</p>
             ) : (
               <>
+                <div style={{ marginBottom: '1rem' }}>
+                  <button className="btn-secondary" type="button" onClick={handleAddUnit} disabled={addingUnit}>
+                    {addingUnit ? 'Adding unit...' : 'Add Unit'}
+                  </button>
+                </div>
                 <div className="operator-meta">
                   <div><span>Name:</span><strong>{selectedOperator.firstName} {selectedOperator.lastName}</strong></div>
-                  <div><span>Body No:</span><strong>{selectedOperator.bodyNo || '-'}</strong></div>
-                  <div><span>Plate No:</span><strong>{selectedOperator.plateNo || '-'}</strong></div>
+                  <div><span>Total Units:</span><strong>{selectedOperator.unitCount || 0}</strong></div>
                   <div><span>Contact:</span><strong>{selectedOperator.contactNo || '-'}</strong></div>
                   <div><span>Area:</span><strong>{selectedOperator.barangay || '-'}, {selectedOperator.cityMunicipality || '-'}</strong></div>
-                  <div><span>Make/Type:</span><strong>{selectedOperator.makeType || '-'}</strong></div>
                 </div>
+
+                <h3>Units ({selectedOperator.unitCount || 0})</h3>
+                {selectedOperator.units?.length ? (
+                  <div className="operator-drivers">
+                    {selectedOperator.units.map((unit) => (
+                      <div key={unit._id} className="operator-driver-item">
+                        <strong>Body #{unit.bodyNo}</strong>
+                        <p>Plate: {unit.plateNo || '-'}</p>
+                        <p>Make/Type: {unit.makeType || '-'}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="operators-state">No units added yet.</p>
+                )}
 
                 <h3>Assigned Drivers ({selectedOperator.driverCount})</h3>
                 {selectedOperator.drivers.length === 0 ? (
@@ -125,6 +178,7 @@ const OperatorsPage = () => {
                       <div key={driver._id} className="operator-driver-item">
                         <strong>{driver.firstName} {driver.lastName}</strong>
                         <p>CPDO ID: {driver.cpdoId} | License: {driver.licenseNo}</p>
+                        <p>Assigned Unit: {driver.unit?.bodyNo || '-'}</p>
                         <p>Status: {driver.status || 'Active'}</p>
                       </div>
                     ))}

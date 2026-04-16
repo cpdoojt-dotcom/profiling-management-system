@@ -102,7 +102,7 @@ const Dashboard = () => {
                 </div>
                 <div className="recent-center">
                   <h3>{driver.firstName} {driver.lastName}</h3>
-                  <p>{driver.licenseNo} | Body #{driver.operator?.bodyNo || '-'} | Plate {driver.operator?.plateNo || '-'}</p>
+                  <p>{driver.licenseNo} | Body #{driver.unit?.bodyNo || '-'} | Plate {driver.unit?.plateNo || '-'}</p>
                 </div>
                 <span className="status-chip">{driver.status || 'Active'}</span>
               </Link>
