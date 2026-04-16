@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import './OperatorsPage.css';
 
 const OperatorsPage = () => {
@@ -13,6 +13,13 @@ const OperatorsPage = () => {
   const [addingUnit, setAddingUnit] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedOperatorId, setSelectedOperatorId] = useState('');
+
+  const initialUnit = {
+    bodyNo: '', colorCode: '', makeType: '',
+    chassisNo: '', motorNo: '', plateNo: '', yearModel: ''
+  };
+  const [showUnitModal, setShowUnitModal] = useState(false);
+  const [newUnitData, setNewUnitData] = useState(initialUnit);
 
   useEffect(() => {
     const fetchOperators = async () => {
@@ -65,16 +72,21 @@ const OperatorsPage = () => {
     [filteredOperators, selectedOperatorId],
   );
 
-  const handleAddUnit = async () => {
-    if (!selectedOperatorId) return;
-    const bodyNo = window.prompt('Enter Body No. for the new unit:');
-    if (!bodyNo) return;
-    const plateNo = window.prompt('Enter Plate No. (optional):') || '';
+  const handleAddUnitClick = () => {
+    setNewUnitData(initialUnit);
+    setActionError('');
+    setShowUnitModal(true);
+  };
+
+  const submitNewUnit = async (e) => {
+    e.preventDefault();
+    if (!selectedOperatorId || !newUnitData.bodyNo) return;
     setAddingUnit(true);
     setActionError('');
     try {
-      await axios.post(`http://localhost:5000/api/operators/${selectedOperatorId}/units`, { bodyNo, plateNo });
+      await axios.post(`http://localhost:5000/api/operators/${selectedOperatorId}/units`, newUnitData);
       await refreshOperators(true);
+      setShowUnitModal(false);
     } catch (err) {
       setActionError(err.response?.data?.message || 'Unable to add unit.');
     } finally {
@@ -143,8 +155,8 @@ const OperatorsPage = () => {
             ) : (
               <>
                 <div style={{ marginBottom: '1rem' }}>
-                  <button className="btn-secondary" type="button" onClick={handleAddUnit} disabled={addingUnit}>
-                    {addingUnit ? 'Adding unit...' : 'Add Unit'}
+                  <button className="btn-secondary" type="button" onClick={handleAddUnitClick} disabled={addingUnit}>
+                    <Plus size={16} /> Add Unit
                   </button>
                 </div>
                 <div className="operator-meta">
@@ -186,6 +198,59 @@ const OperatorsPage = () => {
                 )}
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {showUnitModal && (
+        <div className="modal-overlay">
+          <div className="modal-content animate-fade-in">
+            <div className="modal-header">
+              <h3>Add Unit to Operator</h3>
+              <button className="modal-close" onClick={() => setShowUnitModal(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={submitNewUnit}>
+              <div className="modal-body driver-form">
+                <div className="form-grid" style={{ marginBottom: 0 }}>
+                  <div className="form-group">
+                    <label>Body No.</label>
+                    <input required type="text" className="input-field" value={newUnitData.bodyNo} onChange={(e) => setNewUnitData({ ...newUnitData, bodyNo: e.target.value })} />
+                  </div>
+                  <div className="form-group">
+                    <label>Plate No.</label>
+                    <input type="text" className="input-field" value={newUnitData.plateNo} onChange={(e) => setNewUnitData({ ...newUnitData, plateNo: e.target.value })} />
+                  </div>
+                  <div className="form-group">
+                    <label>Color Code</label>
+                    <input type="text" className="input-field" value={newUnitData.colorCode} onChange={(e) => setNewUnitData({ ...newUnitData, colorCode: e.target.value })} />
+                  </div>
+                  <div className="form-group">
+                    <label>Make/Type</label>
+                    <input type="text" className="input-field" value={newUnitData.makeType} onChange={(e) => setNewUnitData({ ...newUnitData, makeType: e.target.value })} />
+                  </div>
+                  <div className="form-group">
+                    <label>Chassis No.</label>
+                    <input type="text" className="input-field" value={newUnitData.chassisNo} onChange={(e) => setNewUnitData({ ...newUnitData, chassisNo: e.target.value })} />
+                  </div>
+                  <div className="form-group">
+                    <label>Motor No.</label>
+                    <input type="text" className="input-field" value={newUnitData.motorNo} onChange={(e) => setNewUnitData({ ...newUnitData, motorNo: e.target.value })} />
+                  </div>
+                  <div className="form-group">
+                    <label>Year Model</label>
+                    <input type="text" className="input-field" value={newUnitData.yearModel} onChange={(e) => setNewUnitData({ ...newUnitData, yearModel: e.target.value })} />
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer form-actions">
+                <button type="button" className="btn-secondary" onClick={() => setShowUnitModal(false)}>Cancel</button>
+                <button type="submit" className="btn-primary" disabled={addingUnit}>
+                  {addingUnit ? 'Saving...' : 'Save Unit'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

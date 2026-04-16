@@ -339,16 +339,34 @@ const DriversList = () => {
                   )}
                 </div>
                 <div className="edit-grid">
-                  <input name="cpdoId" placeholder="CPDO ID" className="input-field" value={editForm.driver.cpdoId} onChange={handleEditChange('driver')} required />
-                  <input name="firstName" placeholder="Driver First Name" className="input-field" value={editForm.driver.firstName} onChange={handleEditChange('driver')} required />
-                  <input name="lastName" placeholder="Driver Last Name" className="input-field" value={editForm.driver.lastName} onChange={handleEditChange('driver')} required />
-                  <input name="licenseNo" placeholder="License No." className="input-field" value={editForm.driver.licenseNo} onChange={handleEditChange('driver')} required />
-                  <input name="contactNo" placeholder="Driver Contact No." className="input-field" value={editForm.driver.contactNo} onChange={handleEditChange('driver')} />
-                  <select name="status" className="input-field" value={editForm.driver.status} onChange={handleEditChange('driver')}>
-                    <option value="Active">Active</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Inactive">Inactive</option>
-                  </select>
+                  <div className="edit-form-group">
+                    <label>CPDO ID</label>
+                    <input name="cpdoId" className="input-field" value={editForm.driver.cpdoId} onChange={handleEditChange('driver')} required />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Driver First Name</label>
+                    <input name="firstName" className="input-field" value={editForm.driver.firstName} onChange={handleEditChange('driver')} required />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Driver Last Name</label>
+                    <input name="lastName" className="input-field" value={editForm.driver.lastName} onChange={handleEditChange('driver')} required />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>License No.</label>
+                    <input name="licenseNo" className="input-field" value={editForm.driver.licenseNo} onChange={handleEditChange('driver')} required />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Contact No.</label>
+                    <input name="contactNo" className="input-field" value={editForm.driver.contactNo} onChange={handleEditChange('driver')} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Status</label>
+                    <select name="status" className="input-field" value={editForm.driver.status} onChange={handleEditChange('driver')}>
+                      <option value="Active">Active</option>
+                      <option value="Pending">Pending</option>
+                      <option value="Inactive">Inactive</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="edit-actions">
                   <button type="button" className="btn-secondary" onClick={() => { setIsEditing(false); setEditImageFile(null); }}>Cancel</button>
