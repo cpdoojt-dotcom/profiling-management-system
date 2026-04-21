@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Bike, Truck, Bus } from 'lucide-react';
 import './OperatorsPage.css';
 
 const OperatorsPage = () => {
@@ -25,6 +25,7 @@ const OperatorsPage = () => {
     chassisNo: '', motorNo: '', plateNo: '', yearModel: ''
   };
   const [showUnitModal, setShowUnitModal] = useState(false);
+  const [editingUnitId, setEditingUnitId] = useState(null);
   const [newUnitData, setNewUnitData] = useState(initialUnit);
 
   useEffect(() => {
@@ -79,7 +80,26 @@ const OperatorsPage = () => {
   );
 
   const handleAddUnitClick = () => {
+    setEditingUnitId(null);
     setNewUnitData(initialUnit);
+    setActionError('');
+    setShowUnitModal(true);
+  };
+
+  const handleEditUnitClick = (unit) => {
+    setEditingUnitId(unit._id);
+    setNewUnitData({
+      bodyNo: unit.bodyNo || '',
+      plateNo: unit.plateNo || '',
+      colorCode: unit.colorCode || '',
+      makeType: unit.makeType || '',
+      chassisNo: unit.chassisNo || '',
+      motorNo: unit.motorNo || '',
+      yearModel: unit.yearModel || '',
+      vehicleType: unit.vehicleType || 'Tricycle',
+      zone: unit.zone || '',
+      conductorName: unit.conductorName || '',
+    });
     setActionError('');
     setShowUnitModal(true);
   };
@@ -90,11 +110,15 @@ const OperatorsPage = () => {
     setAddingUnit(true);
     setActionError('');
     try {
-      await axios.post(`http://localhost:5000/api/operators/${selectedOperatorId}/units`, newUnitData);
+      if (editingUnitId) {
+        await axios.put(`http://localhost:5000/api/units/${editingUnitId}`, newUnitData);
+      } else {
+        await axios.post(`http://localhost:5000/api/operators/${selectedOperatorId}/units`, newUnitData);
+      }
       await refreshOperators(true);
       setShowUnitModal(false);
     } catch (err) {
-      setActionError(err.response?.data?.message || 'Unable to add unit.');
+      setActionError(err.response?.data?.message || 'Unable to save unit.');
     } finally {
       setAddingUnit(false);
     }
@@ -106,7 +130,9 @@ const OperatorsPage = () => {
       lastName: selectedOperator.lastName || '',
       firstName: selectedOperator.firstName || '',
       middleName: selectedOperator.middleName || '',
-      civilStatus: selectedOperator.civilStatus || '',
+      civilStatus: selectedOperator.civilStatus || 'Single',
+      birthdate: selectedOperator.birthdate || '',
+      birthplace: selectedOperator.birthplace || '',
       age: selectedOperator.age || '',
       addressNo: selectedOperator.addressNo || '',
       street: selectedOperator.street || '',
@@ -208,11 +234,11 @@ const OperatorsPage = () => {
           </div>
 
           <div className="glass-panel operator-details">
-            <div className="details-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.6rem' }}>
+            <div className="details-header">
               <h2>Operator Details</h2>
               {selectedOperator && !isEditing && (
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <button className="btn-secondary" type="button" style={{ padding: '0.45rem 0.75rem', fontSize: '0.85rem' }} onClick={handleEditOperator}>Edit</button>
+                <div className="details-actions">
+                  <button className="btn-secondary" type="button" onClick={handleEditOperator}>Edit</button>
                   <button className="btn-danger" type="button" onClick={handleDeleteOperator}>Delete</button>
                 </div>
               )}
@@ -224,7 +250,7 @@ const OperatorsPage = () => {
               <p className="operators-state">Select an operator to view details and assigned drivers.</p>
             ) : isEditing ? (
               <form onSubmit={handleUpdateOperator} className="edit-form">
-                <div className="form-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+                <div className="form-grid-2col">
                   <div className="edit-form-group">
                     <label>First Name</label>
                     <input className="input-field" value={editForm.firstName} onChange={e => setEditForm({ ...editForm, firstName: e.target.value })} required />
@@ -241,9 +267,22 @@ const OperatorsPage = () => {
                     <label>Age</label>
                     <input type="number" className="input-field" value={editForm.age} onChange={e => setEditForm({ ...editForm, age: e.target.value })} />
                   </div>
-                  <div className="edit-form-group">
+                   <div className="edit-form-group">
                     <label>Civil Status</label>
-                    <input className="input-field" value={editForm.civilStatus} onChange={e => setEditForm({ ...editForm, civilStatus: e.target.value })} />
+                    <select className="input-field" value={editForm.civilStatus} onChange={e => setEditForm({ ...editForm, civilStatus: e.target.value })}>
+                      <option value="Single">Single</option>
+                      <option value="Married">Married</option>
+                      <option value="Widowed">Widowed</option>
+                      <option value="Separated">Separated</option>
+                    </select>
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Birthdate</label>
+                    <input type="date" className="input-field" value={editForm.birthdate ? editForm.birthdate.split('T')[0] : ''} onChange={e => setEditForm({ ...editForm, birthdate: e.target.value })} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Birthplace</label>
+                    <input type="text" className="input-field" value={editForm.birthplace} onChange={e => setEditForm({ ...editForm, birthplace: e.target.value })} />
                   </div>
                   <div className="edit-form-group">
                     <label>Contact No.</label>
@@ -274,7 +313,7 @@ const OperatorsPage = () => {
                     <input className="input-field" value={editForm.ltfrbMchCaseNo} onChange={e => setEditForm({ ...editForm, ltfrbMchCaseNo: e.target.value })} />
                   </div>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.25rem' }}>
+                <div className="form-actions">
                   <button type="button" className="btn-secondary" onClick={() => setIsEditing(false)}>Cancel</button>
                   <button type="submit" className="btn-primary" disabled={addingUnit}>
                     {addingUnit ? 'Saving...' : 'Save Changes'}
@@ -283,7 +322,7 @@ const OperatorsPage = () => {
               </form>
             ) : (
               <>
-                <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
+                <div className="operator-details-controls">
                   <button className="btn-secondary" type="button" onClick={handleAddUnitClick} disabled={addingUnit}>
                     <Plus size={16} /> Add Unit
                   </button>
@@ -291,6 +330,10 @@ const OperatorsPage = () => {
                 <div className="operator-meta">
                   <div><span>Name:</span><strong>{selectedOperator.firstName} {selectedOperator.middleName ? selectedOperator.middleName + ' ' : ''}{selectedOperator.lastName}</strong></div>
                   <div><span>Total Units:</span><strong>{selectedOperator.unitCount || 0}</strong></div>
+                  <div><span>Age:</span><strong>{selectedOperator.age || '-'}</strong></div>
+                  <div><span>Civil Status:</span><strong>{selectedOperator.civilStatus || '-'}</strong></div>
+                  <div><span>Birthdate:</span><strong>{selectedOperator.birthdate ? new Date(selectedOperator.birthdate).toLocaleDateString() : '-'}</strong></div>
+                  <div><span>Birthplace:</span><strong>{selectedOperator.birthplace || '-'}</strong></div>
                   <div><span>Contact:</span><strong>{selectedOperator.contactNo || '-'}</strong></div>
                   <div><span>Area:</span><strong>{selectedOperator.barangay || '-'}, {selectedOperator.cityMunicipality || '-'}</strong></div>
                   <div><span>LTFRB Case:</span><strong>{selectedOperator.ltfrbMchCaseNo || '-'}</strong></div>
@@ -300,10 +343,19 @@ const OperatorsPage = () => {
                 {selectedOperator.units?.length ? (
                   <div className="operator-drivers">
                     {selectedOperator.units.map((unit) => (
-                      <div key={unit._id} className="operator-driver-item">
-                        <strong>Body #{unit.bodyNo}</strong>
+                      <div key={unit._id} className="operator-driver-item" style={{ position: 'relative' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <strong>Body #{unit.bodyNo}</strong>
+                          <button className="btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleEditUnitClick(unit)}>Edit</button>
+                        </div>
                         <p>Plate: {unit.plateNo || '-'}</p>
-                        <p>Make/Type: {unit.makeType || '-'}</p>
+                        <p>
+                          {unit.vehicleType === 'Tricycle' ? <Bike size={14} /> : 
+                           unit.vehicleType === 'Jeepney' ? <Truck size={14} /> : 
+                           <Bus size={14} />} 
+                          {' '}{unit.vehicleType} | {unit.zone || 'No Zone'}
+                        </p>
+                        <p>Conductor: {unit.conductorName || 'None'}</p>
                       </div>
                     ))}
                   </div>
@@ -336,7 +388,7 @@ const OperatorsPage = () => {
         <div className="modal-overlay">
           <div className="modal-content animate-fade-in">
             <div className="modal-header">
-              <h3>Add Unit to Operator</h3>
+              <h3>{editingUnitId ? 'Edit Unit' : 'Add Unit to Operator'}</h3>
               <button className="modal-close" onClick={() => setShowUnitModal(false)}>
                 <X size={20} />
               </button>
@@ -371,6 +423,24 @@ const OperatorsPage = () => {
                   <div className="form-group">
                     <label>Year Model</label>
                     <input type="text" className="input-field" value={newUnitData.yearModel} onChange={(e) => setNewUnitData({ ...newUnitData, yearModel: e.target.value })} />
+                  </div>
+                  <div className="form-group">
+                    <label>Vehicle Category</label>
+                    <select className="input-field" value={newUnitData.vehicleType} onChange={(e) => setNewUnitData({ ...newUnitData, vehicleType: e.target.value })}>
+                      <option value="Tricycle">Tricycle</option>
+                      <option value="Jeepney">Jeepney</option>
+                      <option value="Mini Bus">Mini Bus</option>
+                    </select>
+                  </div>
+                  {newUnitData.vehicleType === 'Tricycle' && (
+                    <div className="form-group">
+                      <label>Zone</label>
+                      <input type="text" className="input-field" value={newUnitData.zone} onChange={(e) => setNewUnitData({ ...newUnitData, zone: e.target.value })} />
+                    </div>
+                  )}
+                  <div className="form-group">
+                    <label>Conductor Name</label>
+                    <input type="text" className="input-field" value={newUnitData.conductorName} onChange={(e) => setNewUnitData({ ...newUnitData, conductorName: e.target.value })} />
                   </div>
                 </div>
               </div>

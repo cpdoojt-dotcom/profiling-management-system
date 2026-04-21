@@ -28,7 +28,14 @@ const driverSchema = new mongoose.Schema({
   birthDate: { type: Number, min: 1, max: 31 },
   birthYear: { type: Number, min: 1900, max: 2100 },
   photoUrl: { type: String, trim: true },
+  conductorName: { type: String, trim: true },
   status: { type: String, default: 'Active' },
+  driverType: { 
+    type: String, 
+    enum: ['Tricycle', 'Jeepney', 'Mini Bus'],
+    required: true,
+    default: 'Tricycle'
+  },
 }, { timestamps: true });
 
 const Driver = mongoose.model('Driver', driverSchema);

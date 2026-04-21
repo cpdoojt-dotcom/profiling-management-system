@@ -5,6 +5,7 @@ import DriversList from './pages/DriversList';
 import OperatorsPage from './pages/OperatorsPage';
 import DriverForm from './pages/DriverForm';
 import OperatorForm from './pages/OperatorForm';
+import UnitMonitoring from './pages/UnitMonitoring';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
@@ -26,6 +27,7 @@ function App() {
         <Route path="operators/new" element={<OperatorForm />} />
         <Route path="drivers" element={<DriversList />} />
         <Route path="drivers/new" element={<DriverForm />} />
+        <Route path="monitoring" element={<UnitMonitoring />} />
       </Route>
     </Routes>
   );

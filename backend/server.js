@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import driverRoutes from './routes/driverRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import operatorRoutes from './routes/operatorRoutes.js';
+import unitRoutes from './routes/unitRoutes.js';
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use('/api/drivers', driverRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/operators', operatorRoutes);
+app.use('/api/units', unitRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)

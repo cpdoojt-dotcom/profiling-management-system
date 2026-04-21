@@ -61,6 +61,10 @@ router.post('/', upload.single('driverImage'), async (req, res) => {
       unit: unitId,
     });
     const newDriver = await driver.save();
+
+    // AUTO-SYNC: Update the Unit profile to reflect this new driver
+    await Unit.findByIdAndUpdate(unitId, { driver: newDriver._id });
+
     const populatedDriver = await newDriver.populate('operator unit');
     res.status(201).json(populatedDriver);
   } catch (err) {
@@ -74,10 +78,18 @@ router.get('/meta/summary', async (_req, res) => {
     const operators = await Operator.countDocuments();
     const totalVehicles = await Unit.countDocuments();
     const totalDrivers = await Driver.countDocuments();
+    
+    const tricycleDrivers = await Driver.countDocuments({ driverType: 'Tricycle' });
+    const jeepneyDrivers = await Driver.countDocuments({ driverType: 'Jeepney' });
+    const minibusDrivers = await Driver.countDocuments({ driverType: 'Mini Bus' });
+
     res.json({
       operators,
       drivers: totalDrivers,
       vehicles: totalVehicles,
+      tricycleDrivers,
+      jeepneyDrivers,
+      minibusDrivers,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -122,6 +134,12 @@ router.put('/:id', upload.single('driverImage'), async (req, res) => {
 
     Object.assign(driver, nextDriverData);
     const savedDriver = await driver.save();
+
+    // AUTO-SYNC: Update the Unit profile to point to this driver if it changed
+    if (driverData.unit) {
+      await Unit.findByIdAndUpdate(driverData.unit, { driver: savedDriver._id });
+    }
+
     const updatedDriver = await Driver.findById(savedDriver._id).populate('operator unit');
     res.json(updatedDriver);
   } catch (err) {

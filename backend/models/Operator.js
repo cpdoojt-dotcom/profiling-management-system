@@ -5,6 +5,8 @@ const operatorSchema = new mongoose.Schema({
   firstName: { type: String, required: true, trim: true },
   middleName: { type: String, trim: true },
   civilStatus: { type: String, trim: true },
+  birthdate: { type: Date },
+  birthplace: { type: String, trim: true },
   age: { type: Number, min: 0 },
   addressNo: { type: String, trim: true },
   street: { type: String, trim: true },
@@ -13,6 +15,12 @@ const operatorSchema = new mongoose.Schema({
   cityMunicipality: { type: String, trim: true },
   contactNo: { type: String, trim: true },
   ltfrbMchCaseNo: { type: String, trim: true },
+  operatorType: { 
+    type: String, 
+    enum: ['Tricycle', 'Jeepney', 'Mini Bus'],
+    required: true,
+    default: 'Tricycle'
+  },
 }, { timestamps: true });
 
 const Operator = mongoose.model('Operator', operatorSchema);

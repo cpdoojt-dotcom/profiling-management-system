@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Building2, LayoutDashboard, List, Users, Settings } from 'lucide-react';
+import { Building2, LayoutDashboard, List, Users, Settings, History } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Sidebar.css';
 
@@ -42,6 +42,13 @@ const Sidebar = () => {
         >
           <List size={20} />
           <span>Driver List</span>
+        </NavLink>
+        <NavLink
+          to="/monitoring"
+          className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
+        >
+          <History size={20} />
+          <span>Unit Monitoring</span>
         </NavLink>
         <button
           type="button"

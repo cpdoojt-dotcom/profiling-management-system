@@ -7,6 +7,11 @@ const unitSchema = new mongoose.Schema({
     required: true,
     index: true,
   },
+  vehicleType: { 
+    type: String, 
+    enum: ['Tricycle', 'Jeepney', 'Mini Bus'], 
+    required: true 
+  },
   bodyNo: { type: String, required: true, trim: true },
   colorCode: { type: String, trim: true },
   makeType: { type: String, trim: true },
@@ -14,6 +19,12 @@ const unitSchema = new mongoose.Schema({
   motorNo: { type: String, trim: true },
   plateNo: { type: String, trim: true },
   yearModel: { type: String, trim: true },
+  zone: { type: String, trim: true }, // Primarily for Tricycles
+  conductorName: { type: String, trim: true },
+  driver: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Driver',
+  },
 }, { timestamps: true });
 
 unitSchema.index({ operator: 1, bodyNo: 1 }, { unique: true });

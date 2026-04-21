@@ -32,13 +32,32 @@
 
 .operators-list,
 .operator-details {
-  padding: 1rem;
+  padding: 1.25rem;
 }
 
 .operators-list h2,
 .operator-details h2 {
   font-size: 1.15rem;
-  margin-bottom: 0.75rem;
+  margin: 0;
+}
+
+.details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--surface-border);
+  padding-bottom: 0.6rem;
+}
+
+.details-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.details-actions .btn-secondary {
+  padding: 0.45rem 0.75rem;
+  font-size: 0.85rem;
 }
 
 .operator-cards {
@@ -55,6 +74,12 @@
   padding: 0.85rem;
   text-align: left;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.operator-card:hover {
+  border-color: var(--accent-light);
+  background: var(--surface-hover);
 }
 
 .operator-card.active {
@@ -98,6 +123,7 @@
 
 .operator-details h3 {
   font-size: 1rem;
+  margin-top: 1.25rem;
   margin-bottom: 0.6rem;
 }
 
@@ -110,6 +136,7 @@
   border: 1px solid var(--surface-border);
   border-radius: 10px;
   padding: 0.75rem;
+  background: var(--surface-hover-subtle);
 }
 
 .operator-driver-item p {
@@ -120,12 +147,34 @@
 
 .operators-state {
   color: var(--text-secondary);
+  font-style: italic;
+  padding: 1rem 0;
 }
 
 @media (max-width: 1100px) {
   .operators-layout {
     grid-template-columns: 1fr;
   }
+}
+
+/* Modal & Forms */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.operator-details-controls {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.form-grid-2col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
 }
 
 .modal-overlay {
@@ -170,182 +219,7 @@
   color: var(--text-secondary);
   cursor: pointer;
   padding: 0.2rem;
-}
-
-.modal-close:hover {
-  color: var(--text-primary);
-.operators-page {
-  animation: fadeIn 0.4s ease;
-}
-
-.operators-header {
-  margin-bottom: 1.25rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-}
-
-.operators-header h1 {
-  font-size: 2rem;
-  margin-bottom: 0.35rem;
-}
-
-.operators-header p {
-  color: var(--text-secondary);
-}
-
-.operators-search {
-  padding: 0.9rem;
-  margin-bottom: 1rem;
-}
-
-.operators-layout {
-  display: grid;
-  grid-template-columns: 1.1fr 1.4fr;
-  gap: 1rem;
-}
-
-.operators-list,
-.operator-details {
-  padding: 1rem;
-}
-
-.operators-list h2,
-.operator-details h2 {
-  font-size: 1.15rem;
-  margin-bottom: 0.75rem;
-}
-
-.operator-cards {
-  display: grid;
-  gap: 0.7rem;
-}
-
-.operator-card {
-  width: 100%;
-  border: 1px solid var(--surface-border);
-  background: transparent;
-  color: var(--text-primary);
-  border-radius: 10px;
-  padding: 0.85rem;
-  text-align: left;
-  cursor: pointer;
-}
-
-.operator-card.active {
-  border-color: var(--accent-color);
-  background: var(--accent-glow);
-}
-
-.operator-card-title {
-  font-weight: 600;
-  margin-bottom: 0.2rem;
-}
-
-.operator-card p {
-  color: var(--text-secondary);
-  font-size: 0.88rem;
-  margin-bottom: 0.25rem;
-}
-
-.operator-card span {
-  font-size: 0.82rem;
-  color: var(--accent-color);
-}
-
-.operator-meta {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.6rem;
-  margin-bottom: 1rem;
-}
-
-.operator-meta div {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.operator-meta span {
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-}
-
-.operator-details h3 {
-  font-size: 1rem;
-  margin-bottom: 0.6rem;
-}
-
-.operator-drivers {
-  display: grid;
-  gap: 0.6rem;
-}
-
-.operator-driver-item {
-  border: 1px solid var(--surface-border);
-  border-radius: 10px;
-  padding: 0.75rem;
-}
-
-.operator-driver-item p {
-  color: var(--text-secondary);
-  font-size: 0.86rem;
-  margin-top: 0.2rem;
-}
-
-.operators-state {
-  color: var(--text-secondary);
-}
-
-@media (max-width: 1100px) {
-  .operators-layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 1rem;
-}
-
-.modal-content {
-  background: var(--surface-bg);
-  border: 1px solid var(--surface-border);
-  border-radius: 12px;
-  width: 100%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-}
-
-.modal-header {
-  padding: 1.25rem;
-  border-bottom: 1px solid var(--surface-border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-size: 1.2rem;
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  color: var(--text-secondary);
-  cursor: pointer;
-  padding: 0.2rem;
+  transition: color 0.2s;
 }
 
 .modal-close:hover {
@@ -368,6 +242,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
+  margin-bottom: 0.5rem;
 }
 
 .edit-form-group label {

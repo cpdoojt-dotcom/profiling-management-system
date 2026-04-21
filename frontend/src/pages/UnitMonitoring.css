@@ -1,0 +1,126 @@
+.monitoring-page {
+  animation: fadeIn 0.4s ease;
+}
+
+.monitoring-header {
+  margin-bottom: 2rem;
+}
+
+.monitoring-search-wrap {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.search-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.unit-card {
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid var(--surface-border);
+}
+
+.unit-card:hover {
+  border-color: var(--accent-color);
+  background: var(--accent-glow);
+}
+
+.unit-card h3 {
+  font-size: 1.25rem;
+  color: var(--accent-color);
+  margin-bottom: 0.5rem;
+}
+
+/* History Timeline */
+.timeline-section {
+  margin-top: 3rem;
+}
+
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+  border-left: 2px solid var(--surface-border);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 2.5rem;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -2.45rem;
+  top: 0.25rem;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  border: 3px solid var(--body-bg);
+}
+
+.timeline-content {
+  padding: 1.5rem;
+}
+
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--surface-border);
+  padding-bottom: 0.5rem;
+}
+
+.log-date {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.log-type {
+  font-weight: 700;
+  color: var(--accent-color);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+/* Comparison Table */
+.diff-table {
+  width: 100%;
+  font-size: 0.9rem;
+  border-collapse: collapse;
+}
+
+.diff-table th {
+  text-align: left;
+  padding: 0.5rem;
+  color: var(--text-secondary);
+  width: 120px;
+}
+
+.diff-row td {
+  padding: 0.5rem;
+}
+
+.diff-old {
+  color: #f87171;
+  text-decoration: line-through;
+  background: rgba(248, 113, 113, 0.1);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+}
+
+.diff-new {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.1);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+}
+
+.no-change {
+  color: var(--text-secondary);
+}

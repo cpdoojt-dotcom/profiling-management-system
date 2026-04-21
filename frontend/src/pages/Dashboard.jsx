@@ -1,14 +1,22 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Users, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Users, AlertTriangle, ShieldCheck, Bike, Truck, Bus } from 'lucide-react';
 import './Dashboard.css';
 
 const Dashboard = () => {
   const [drivers, setDrivers] = useState([]);
-  const [summary, setSummary] = useState({ drivers: 0, operators: 0, vehicles: 0 });
+  const [summary, setSummary] = useState({ 
+    drivers: 0, 
+    operators: 0, 
+    vehicles: 0,
+    tricycleDrivers: 0,
+    jeepneyDrivers: 0,
+    minibusDrivers: 0
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDrivers = async () => {
@@ -67,6 +75,32 @@ const Dashboard = () => {
             <h3>Total PUV Units</h3>
             <p>{summary.vehicles}</p>
           </div>
+        </div>
+      </div>
+
+      <div className="stats-categories-grid">
+        <div className="category-stat-card glass-panel" onClick={() => navigate('/drivers?type=Tricycle')}>
+          <div className="category-info">
+            <span className="category-label"><Bike size={18} /> Tricycle Drivers</span>
+            <span className="category-value">{summary.tricycleDrivers}</span>
+          </div>
+          <div className="category-action">View Directory →</div>
+        </div>
+        
+        <div className="category-stat-card glass-panel" onClick={() => navigate('/drivers?type=Jeepney')}>
+          <div className="category-info">
+            <span className="category-label"><Truck size={18} /> Jeepney Drivers</span>
+            <span className="category-value">{summary.jeepneyDrivers}</span>
+          </div>
+          <div className="category-action">View Directory →</div>
+        </div>
+
+        <div className="category-stat-card glass-panel" onClick={() => navigate('/drivers?type=Mini%20Bus')}>
+          <div className="category-info">
+            <span className="category-label"><Bus size={18} /> Mini Bus Drivers</span>
+            <span className="category-value">{summary.minibusDrivers}</span>
+          </div>
+          <div className="category-action">View Directory →</div>
         </div>
       </div>
 

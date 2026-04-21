@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowUpDown, Plus } from 'lucide-react';
+import { ArrowUpDown, Plus, Bike, Truck, Bus } from 'lucide-react';
 import axios from 'axios';
 import './DriversList.css';
 
@@ -29,7 +29,7 @@ const DriversList = () => {
   const [selectedDriverId, setSelectedDriverId] = useState('');
   const [query, setQuery] = useState('');
   const [barangayFilter, setBarangayFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
   const [editImageFile, setEditImageFile] = useState(null);
@@ -41,7 +41,9 @@ const DriversList = () => {
     },
   });
   const pageSize = 8;
-  const selectedFromQuery = new URLSearchParams(location.search).get('driverId');
+  const searchParams = new URLSearchParams(location.search);
+  const selectedFromQuery = searchParams.get('driverId');
+  const typeFromQuery = searchParams.get('type');
 
   const fetchDrivers = async () => {
     const res = await axios.get('http://localhost:5000/api/drivers');
@@ -70,7 +72,10 @@ const DriversList = () => {
     if (selectedFromQuery) {
       setSelectedDriverId(selectedFromQuery);
     }
-  }, [selectedFromQuery]);
+    if (typeFromQuery) {
+      setCategoryFilter(typeFromQuery);
+    }
+  }, [selectedFromQuery, typeFromQuery]);
 
   const barangayOptions = useMemo(
     () => [...new Set(drivers.map((driver) => driver.operator?.barangay).filter(Boolean))],
@@ -88,11 +93,11 @@ const DriversList = () => {
         || String(driver.unit?.plateNo || '').toLowerCase().includes(normalizedQuery)
         || String(driver.unit?.bodyNo || '').toLowerCase().includes(normalizedQuery);
       const matchesBarangay = barangayFilter === 'all' || driver.operator?.barangay === barangayFilter;
-      const matchesStatus = statusFilter === 'all'
-        || String(driver.status || 'Active').toLowerCase() === statusFilter;
-      return matchesQuery && matchesBarangay && matchesStatus;
+      const matchesCategory = categoryFilter === 'all'
+        || String(driver.driverType || 'Tricycle').toLowerCase() === categoryFilter.toLowerCase();
+      return matchesQuery && matchesBarangay && matchesCategory;
     });
-  }, [drivers, query, barangayFilter, statusFilter]);
+  }, [drivers, query, barangayFilter, categoryFilter]);
 
   const sortedDrivers = useMemo(() => {
     if (sortBy === 'createdAt') {
@@ -112,7 +117,7 @@ const DriversList = () => {
 
   useEffect(() => {
     setPage(1);
-  }, [query, barangayFilter, statusFilter]);
+  }, [query, barangayFilter, categoryFilter]);
 
   useEffect(() => {
     if (page > totalPages) {
@@ -237,11 +242,11 @@ const DriversList = () => {
             <option key={barangay} value={barangay}>{barangay}</option>
           ))}
         </select>
-        <select className="input-field" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-          <option value="all">All Status</option>
-          <option value="active">Active</option>
-          <option value="pending">Pending</option>
-          <option value="inactive">Inactive</option>
+        <select className="input-field" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+          <option value="all">All Category</option>
+          <option value="Tricycle">Tricycle</option>
+          <option value="Jeepney">Jeepney</option>
+          <option value="Mini Bus">Mini Bus</option>
         </select>
       </div>
 
@@ -256,28 +261,23 @@ const DriversList = () => {
               <thead>
                 <tr>
                   <th>
+                    <button type="button" className="sort-btn" onClick={() => handleSort('unit.bodyNo')}>
+                      Body # <ArrowUpDown size={14} />
+                    </button>
+                  </th>
+                  <th>
                     <button type="button" className="sort-btn" onClick={() => handleSort('lastName')}>
                       Driver Name <ArrowUpDown size={14} />
                     </button>
                   </th>
                   <th>
-                    <button type="button" className="sort-btn" onClick={() => handleSort('cpdoId')}>
-                      CPDO ID <ArrowUpDown size={14} />
+                    <button type="button" className="sort-btn" onClick={() => handleSort('unit.zone')}>
+                      Zone <ArrowUpDown size={14} />
                     </button>
                   </th>
                   <th>
-                    <button type="button" className="sort-btn" onClick={() => handleSort('licenseNo')}>
-                      License <ArrowUpDown size={14} />
-                    </button>
-                  </th>
-                  <th>
-                    <button type="button" className="sort-btn" onClick={() => handleSort('status')}>
-                      Status <ArrowUpDown size={14} />
-                    </button>
-                  </th>
-                  <th>
-                    <button type="button" className="sort-btn" onClick={() => handleSort('createdAt')}>
-                      Added <ArrowUpDown size={14} />
+                    <button type="button" className="sort-btn" onClick={() => handleSort('driverType')}>
+                      Vehicle Type <ArrowUpDown size={14} />
                     </button>
                   </th>
                 </tr>
@@ -289,11 +289,17 @@ const DriversList = () => {
                     onClick={() => setSelectedDriverId(driver._id)}
                     className={selectedDriverId === driver._id ? 'selected-row' : ''}
                   >
+                    <td style={{ fontWeight: '700', color: 'var(--accent-color)' }}>{driver.unit?.bodyNo || '-'}</td>
                     <td>{driver.firstName} {driver.lastName}</td>
-                    <td>{driver.cpdoId}</td>
-                    <td>{driver.licenseNo}</td>
-                    <td>{driver.status || 'Active'}</td>
-                    <td>{new Date(driver.createdAt).toLocaleDateString()}</td>
+                    <td>{driver.unit?.vehicleType === 'Tricycle' ? (driver.unit?.zone || 'No Zone') : 'N/A'}</td>
+                    <td>
+                      <span className={`status-type ${String(driver.driverType || 'Tricycle').toLowerCase().replace(' ', '-')}`}>
+                        {driver.driverType === 'Jeepney' ? <Truck size={14} /> : 
+                         driver.driverType === 'Mini Bus' ? <Bus size={14} /> : 
+                         <Bike size={14} />}
+                        {' '}{driver.driverType || 'Tricycle'}
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>

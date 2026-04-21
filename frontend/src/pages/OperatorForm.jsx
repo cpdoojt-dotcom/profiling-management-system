@@ -8,7 +8,9 @@ const initialOperator = {
   lastName: '',
   firstName: '',
   middleName: '',
-  civilStatus: '',
+  civilStatus: 'Single',
+  birthdate: '',
+  birthplace: '',
   age: '',
   addressNo: '',
   street: '',
@@ -17,6 +19,7 @@ const initialOperator = {
   cityMunicipality: '',
   contactNo: '',
   ltfrbMchCaseNo: '',
+  operatorType: 'Tricycle',
 };
 
 const initialUnit = {
@@ -27,6 +30,8 @@ const initialUnit = {
   motorNo: '',
   plateNo: '',
   yearModel: '',
+  vehicleType: 'Tricycle',
+  zone: '',
 };
 
 const OperatorForm = () => {
@@ -109,7 +114,20 @@ const OperatorForm = () => {
           </div>
           <div className="form-group">
             <label>Civil Status</label>
-            <input type="text" name="civilStatus" className="input-field" value={operator.civilStatus} onChange={handleOperatorChange} />
+            <select name="civilStatus" className="input-field" value={operator.civilStatus} onChange={handleOperatorChange}>
+              <option value="Single">Single</option>
+              <option value="Married">Married</option>
+              <option value="Widowed">Widowed</option>
+              <option value="Separated">Separated</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Birthdate</label>
+            <input type="date" name="birthdate" className="input-field" value={operator.birthdate} onChange={handleOperatorChange} />
+          </div>
+          <div className="form-group">
+            <label>Birthplace</label>
+            <input type="text" name="birthplace" className="input-field" value={operator.birthplace} onChange={handleOperatorChange} />
           </div>
           <div className="form-group">
             <label>Age</label>
@@ -142,6 +160,21 @@ const OperatorForm = () => {
           <div className="form-group">
             <label>LTFRB/MCH Case No.</label>
             <input type="text" name="ltfrbMchCaseNo" className="input-field" value={operator.ltfrbMchCaseNo} onChange={handleOperatorChange} />
+          </div>
+          <div className="form-group">
+            <label>Classification</label>
+            <select name="operatorType" className="input-field" value={operator.operatorType} onChange={(e) => {
+              const val = e.target.value;
+              setOperator(prev => ({ ...prev, operatorType: val }));
+              // Synchronize first unit type with operator type
+              if (units.length > 0) {
+                handleUnitChange(0, 'vehicleType', val);
+              }
+            }}>
+              <option value="Tricycle">Tricycle</option>
+              <option value="Jeepney">Jeepney</option>
+              <option value="Mini Bus">Mini Bus</option>
+            </select>
           </div>
         </div>
 
@@ -191,6 +224,20 @@ const OperatorForm = () => {
                 <label>Year Model</label>
                 <input type="text" className="input-field" value={unit.yearModel} onChange={(e) => handleUnitChange(index, 'yearModel', e.target.value)} />
               </div>
+              <div className="form-group">
+                <label>Vehicle Category</label>
+                <select className="input-field" value={unit.vehicleType} onChange={(e) => handleUnitChange(index, 'vehicleType', e.target.value)}>
+                  <option value="Tricycle">Tricycle</option>
+                  <option value="Jeepney">Jeepney</option>
+                  <option value="Mini Bus">Mini Bus</option>
+                </select>
+              </div>
+              {unit.vehicleType === 'Tricycle' && (
+                <div className="form-group animate-fade-in" style={{ borderColor: 'var(--accent-color)' }}>
+                  <label style={{ color: 'var(--accent-color)' }}>Tricycle Zone</label>
+                  <input required type="text" className="input-field" style={{ borderColor: 'var(--accent-color)' }} value={unit.zone} placeholder="Enter Zone Name..." onChange={(e) => handleUnitChange(index, 'zone', e.target.value)} />
+                </div>
+              )}
             </div>
           </div>
         ))}

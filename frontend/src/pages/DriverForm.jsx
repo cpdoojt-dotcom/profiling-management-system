@@ -22,6 +22,7 @@ const initialDriver = {
   birthDate: '',
   birthYear: '',
   status: 'Active',
+  driverType: 'Tricycle',
 };
 
 const DriverForm = () => {
@@ -54,6 +55,11 @@ const DriverForm = () => {
     const selectedOperator = operators.find((operator) => operator._id === selectedOperatorId);
     const nextUnitId = selectedOperator?.units?.[0]?._id || '';
     setSelectedUnitId(nextUnitId);
+    
+    // Auto-set driverType based on operator classification
+    if (selectedOperator?.operatorType) {
+      setDriver(prev => ({ ...prev, driverType: selectedOperator.operatorType }));
+    }
   }, [selectedOperatorId, operators]);
 
   const handleChange = (e) => {
@@ -233,6 +239,14 @@ const DriverForm = () => {
               <option value="Active">Active</option>
               <option value="Pending">Pending</option>
               <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Driver Classification</label>
+            <select name="driverType" className="input-field" value={driver.driverType} onChange={handleChange}>
+              <option value="Tricycle">Tricycle</option>
+              <option value="Jeepney">Jeepney</option>
+              <option value="Mini Bus">Mini Bus</option>
             </select>
           </div>
         </div>

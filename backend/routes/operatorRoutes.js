@@ -2,6 +2,7 @@ import express from 'express';
 import Operator from '../models/Operator.js';
 import Driver from '../models/Driver.js';
 import Unit from '../models/Unit.js';
+import UnitHistory from '../models/UnitHistory.js';
 
 const router = express.Router();
 
@@ -18,6 +19,7 @@ const normalizeOperatorData = (operatorData) => ({
   cityMunicipality: operatorData.cityMunicipality,
   contactNo: operatorData.contactNo,
   ltfrbMchCaseNo: operatorData.ltfrbMchCaseNo,
+  operatorType: operatorData.operatorType || 'Tricycle',
 });
 
 const normalizeUnitData = (unitData) => ({
@@ -28,7 +30,24 @@ const normalizeUnitData = (unitData) => ({
   motorNo: unitData.motorNo,
   plateNo: unitData.plateNo,
   yearModel: unitData.yearModel,
+  vehicleType: unitData.vehicleType || 'Tricycle',
+  zone: unitData.zone,
+  conductorName: unitData.conductorName,
 });
+
+const logUnitHistory = async (unitId, bodyNo, oldData, newData, changeType = 'Update') => {
+  try {
+    await UnitHistory.create({
+      unitId,
+      bodyNo,
+      oldData,
+      newData,
+      changeType,
+    });
+  } catch (err) {
+    console.error('Failed to log unit history:', err);
+  }
+};
 
 // Create operator record with at least one unit
 router.post('/', async (req, res) => {
@@ -47,6 +66,11 @@ router.post('/', async (req, res) => {
         operator: operator._id,
       })),
     );
+
+    // Initial history
+    for (const unit of createdUnits) {
+      await logUnitHistory(unit._id, unit.bodyNo, null, unit.toObject(), 'Creation');
+    }
 
     res.status(201).json({ ...operator.toObject(), units: createdUnits });
   } catch (err) {
@@ -68,6 +92,9 @@ router.post('/:id/units', async (req, res) => {
       ...normalizeUnitData(req.body),
       operator: operator._id,
     });
+    
+    await logUnitHistory(unit._id, unit.bodyNo, null, unit.toObject(), 'Creation');
+    
     res.status(201).json(unit);
   } catch (err) {
     res.status(400).json({ message: err.message });
