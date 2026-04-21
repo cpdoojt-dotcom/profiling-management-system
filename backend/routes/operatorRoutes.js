@@ -3,6 +3,7 @@ import Operator from '../models/Operator.js';
 import Driver from '../models/Driver.js';
 import Unit from '../models/Unit.js';
 import UnitHistory from '../models/UnitHistory.js';
+import Conductor from '../models/Conductor.js';
 
 const router = express.Router();
 
@@ -118,14 +119,20 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Get all operators with linked drivers
+// Get all operators with linked units, drivers, and conductors
 router.get('/', async (_req, res) => {
   try {
     const operators = await Operator.find().sort({ createdAt: -1 }).lean();
     const operatorIds = operators.map((operator) => operator._id);
+    
     const units = await Unit.find({ operator: { $in: operatorIds } }).sort({ bodyNo: 1 }).lean();
 
     const drivers = await Driver.find({ operator: { $in: operatorIds } })
+      .populate('unit')
+      .sort({ lastName: 1, firstName: 1 })
+      .lean();
+
+    const conductors = await Conductor.find({ operator: { $in: operatorIds } })
       .populate('unit')
       .sort({ lastName: 1, firstName: 1 })
       .lean();
@@ -139,6 +146,15 @@ router.get('/', async (_req, res) => {
       groupedDrivers.get(key).push(driver);
     });
 
+    const groupedConductors = new Map();
+    conductors.forEach((conductor) => {
+      const key = String(conductor.operator);
+      if (!groupedConductors.has(key)) {
+        groupedConductors.set(key, []);
+      }
+      groupedConductors.get(key).push(conductor);
+    });
+
     const groupedUnits = new Map();
     units.forEach((unit) => {
       const key = String(unit.operator);
@@ -150,13 +166,16 @@ router.get('/', async (_req, res) => {
 
     const payload = operators.map((operator) => {
       const linkedDrivers = groupedDrivers.get(String(operator._id)) || [];
+      const linkedConductors = groupedConductors.get(String(operator._id)) || [];
       const linkedUnits = groupedUnits.get(String(operator._id)) || [];
       return {
         ...operator,
         units: linkedUnits,
         unitCount: linkedUnits.length,
         driverCount: linkedDrivers.length,
+        conductorCount: linkedConductors.length,
         drivers: linkedDrivers,
+        conductors: linkedConductors,
       };
     });
 

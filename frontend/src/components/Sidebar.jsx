@@ -44,6 +44,13 @@ const Sidebar = () => {
           <span>Driver List</span>
         </NavLink>
         <NavLink
+          to="/conductors"
+          className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
+        >
+          <Users size={20} />
+          <span>Conductor List</span>
+        </NavLink>
+        <NavLink
           to="/monitoring"
           className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
         >

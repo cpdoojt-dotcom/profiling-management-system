@@ -225,7 +225,7 @@ const OperatorsPage = () => {
                     <div className="operator-card-title">
                       {operator.firstName} {operator.lastName}
                     </div>
-                    <p>{operator.unitCount || 0} unit(s) | {operator.driverCount} driver(s)</p>
+                    <p>{operator.unitCount || 0} unit(s) | {operator.driverCount} driver(s) | {operator.conductorCount || 0} conductor(s)</p>
                     <span>Contact: {operator.contactNo || '-'}</span>
                   </button>
                 ))}
@@ -355,7 +355,13 @@ const OperatorsPage = () => {
                            <Bus size={14} />} 
                           {' '}{unit.vehicleType} | {unit.zone || 'No Zone'}
                         </p>
-                        <p>Conductor: {unit.conductorName || 'None'}</p>
+                        <p>
+                          Conductor: {
+                            unit.conductor ? 
+                            (typeof unit.conductor === 'object' ? `${unit.conductor.firstName} ${unit.conductor.lastName}` : unit.conductor) : 
+                            (unit.conductorName || 'None')
+                          }
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -374,6 +380,22 @@ const OperatorsPage = () => {
                         <p>CPDO ID: {driver.cpdoId} | License: {driver.licenseNo}</p>
                         <p>Assigned Unit: {driver.unit?.bodyNo || '-'}</p>
                         <p>Status: {driver.status || 'Active'}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <h3>Assigned Conductors ({selectedOperator.conductorCount || 0})</h3>
+                {selectedOperator.conductors?.length === 0 ? (
+                  <p className="operators-state">No conductors assigned yet.</p>
+                ) : (
+                  <div className="operator-drivers">
+                    {selectedOperator.conductors?.map((conductor) => (
+                      <div key={conductor._id} className="operator-driver-item" style={{ borderLeftColor: 'var(--accent-color)' }}>
+                        <strong>{conductor.firstName} {conductor.lastName}</strong>
+                        <p>Status: {conductor.status || 'Active'}</p>
+                        <p>Assigned Unit: {conductor.unit?.bodyNo || '-'}</p>
+                        <p>Contact: {conductor.emergencyContactNo || '-'}</p>
                       </div>
                     ))}
                   </div>

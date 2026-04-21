@@ -6,6 +6,7 @@ import driverRoutes from './routes/driverRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import operatorRoutes from './routes/operatorRoutes.js';
 import unitRoutes from './routes/unitRoutes.js';
+import conductorRoutes from './routes/conductorRoutes.js';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use('/api/drivers', driverRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/operators', operatorRoutes);
 app.use('/api/units', unitRoutes);
+app.use('/api/conductors', conductorRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)

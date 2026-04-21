@@ -11,6 +11,7 @@ const unitHistorySchema = new mongoose.Schema({
   
   // Snapshot of what changed
   changeType: { type: String, enum: ['Creation', 'Update', 'Transfer', 'Status Change'], default: 'Update' },
+  summary: { type: String, trim: true },
   reason: { type: String, trim: true },
   
   // Data snapshot before and after

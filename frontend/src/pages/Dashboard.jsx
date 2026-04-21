@@ -10,9 +10,13 @@ const Dashboard = () => {
     drivers: 0, 
     operators: 0, 
     vehicles: 0,
+    conductors: 0,
     tricycleDrivers: 0,
     jeepneyDrivers: 0,
-    minibusDrivers: 0
+    minibusDrivers: 0,
+    tricycleUnits: 0,
+    jeepneyUnits: 0,
+    minibusUnits: 0
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -76,29 +80,49 @@ const Dashboard = () => {
             <p>{summary.vehicles}</p>
           </div>
         </div>
+
+        <div className="stat-card glass-panel">
+          <div className="stat-icon" style={{color: 'var(--accent-color)', backgroundColor: 'rgba(59, 130, 246, 0.15)'}}>
+            <Users size={24} />
+          </div>
+          <div className="stat-details">
+            <h3>Total Conductors</h3>
+            <p>{summary.conductors || 0}</p>
+          </div>
+        </div>
       </div>
 
       <div className="stats-categories-grid">
         <div className="category-stat-card glass-panel" onClick={() => navigate('/drivers?type=Tricycle')}>
           <div className="category-info">
-            <span className="category-label"><Bike size={18} /> Tricycle Drivers</span>
-            <span className="category-value">{summary.tricycleDrivers}</span>
+            <span className="category-label"><Bike size={18} /> Tricycle</span>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.4rem' }}>
+              <span className="category-value" style={{ fontSize: '1.2rem' }}>{summary.tricycleDrivers} Drivers</span>
+              <span className="category-value" style={{ fontSize: '1.2rem', color: 'var(--warning)' }}>{summary.tricycleUnits} Units</span>
+            </div>
           </div>
           <div className="category-action">View Directory →</div>
         </div>
         
         <div className="category-stat-card glass-panel" onClick={() => navigate('/drivers?type=Jeepney')}>
           <div className="category-info">
-            <span className="category-label"><Truck size={18} /> Jeepney Drivers</span>
-            <span className="category-value">{summary.jeepneyDrivers}</span>
+            <span className="category-label"><Truck size={18} /> Jeepney</span>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.4rem' }}>
+              <span className="category-value" style={{ fontSize: '1.2rem' }}>{summary.jeepneyDrivers} Drivers</span>
+              <span className="category-value" style={{ fontSize: '1.2rem', color: 'var(--warning)' }}>{summary.jeepneyUnits} Units</span>
+            </div>
           </div>
           <div className="category-action">View Directory →</div>
         </div>
 
         <div className="category-stat-card glass-panel" onClick={() => navigate('/drivers?type=Mini%20Bus')}>
           <div className="category-info">
-            <span className="category-label"><Bus size={18} /> Mini Bus Drivers</span>
-            <span className="category-value">{summary.minibusDrivers}</span>
+            <span className="category-label"><Bus size={18} /> Mini Bus</span>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.4rem' }}>
+              <span className="category-value" style={{ fontSize: '1.2rem' }}>{summary.minibusDrivers} Drv.</span>
+              <span className="category-value" style={{ fontSize: '1.2rem', color: 'var(--warning)' }}>{summary.minibusUnits} Units</span>
+              <span className="category-value" style={{ fontSize: '1.2rem', color: 'var(--accent-color)' }}>{summary.conductors} Cond.</span>
+            </div>
           </div>
           <div className="category-action">View Directory →</div>
         </div>

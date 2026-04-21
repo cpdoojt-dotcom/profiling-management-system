@@ -9,12 +9,14 @@ const UnitMonitoring = () => {
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [history, setHistory] = useState([]);
   const [assignedDrivers, setAssignedDrivers] = useState([]);
+  const [assignedConductors, setAssignedConductors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
   const [showEditModal, setShowEditModal] = useState(false);
   const [operators, setOperators] = useState([]);
   const [driversList, setDriversList] = useState([]);
+  const [conductorsList, setConductorsList] = useState([]);
   const [editFormData, setEditFormData] = useState({});
   const [saving, setSaving] = useState(false);
 
@@ -25,10 +27,11 @@ const UnitMonitoring = () => {
   const fetchInitialData = async () => {
     setLoading(true);
     try {
-      const [unitsRes, opsRes, driversRes] = await Promise.all([
+      const [unitsRes, opsRes, driversRes, conductorsRes] = await Promise.all([
         axios.get('http://localhost:5000/api/units'),
         axios.get('http://localhost:5000/api/operators'),
-        axios.get('http://localhost:5000/api/drivers')
+        axios.get('http://localhost:5000/api/drivers'),
+        axios.get('http://localhost:5000/api/conductors')
       ]);
 
       // Cross-reference drivers with units to fill in "Unassigned" gaps visually
@@ -48,6 +51,7 @@ const UnitMonitoring = () => {
       setUnits(enhancedUnits);
       setOperators(opsRes.data);
       setDriversList(allDrivers);
+      setConductorsList(conductorsRes.data);
     } catch (err) {
       setError('Unable to load monitoring data.');
     } finally {
@@ -78,6 +82,7 @@ const UnitMonitoring = () => {
       const res = await axios.get(`http://localhost:5000/api/units/history/${unit.bodyNo}`);
       setHistory(res.data.history || []);
       setAssignedDrivers(res.data.drivers || []);
+      setAssignedConductors(res.data.conductors || []);
     } catch (err) {
       setError('Failed to load history.');
     } finally {
@@ -94,7 +99,7 @@ const UnitMonitoring = () => {
       plateNo: selectedUnit.plateNo || '',
       vehicleType: selectedUnit.vehicleType || 'Tricycle',
       zone: selectedUnit.zone || '',
-      conductorName: selectedUnit.conductorName || '',
+      conductor: selectedUnit.conductor?._id || selectedUnit.conductor || '',
       operator: selectedUnit.operator?._id || selectedUnit.operator,
       driver: suggestedDriverId,
       makeType: selectedUnit.makeType || '',
@@ -195,6 +200,14 @@ const UnitMonitoring = () => {
                   (unit.assignedDriverName ? unit.assignedDriverName : 'Unassigned')
                 }
               </p>
+              {unit.vehicleType === 'Mini Bus' && (
+                <p>
+                  <User size={14} style={{ color: 'var(--accent-color)' }} /> 
+                  <strong>Conductor:</strong> {
+                    unit.conductor ? `${unit.conductor.firstName} ${unit.conductor.lastName}` : 'Unassigned'
+                  }
+                </p>
+              )}
               <p><MapPin size={14} /> {unit.zone || 'No Zone'}</p>
             </div>
           ))}
@@ -230,6 +243,22 @@ const UnitMonitoring = () => {
             </div>
           )}
 
+          {assignedConductors.length > 0 && (
+            <div className="assigned-drivers-list glass-panel" style={{ marginBottom: '2rem', padding: '1.5rem', borderLeft: '4px solid var(--accent-color)' }}>
+              <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.1rem' }}>
+                <User size={18} /> Currently Assigned Conductors ({assignedConductors.length})
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+                {assignedConductors.map(cond => (
+                  <div key={cond._id} className="driver-mini-card" style={{ padding: '0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <strong style={{ display: 'block', fontSize: '1rem', color: '#fff' }}>{cond.firstName} {cond.lastName}</strong>
+                    <div style={{ fontSize: '0.85rem', marginTop: '0.4rem', color: 'var(--accent-color)', fontWeight: '600' }}>Status: {cond.status || 'Active'}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {history.length === 0 ? (
             <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center' }}>
               <History size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
@@ -242,7 +271,7 @@ const UnitMonitoring = () => {
                   <div className="timeline-dot"></div>
                   <div className="glass-panel timeline-content">
                     <div className="log-header">
-                      <span className="log-type">{log.changeType}</span>
+                      <span className="log-type">{log.summary || log.changeType}</span>
                       <span className="log-date">{new Date(log.createdAt).toLocaleString()}</span>
                     </div>
 
@@ -319,10 +348,19 @@ const UnitMonitoring = () => {
                       <input type="text" className="input-field" value={editFormData.zone} onChange={e => setEditFormData({...editFormData, zone: e.target.value})} />
                     </div>
                   )}
-                  <div className="form-group">
-                    <label>Conductor Name</label>
-                    <input type="text" className="input-field" value={editFormData.conductorName} onChange={e => setEditFormData({...editFormData, conductorName: e.target.value})} />
-                  </div>
+                  {editFormData.vehicleType === 'Mini Bus' && (
+                    <div className="form-group">
+                      <label>Conductor Profile</label>
+                      <select className="input-field" value={editFormData.conductor} onChange={e => setEditFormData({...editFormData, conductor: e.target.value})}>
+                        <option value="">-- No Conductor Assigned --</option>
+                        {conductorsList.map(c => (
+                          <option key={c._id} value={c._id}>
+                            {c.firstName} {c.lastName} (ID: {c.cpdoId})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                   <div className="form-group">
                     <label>Plate Number</label>
                     <input type="text" className="input-field" value={editFormData.plateNo} onChange={e => setEditFormData({...editFormData, plateNo: e.target.value})} />

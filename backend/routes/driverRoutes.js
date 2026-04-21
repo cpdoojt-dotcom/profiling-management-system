@@ -3,6 +3,7 @@ import multer from 'multer';
 import Driver from '../models/Driver.js';
 import Operator from '../models/Operator.js';
 import Unit from '../models/Unit.js';
+import Conductor from '../models/Conductor.js';
 import { uploadImageBuffer } from '../config/cloudinary.js';
 
 const router = express.Router();
@@ -82,14 +83,23 @@ router.get('/meta/summary', async (_req, res) => {
     const tricycleDrivers = await Driver.countDocuments({ driverType: 'Tricycle' });
     const jeepneyDrivers = await Driver.countDocuments({ driverType: 'Jeepney' });
     const minibusDrivers = await Driver.countDocuments({ driverType: 'Mini Bus' });
+    const totalConductors = await Conductor.countDocuments();
+
+    const tricycleUnits = await Unit.countDocuments({ vehicleType: 'Tricycle' });
+    const jeepneyUnits = await Unit.countDocuments({ vehicleType: 'Jeepney' });
+    const minibusUnits = await Unit.countDocuments({ vehicleType: 'Mini Bus' });
 
     res.json({
       operators,
       drivers: totalDrivers,
       vehicles: totalVehicles,
+      conductors: totalConductors,
       tricycleDrivers,
       jeepneyDrivers,
       minibusDrivers,
+      tricycleUnits,
+      jeepneyUnits,
+      minibusUnits
     });
   } catch (err) {
     res.status(500).json({ message: err.message });

@@ -36,7 +36,7 @@ const DriversList = () => {
   const [operators, setOperators] = useState([]);
   const [editForm, setEditForm] = useState({
     driver: {
-      cpdoId: '', firstName: '', lastName: '', middleName: '', licenseNo: '', contactNo: '', status: 'Active',
+      cpdoId: '', firstName: '', lastName: '', middleName: '', licenseNo: '', licenseExpiryDate: '', licenseRestrictions: '', contactNo: '', status: 'Active',
       addressNo: '', street: '', purok: '', barangay: '', cityMunicipality: '', operator: '', unit: ''
     },
   });
@@ -48,9 +48,6 @@ const DriversList = () => {
   const fetchDrivers = async () => {
     const res = await axios.get('http://localhost:5000/api/drivers');
     setDrivers(res.data);
-    if (res.data[0]?._id && !selectedDriverId) {
-      setSelectedDriverId(res.data[0]._id);
-    }
   };
 
   useEffect(() => {
@@ -139,6 +136,8 @@ const DriversList = () => {
         lastName: selectedDriver.lastName || '',
         middleName: selectedDriver.middleName || '',
         licenseNo: selectedDriver.licenseNo || '',
+        licenseExpiryDate: selectedDriver.licenseExpiryDate || '',
+        licenseRestrictions: selectedDriver.licenseRestrictions || '',
         contactNo: selectedDriver.contactNo || '',
         status: selectedDriver.status || 'Active',
         addressNo: selectedDriver.addressNo || '',
@@ -373,6 +372,14 @@ const DriversList = () => {
                     <input name="licenseNo" className="input-field" value={editForm.driver.licenseNo} onChange={handleEditChange('driver')} required />
                   </div>
                   <div className="edit-form-group">
+                    <label>License Expiry</label>
+                    <input type="date" name="licenseExpiryDate" className="input-field" value={editForm.driver.licenseExpiryDate} onChange={handleEditChange('driver')} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Restrictions</label>
+                    <input name="licenseRestrictions" className="input-field" value={editForm.driver.licenseRestrictions} onChange={handleEditChange('driver')} />
+                  </div>
+                  <div className="edit-form-group">
                     <label>Operator</label>
                     <select name="operator" className="input-field" value={editForm.driver.operator} onChange={(e) => {
                       const opId = e.target.value;
@@ -443,6 +450,8 @@ const DriversList = () => {
                 <div><span>CPDO ID:</span><strong>{selectedDriver.cpdoId}</strong></div>
                 <div><span>Name:</span><strong>{selectedDriver.firstName} {selectedDriver.lastName}</strong></div>
                 <div><span>License:</span><strong>{selectedDriver.licenseNo}</strong></div>
+                <div><span>Expiry:</span><strong>{selectedDriver.licenseExpiryDate || '-'}</strong></div>
+                <div><span>Restrictions:</span><strong>{selectedDriver.licenseRestrictions || '-'}</strong></div>
                 <div><span>Body No:</span><strong>{selectedDriver.unit?.bodyNo || '-'}</strong></div>
                 <div><span>Plate No:</span><strong>{selectedDriver.unit?.plateNo || '-'}</strong></div>
                 <div><span>Operator:</span><strong>{selectedDriver.operator?.firstName} {selectedDriver.operator?.lastName}</strong></div>
