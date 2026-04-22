@@ -47,7 +47,24 @@ const OperatorForm = () => {
   };
 
   const handleUnitChange = (index, field, value) => {
-    setUnits((prev) => prev.map((unit, idx) => (idx === index ? { ...unit, [field]: value } : unit)));
+    setUnits((prev) => prev.map((unit, idx) => {
+      if (idx === index) {
+        let updated = { ...unit, [field]: value };
+        // Auto-fill logic
+        const bodyNo = (field === 'bodyNo' ? value : unit.bodyNo) || '';
+        const vehicleType = field === 'vehicleType' ? value : unit.vehicleType;
+        const firstChar = bodyNo.charAt(0);
+        if (vehicleType === 'Tricycle') {
+          if (bodyNo.startsWith('BB')) {
+            updated.zone = 'BB';
+          } else if (firstChar >= '1' && firstChar <= '9') {
+            updated.zone = `Zone ${firstChar}`;
+          }
+        }
+        return updated;
+      }
+      return unit;
+    }));
   };
 
   const addUnit = () => {
@@ -166,10 +183,23 @@ const OperatorForm = () => {
             <select name="operatorType" className="input-field" value={operator.operatorType} onChange={(e) => {
               const val = e.target.value;
               setOperator(prev => ({ ...prev, operatorType: val }));
-              // Synchronize first unit type with operator type
-              if (units.length > 0) {
-                handleUnitChange(0, 'vehicleType', val);
-              }
+              // Synchronize ALL units' vehicle type with operator classification
+              setUnits(prev => prev.map(unit => {
+                const updated = { ...unit, vehicleType: val };
+                // Also trigger zone logic for tricycle
+                if (val === 'Tricycle') {
+                  const bodyNo = unit.bodyNo || '';
+                  const firstChar = bodyNo.charAt(0);
+                  if (bodyNo.startsWith('BB')) {
+                    updated.zone = 'BB';
+                  } else if (firstChar >= '1' && firstChar <= '9') {
+                    updated.zone = `Zone ${firstChar}`;
+                  }
+                } else {
+                  updated.zone = ''; // Clear zone for non-tricycles
+                }
+                return updated;
+              }));
             }}>
               <option value="Tricycle">Tricycle</option>
               <option value="Jeepney">Jeepney</option>
@@ -180,7 +210,14 @@ const OperatorForm = () => {
 
         <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span>Unit Information</span>
-          <button className="btn-secondary" type="button" onClick={addUnit}>
+          <button className="btn-secondary" type="button" onClick={() => {
+            const newUnit = { ...initialUnit, vehicleType: operator.operatorType };
+            // Apply zone logic for the new unit if tricycle
+            if (operator.operatorType === 'Tricycle') {
+              // Leave zone empty as bodyNo is empty
+            }
+            setUnits(prev => [...prev, newUnit]);
+          }}>
             <Plus size={16} />
             Add Another Unit
           </button>
@@ -226,7 +263,13 @@ const OperatorForm = () => {
               </div>
               <div className="form-group">
                 <label>Vehicle Category</label>
-                <select className="input-field" value={unit.vehicleType} onChange={(e) => handleUnitChange(index, 'vehicleType', e.target.value)}>
+                <select 
+                  className="input-field" 
+                  style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }} 
+                  value={unit.vehicleType} 
+                  disabled 
+                  onChange={(e) => handleUnitChange(index, 'vehicleType', e.target.value)}
+                >
                   <option value="Tricycle">Tricycle</option>
                   <option value="Jeepney">Jeepney</option>
                   <option value="Mini Bus">Mini Bus</option>

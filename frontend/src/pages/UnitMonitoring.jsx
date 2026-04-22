@@ -314,7 +314,29 @@ const UnitMonitoring = () => {
                   </div>
                   <div className="form-group">
                     <label>Current Operator</label>
-                    <select className="input-field" value={editFormData.operator} onChange={e => setEditFormData({...editFormData, operator: e.target.value})}>
+                    <select 
+                      className="input-field" 
+                      value={editFormData.operator} 
+                      onChange={e => {
+                        const opId = e.target.value;
+                        const op = operators.find(o => o._id === opId);
+                        const updated = { ...editFormData, operator: opId };
+                        if (op && op.operatorType) {
+                          updated.vehicleType = op.operatorType;
+                          // Trigger zone logic if it became Tricycle
+                          if (op.operatorType === 'Tricycle') {
+                            const bodyNo = editFormData.bodyNo || '';
+                            const firstChar = bodyNo.charAt(0);
+                            if (bodyNo.startsWith('BB')) {
+                              updated.zone = 'BB';
+                            } else if (firstChar >= '1' && firstChar <= '9') {
+                              updated.zone = `Zone ${firstChar}`;
+                            }
+                          }
+                        }
+                        setEditFormData(updated);
+                      }}
+                    >
                       {operators.map(op => (
                         <option key={op._id} value={op._id}>{op.firstName} {op.lastName}</option>
                       ))}
@@ -336,7 +358,26 @@ const UnitMonitoring = () => {
                   </div>
                   <div className="form-group">
                     <label>Vehicle Type</label>
-                    <select className="input-field" value={editFormData.vehicleType} onChange={e => setEditFormData({...editFormData, vehicleType: e.target.value})}>
+                    <select 
+                      className="input-field" 
+                      style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
+                      value={editFormData.vehicleType} 
+                      disabled
+                      onChange={e => {
+                        const val = e.target.value;
+                        const updated = { ...editFormData, vehicleType: val };
+                        const bodyNo = editFormData.bodyNo || '';
+                        const firstChar = bodyNo.charAt(0);
+                        if (val === 'Tricycle') {
+                          if (bodyNo.startsWith('BB')) {
+                            updated.zone = 'BB';
+                          } else if (firstChar >= '1' && firstChar <= '9') {
+                            updated.zone = `Zone ${firstChar}`;
+                          }
+                        }
+                        setEditFormData(updated);
+                      }}
+                    >
                       <option value="Tricycle">Tricycle</option>
                       <option value="Jeepney">Jeepney</option>
                       <option value="Mini Bus">Mini Bus</option>

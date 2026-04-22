@@ -253,7 +253,14 @@ const DriverForm = () => {
           </div>
           <div className="form-group">
             <label>Driver Classification</label>
-            <select name="driverType" className="input-field" value={driver.driverType} onChange={handleChange}>
+            <select 
+              name="driverType" 
+              className="input-field" 
+              style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
+              value={driver.driverType} 
+              disabled 
+              onChange={handleChange}
+            >
               <option value="Tricycle">Tricycle</option>
               <option value="Jeepney">Jeepney</option>
               <option value="Mini Bus">Mini Bus</option>

@@ -22,7 +22,8 @@ const OperatorsPage = () => {
 
   const initialUnit = {
     bodyNo: '', colorCode: '', makeType: '',
-    chassisNo: '', motorNo: '', plateNo: '', yearModel: ''
+    chassisNo: '', motorNo: '', plateNo: '', yearModel: '',
+    vehicleType: 'Tricycle', zone: ''
   };
   const [showUnitModal, setShowUnitModal] = useState(false);
   const [editingUnitId, setEditingUnitId] = useState(null);
@@ -81,7 +82,10 @@ const OperatorsPage = () => {
 
   const handleAddUnitClick = () => {
     setEditingUnitId(null);
-    setNewUnitData(initialUnit);
+    setNewUnitData({
+      ...initialUnit,
+      vehicleType: selectedOperator?.operatorType || 'Tricycle'
+    });
     setActionError('');
     setShowUnitModal(true);
   };
@@ -141,6 +145,7 @@ const OperatorsPage = () => {
       cityMunicipality: selectedOperator.cityMunicipality || '',
       contactNo: selectedOperator.contactNo || '',
       ltfrbMchCaseNo: selectedOperator.ltfrbMchCaseNo || '',
+      operatorType: selectedOperator.operatorType || 'Tricycle',
     });
     setIsEditing(true);
     setActionError('');
@@ -312,6 +317,14 @@ const OperatorsPage = () => {
                     <label>LTFRB Case No.</label>
                     <input className="input-field" value={editForm.ltfrbMchCaseNo} onChange={e => setEditForm({ ...editForm, ltfrbMchCaseNo: e.target.value })} />
                   </div>
+                  <div className="edit-form-group">
+                    <label>Classification</label>
+                    <select className="input-field" value={editForm.operatorType} onChange={e => setEditForm({ ...editForm, operatorType: e.target.value })}>
+                      <option value="Tricycle">Tricycle</option>
+                      <option value="Jeepney">Jeepney</option>
+                      <option value="Mini Bus">Mini Bus</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="form-actions">
                   <button type="button" className="btn-secondary" onClick={() => setIsEditing(false)}>Cancel</button>
@@ -329,6 +342,7 @@ const OperatorsPage = () => {
                 </div>
                 <div className="operator-meta">
                   <div><span>Name:</span><strong>{selectedOperator.firstName} {selectedOperator.middleName ? selectedOperator.middleName + ' ' : ''}{selectedOperator.lastName}</strong></div>
+                  <div><span>Classification:</span><strong>{selectedOperator.operatorType || '-'}</strong></div>
                   <div><span>Total Units:</span><strong>{selectedOperator.unitCount || 0}</strong></div>
                   <div><span>Age:</span><strong>{selectedOperator.age || '-'}</strong></div>
                   <div><span>Civil Status:</span><strong>{selectedOperator.civilStatus || '-'}</strong></div>
@@ -420,7 +434,25 @@ const OperatorsPage = () => {
                 <div className="form-grid" style={{ marginBottom: 0 }}>
                   <div className="form-group">
                     <label>Body No.</label>
-                    <input required type="text" className="input-field" value={newUnitData.bodyNo} onChange={(e) => setNewUnitData({ ...newUnitData, bodyNo: e.target.value })} />
+                    <input 
+                      required 
+                      type="text" 
+                      className="input-field" 
+                      value={newUnitData.bodyNo} 
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const updated = { ...newUnitData, bodyNo: val };
+                        const firstChar = val.charAt(0);
+                        if (newUnitData.vehicleType === 'Tricycle') {
+                          if (val.startsWith('BB')) {
+                            updated.zone = 'BB';
+                          } else if (firstChar >= '1' && firstChar <= '9') {
+                            updated.zone = `Zone ${firstChar}`;
+                          }
+                        }
+                        setNewUnitData(updated);
+                      }} 
+                    />
                   </div>
                   <div className="form-group">
                     <label>Plate No.</label>
@@ -448,7 +480,26 @@ const OperatorsPage = () => {
                   </div>
                   <div className="form-group">
                     <label>Vehicle Category</label>
-                    <select className="input-field" value={newUnitData.vehicleType} onChange={(e) => setNewUnitData({ ...newUnitData, vehicleType: e.target.value })}>
+                    <select 
+                      className="input-field" 
+                      style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
+                      value={newUnitData.vehicleType} 
+                      disabled
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const updated = { ...newUnitData, vehicleType: val };
+                        const bodyNo = newUnitData.bodyNo || '';
+                        const firstChar = bodyNo.charAt(0);
+                        if (val === 'Tricycle') {
+                          if (bodyNo.startsWith('BB')) {
+                            updated.zone = 'BB';
+                          } else if (firstChar >= '1' && firstChar <= '9') {
+                            updated.zone = `Zone ${firstChar}`;
+                          }
+                        }
+                        setNewUnitData(updated);
+                      }}
+                    >
                       <option value="Tricycle">Tricycle</option>
                       <option value="Jeepney">Jeepney</option>
                       <option value="Mini Bus">Mini Bus</option>

@@ -250,3 +250,11 @@
   font-size: 0.85rem;
   font-weight: 500;
 }
+
+.input-field:disabled {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: var(--text-secondary) !important;
+  cursor: not-allowed;
+  border-color: var(--surface-border);
+  opacity: 0.8;
+}
