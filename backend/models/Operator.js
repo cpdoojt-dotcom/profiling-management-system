@@ -14,12 +14,11 @@ const operatorSchema = new mongoose.Schema({
   barangay: { type: String, trim: true },
   cityMunicipality: { type: String, trim: true },
   contactNo: { type: String, trim: true },
-  ltfrbMchCaseNo: { type: String, trim: true },
   operatorType: { 
     type: String, 
-    enum: ['Tricycle', 'Jeepney', 'Mini Bus'],
+    enum: ['FOR HIRE', 'Tricycle', 'Jeepney', 'Mini Bus'],
     required: true,
-    default: 'Tricycle'
+    default: 'FOR HIRE'
   },
 }, { timestamps: true });
 

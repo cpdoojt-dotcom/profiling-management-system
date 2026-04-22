@@ -17,13 +17,13 @@ const OperatorsPage = () => {
   const [editForm, setEditForm] = useState({
     lastName: '', firstName: '', middleName: '', civilStatus: '', age: '',
     addressNo: '', street: '', purok: '', barangay: '', cityMunicipality: '',
-    contactNo: '', ltfrbMchCaseNo: ''
+    contactNo: ''
   });
 
   const initialUnit = {
     bodyNo: '', colorCode: '', makeType: '',
     chassisNo: '', motorNo: '', plateNo: '', yearModel: '',
-    vehicleType: 'Tricycle', zone: ''
+    vehicleType: 'Tricycle', zone: '', ltfrbMchCaseNo: ''
   };
   const [showUnitModal, setShowUnitModal] = useState(false);
   const [editingUnitId, setEditingUnitId] = useState(null);
@@ -84,7 +84,7 @@ const OperatorsPage = () => {
     setEditingUnitId(null);
     setNewUnitData({
       ...initialUnit,
-      vehicleType: selectedOperator?.operatorType || 'Tricycle'
+      vehicleType: 'Tricycle'
     });
     setActionError('');
     setShowUnitModal(true);
@@ -102,6 +102,7 @@ const OperatorsPage = () => {
       yearModel: unit.yearModel || '',
       vehicleType: unit.vehicleType || 'Tricycle',
       zone: unit.zone || '',
+      ltfrbMchCaseNo: unit.ltfrbMchCaseNo || '',
       conductorName: unit.conductorName || '',
     });
     setActionError('');
@@ -144,8 +145,8 @@ const OperatorsPage = () => {
       barangay: selectedOperator.barangay || '',
       cityMunicipality: selectedOperator.cityMunicipality || '',
       contactNo: selectedOperator.contactNo || '',
-      ltfrbMchCaseNo: selectedOperator.ltfrbMchCaseNo || '',
-      operatorType: selectedOperator.operatorType || 'Tricycle',
+      contactNo: selectedOperator.contactNo || '',
+      operatorType: 'FOR HIRE',
     });
     setIsEditing(true);
     setActionError('');
@@ -314,16 +315,13 @@ const OperatorsPage = () => {
                     <input className="input-field" value={editForm.cityMunicipality} onChange={e => setEditForm({ ...editForm, cityMunicipality: e.target.value })} />
                   </div>
                   <div className="edit-form-group">
-                    <label>LTFRB Case No.</label>
-                    <input className="input-field" value={editForm.ltfrbMchCaseNo} onChange={e => setEditForm({ ...editForm, ltfrbMchCaseNo: e.target.value })} />
-                  </div>
-                  <div className="edit-form-group">
                     <label>Classification</label>
-                    <select className="input-field" value={editForm.operatorType} onChange={e => setEditForm({ ...editForm, operatorType: e.target.value })}>
-                      <option value="Tricycle">Tricycle</option>
-                      <option value="Jeepney">Jeepney</option>
-                      <option value="Mini Bus">Mini Bus</option>
-                    </select>
+                    <input 
+                      readOnly 
+                      className="input-field" 
+                      style={{ background: 'var(--surface-bg)', opacity: 0.7 }} 
+                      value={editForm.operatorType} 
+                    />
                   </div>
                 </div>
                 <div className="form-actions">
@@ -350,7 +348,6 @@ const OperatorsPage = () => {
                   <div><span>Birthplace:</span><strong>{selectedOperator.birthplace || '-'}</strong></div>
                   <div><span>Contact:</span><strong>{selectedOperator.contactNo || '-'}</strong></div>
                   <div><span>Area:</span><strong>{selectedOperator.barangay || '-'}, {selectedOperator.cityMunicipality || '-'}</strong></div>
-                  <div><span>LTFRB Case:</span><strong>{selectedOperator.ltfrbMchCaseNo || '-'}</strong></div>
                 </div>
 
                 <h3>Units ({selectedOperator.unitCount || 0})</h3>
@@ -367,7 +364,7 @@ const OperatorsPage = () => {
                           {unit.vehicleType === 'Tricycle' ? <Bike size={14} /> : 
                            unit.vehicleType === 'Jeepney' ? <Truck size={14} /> : 
                            <Bus size={14} />} 
-                          {' '}{unit.vehicleType} | {unit.zone || 'No Zone'}
+                          {' '}{unit.vehicleType} | {unit.vehicleType === 'Tricycle' ? (unit.zone || 'No Zone') : (unit.ltfrbMchCaseNo || 'No LTFRB No.')}
                         </p>
                         <p>
                           Conductor: {
@@ -482,9 +479,7 @@ const OperatorsPage = () => {
                     <label>Vehicle Category</label>
                     <select 
                       className="input-field" 
-                      style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
                       value={newUnitData.vehicleType} 
-                      disabled
                       onChange={(e) => {
                         const val = e.target.value;
                         const updated = { ...newUnitData, vehicleType: val };
@@ -509,6 +504,12 @@ const OperatorsPage = () => {
                     <div className="form-group">
                       <label>Zone</label>
                       <input type="text" className="input-field" value={newUnitData.zone} onChange={(e) => setNewUnitData({ ...newUnitData, zone: e.target.value })} />
+                    </div>
+                  )}
+                  {(newUnitData.vehicleType === 'Jeepney' || newUnitData.vehicleType === 'Mini Bus') && (
+                    <div className="form-group" style={{ borderColor: 'var(--accent-color)' }}>
+                      <label style={{ color: 'var(--accent-color)' }}>LTFRB Case No.</label>
+                      <input type="text" className="input-field" style={{ borderColor: 'var(--accent-color)' }} value={newUnitData.ltfrbMchCaseNo} onChange={(e) => setNewUnitData({ ...newUnitData, ltfrbMchCaseNo: e.target.value })} />
                     </div>
                   )}
                   <div className="form-group">

@@ -107,6 +107,7 @@ const UnitMonitoring = () => {
       chassisNo: selectedUnit.chassisNo || '',
       motorNo: selectedUnit.motorNo || '',
       colorCode: selectedUnit.colorCode || '',
+      ltfrbMchCaseNo: selectedUnit.ltfrbMchCaseNo || '',
     });
     setShowEditModal(true);
   };
@@ -287,6 +288,7 @@ const UnitMonitoring = () => {
                         <DiffRow label="Chassis No" oldVal={log.oldData?.chassisNo} newVal={log.newData?.chassisNo} />
                         <DiffRow label="Motor No" oldVal={log.oldData?.motorNo} newVal={log.newData?.motorNo} />
                         <DiffRow label="Zone" oldVal={log.oldData?.zone} newVal={log.newData?.zone} />
+                        <DiffRow label="LTFRB Case" oldVal={log.oldData?.ltfrbMchCaseNo} newVal={log.newData?.ltfrbMchCaseNo} />
                         <DiffRow label="Conductor" oldVal={log.oldData?.conductorName} newVal={log.newData?.conductorName} />
                       </tbody>
                     </table>
@@ -321,19 +323,7 @@ const UnitMonitoring = () => {
                         const opId = e.target.value;
                         const op = operators.find(o => o._id === opId);
                         const updated = { ...editFormData, operator: opId };
-                        if (op && op.operatorType) {
-                          updated.vehicleType = op.operatorType;
-                          // Trigger zone logic if it became Tricycle
-                          if (op.operatorType === 'Tricycle') {
-                            const bodyNo = editFormData.bodyNo || '';
-                            const firstChar = bodyNo.charAt(0);
-                            if (bodyNo.startsWith('BB')) {
-                              updated.zone = 'BB';
-                            } else if (firstChar >= '1' && firstChar <= '9') {
-                              updated.zone = `Zone ${firstChar}`;
-                            }
-                          }
-                        }
+                        // No longer syncing with operatorType as it's now 'FOR HIRE'
                         setEditFormData(updated);
                       }}
                     >
@@ -360,9 +350,7 @@ const UnitMonitoring = () => {
                     <label>Vehicle Type</label>
                     <select 
                       className="input-field" 
-                      style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
                       value={editFormData.vehicleType} 
-                      disabled
                       onChange={e => {
                         const val = e.target.value;
                         const updated = { ...editFormData, vehicleType: val };
@@ -387,6 +375,12 @@ const UnitMonitoring = () => {
                     <div className="form-group">
                       <label>Zone</label>
                       <input type="text" className="input-field" value={editFormData.zone} onChange={e => setEditFormData({...editFormData, zone: e.target.value})} />
+                    </div>
+                  )}
+                  {(editFormData.vehicleType === 'Jeepney' || editFormData.vehicleType === 'Mini Bus') && (
+                    <div className="form-group" style={{ borderColor: 'var(--accent-color)' }}>
+                      <label style={{ color: 'var(--accent-color)' }}>LTFRB Case No.</label>
+                      <input type="text" className="input-field" style={{ borderColor: 'var(--accent-color)' }} value={editFormData.ltfrbMchCaseNo} onChange={e => setEditFormData({...editFormData, ltfrbMchCaseNo: e.target.value})} />
                     </div>
                   )}
                   {editFormData.vehicleType === 'Mini Bus' && (

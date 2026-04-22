@@ -20,6 +20,7 @@ const unitSchema = new mongoose.Schema({
   plateNo: { type: String, trim: true },
   yearModel: { type: String, trim: true },
   zone: { type: String, trim: true }, // Primarily for Tricycles
+  ltfrbMchCaseNo: { type: String, trim: true },
   conductor: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Conductor',

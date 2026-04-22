@@ -55,14 +55,23 @@ const DriverForm = () => {
 
   useEffect(() => {
     const selectedOperator = operators.find((operator) => operator._id === selectedOperatorId);
-    const nextUnitId = selectedOperator?.units?.[0]?._id || '';
+    const firstUnit = selectedOperator?.units?.[0];
+    const nextUnitId = firstUnit?._id || '';
     setSelectedUnitId(nextUnitId);
     
-    // Auto-set driverType based on operator classification
-    if (selectedOperator?.operatorType) {
-      setDriver(prev => ({ ...prev, driverType: selectedOperator.operatorType }));
+    // Auto-set driverType based on unit's vehicle category if available
+    if (firstUnit?.vehicleType) {
+      setDriver(prev => ({ ...prev, driverType: firstUnit.vehicleType }));
     }
   }, [selectedOperatorId, operators]);
+
+  useEffect(() => {
+    const selectedOperator = operators.find((operator) => operator._id === selectedOperatorId);
+    const selectedUnit = selectedOperator?.units?.find(u => u._id === selectedUnitId);
+    if (selectedUnit?.vehicleType) {
+      setDriver(prev => ({ ...prev, driverType: selectedUnit.vehicleType }));
+    }
+  }, [selectedUnitId, selectedOperatorId, operators]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -256,9 +265,7 @@ const DriverForm = () => {
             <select 
               name="driverType" 
               className="input-field" 
-              style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
               value={driver.driverType} 
-              disabled 
               onChange={handleChange}
             >
               <option value="Tricycle">Tricycle</option>

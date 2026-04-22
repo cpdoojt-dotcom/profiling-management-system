@@ -18,8 +18,7 @@ const initialOperator = {
   barangay: '',
   cityMunicipality: '',
   contactNo: '',
-  ltfrbMchCaseNo: '',
-  operatorType: 'Tricycle',
+  operatorType: 'FOR HIRE',
 };
 
 const initialUnit = {
@@ -32,6 +31,7 @@ const initialUnit = {
   yearModel: '',
   vehicleType: 'Tricycle',
   zone: '',
+  ltfrbMchCaseNo: '',
 };
 
 const OperatorForm = () => {
@@ -175,36 +175,13 @@ const OperatorForm = () => {
             <input type="text" name="cityMunicipality" className="input-field" value={operator.cityMunicipality} onChange={handleOperatorChange} />
           </div>
           <div className="form-group">
-            <label>LTFRB/MCH Case No.</label>
-            <input type="text" name="ltfrbMchCaseNo" className="input-field" value={operator.ltfrbMchCaseNo} onChange={handleOperatorChange} />
-          </div>
-          <div className="form-group">
             <label>Classification</label>
-            <select name="operatorType" className="input-field" value={operator.operatorType} onChange={(e) => {
-              const val = e.target.value;
-              setOperator(prev => ({ ...prev, operatorType: val }));
-              // Synchronize ALL units' vehicle type with operator classification
-              setUnits(prev => prev.map(unit => {
-                const updated = { ...unit, vehicleType: val };
-                // Also trigger zone logic for tricycle
-                if (val === 'Tricycle') {
-                  const bodyNo = unit.bodyNo || '';
-                  const firstChar = bodyNo.charAt(0);
-                  if (bodyNo.startsWith('BB')) {
-                    updated.zone = 'BB';
-                  } else if (firstChar >= '1' && firstChar <= '9') {
-                    updated.zone = `Zone ${firstChar}`;
-                  }
-                } else {
-                  updated.zone = ''; // Clear zone for non-tricycles
-                }
-                return updated;
-              }));
-            }}>
-              <option value="Tricycle">Tricycle</option>
-              <option value="Jeepney">Jeepney</option>
-              <option value="Mini Bus">Mini Bus</option>
-            </select>
+            <input 
+              readOnly 
+              className="input-field" 
+              style={{ background: 'var(--surface-bg)', opacity: 0.7 }} 
+              value={operator.operatorType} 
+            />
           </div>
         </div>
 
@@ -265,9 +242,7 @@ const OperatorForm = () => {
                 <label>Vehicle Category</label>
                 <select 
                   className="input-field" 
-                  style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }} 
                   value={unit.vehicleType} 
-                  disabled 
                   onChange={(e) => handleUnitChange(index, 'vehicleType', e.target.value)}
                 >
                   <option value="Tricycle">Tricycle</option>
@@ -279,6 +254,12 @@ const OperatorForm = () => {
                 <div className="form-group animate-fade-in" style={{ borderColor: 'var(--accent-color)' }}>
                   <label style={{ color: 'var(--accent-color)' }}>Tricycle Zone</label>
                   <input required type="text" className="input-field" style={{ borderColor: 'var(--accent-color)' }} value={unit.zone} placeholder="Enter Zone Name..." onChange={(e) => handleUnitChange(index, 'zone', e.target.value)} />
+                </div>
+              )}
+              {(unit.vehicleType === 'Jeepney' || unit.vehicleType === 'Mini Bus') && (
+                <div className="form-group animate-fade-in" style={{ borderColor: 'var(--accent-color)' }}>
+                  <label style={{ color: 'var(--accent-color)' }}>LTFRB/MCH Case No.</label>
+                  <input required type="text" className="input-field" style={{ borderColor: 'var(--accent-color)' }} value={unit.ltfrbMchCaseNo} placeholder="Enter Case Number..." onChange={(e) => handleUnitChange(index, 'ltfrbMchCaseNo', e.target.value)} />
                 </div>
               )}
             </div>
