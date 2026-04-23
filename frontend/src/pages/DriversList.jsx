@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowUpDown, Plus, Bike, Truck, Bus } from 'lucide-react';
 import axios from 'axios';
+import { useConfirm } from '../context/ConfirmContext';
 import './DriversList.css';
 
 const sortDrivers = (items, sortBy, direction) => {
@@ -19,6 +20,7 @@ const sortDrivers = (items, sortBy, direction) => {
 const DriversList = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const confirm = useConfirm();
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -176,6 +178,7 @@ const DriversList = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     if (!selectedDriverId) return;
+    if (!await confirm('Are you sure you want to save changes to this driver profile?')) return;
     setActionLoading(true);
     setActionError('');
     try {
@@ -198,7 +201,7 @@ const DriversList = () => {
 
   const handleDelete = async () => {
     if (!selectedDriverId) return;
-    if (!window.confirm('Delete this driver profile? This action cannot be undone.')) return;
+    if (!await confirm('Delete this driver profile? This action cannot be undone.')) return;
     setActionLoading(true);
     setActionError('');
     try {

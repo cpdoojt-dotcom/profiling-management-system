@@ -1,9 +1,44 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Search, History, ArrowRight, User, MapPin, Truck, Edit, X, Save, Bike, Bus } from 'lucide-react';
+import { useConfirm } from '../context/ConfirmContext';
 import './UnitMonitoring.css';
 
+const getColorOptions = (bodyNo, vehicleType) => {
+  if (!bodyNo) return [];
+  const bn = bodyNo.toUpperCase();
+  if (vehicleType === 'Tricycle') {
+    if (bn.startsWith('1')) return ['ORANGE'];
+    if (bn.startsWith('2')) return ['GREEN'];
+    if (bn.startsWith('3')) return ['BLUE'];
+    if (bn.startsWith('4')) return ['BROWN'];
+    if (bn.startsWith('BB')) return ['SILVER'];
+    if (bn.startsWith('5')) return ['CREAM'];
+    if (bn.startsWith('6')) return ['YELLOW'];
+    if (bn.startsWith('7')) return ['RED'];
+    if (bn.startsWith('8')) return ['SKYBLUE W/ CREAM TOP'];
+    if (bn.startsWith('9')) return ['SKY BLUE W/RED TOP'];
+  } else if (vehicleType === 'Jeepney') {
+    if (bn.startsWith('JO1')) return ['YELLOW'];
+    if (bn.startsWith('JO2')) return ['ORANGE'];
+    if (bn.startsWith('JO3')) return ['RED'];
+    if (bn.startsWith('JO4')) return ['YELLOW GREEN'];
+    if (bn.startsWith('JO5')) return ['CREAM'];
+    if (bn.startsWith('JO6')) return ['BROWN'];
+    if (bn.startsWith('JO7')) return ['GREEN W/WHITE TOP'];
+    if (bn.startsWith('JO8')) return ['DARKBLUE', 'DARKBLUE W/ YELLOW TOP'];
+    if (bn.startsWith('JO9')) return ['SKYBLUE', 'SKYBLUE W/ WHITE TOP'];
+    if (bn.startsWith('J10') || bn.startsWith('J11')) return ['YELLOW W/RED TOP'];
+    if (bn.startsWith('J12') || bn.startsWith('J13')) return ['SKYBLUE W/GOLD TOP'];
+  } else if (vehicleType === 'Mini Bus') {
+    if (bn.startsWith('O-B')) return ['DIRTY WHITE WITH GREEN STRIPES'];
+    if (bn.startsWith('O-Z')) return ['WHITE WITH BLUE STRIPES'];
+  }
+  return [];
+};
+
 const UnitMonitoring = () => {
+  const confirm = useConfirm();
   const [query, setQuery] = useState('');
   const [units, setUnits] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState(null);
@@ -114,6 +149,7 @@ const UnitMonitoring = () => {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    if (!await confirm('Are you sure you want to save changes to this unit?')) return;
     setSaving(true);
     try {
       const res = await axios.put(`http://localhost:5000/api/units/${selectedUnit._id}`, editFormData);
@@ -363,6 +399,16 @@ const UnitMonitoring = () => {
                             updated.zone = `Zone ${firstChar}`;
                           }
                         }
+                        
+                        const colorOpts = getColorOptions(bodyNo, val);
+                        if (colorOpts.length === 1) {
+                          updated.colorCode = colorOpts[0];
+                        } else if (colorOpts.length > 1) {
+                          if (!colorOpts.includes(updated.colorCode)) {
+                            updated.colorCode = '';
+                          }
+                        }
+                        
                         setEditFormData(updated);
                       }}
                     >
@@ -410,7 +456,18 @@ const UnitMonitoring = () => {
                   </div>
                   <div className="form-group">
                     <label>Color Code</label>
-                    <input type="text" className="input-field" value={editFormData.colorCode} onChange={e => setEditFormData({...editFormData, colorCode: e.target.value})} />
+                    {getColorOptions(editFormData.bodyNo, editFormData.vehicleType).length > 1 ? (
+                      <select 
+                        className="input-field" 
+                        value={editFormData.colorCode} 
+                        onChange={e => setEditFormData({...editFormData, colorCode: e.target.value})}
+                      >
+                        <option value="">-- Select Color --</option>
+                        {getColorOptions(editFormData.bodyNo, editFormData.vehicleType).map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    ) : (
+                      <input type="text" className="input-field" value={editFormData.colorCode} onChange={e => setEditFormData({...editFormData, colorCode: e.target.value})} />
+                    )}
                   </div>
                   <div className="form-group">
                     <label>Chassis Number</label>

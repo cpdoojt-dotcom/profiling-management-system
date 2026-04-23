@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Save, X } from 'lucide-react';
+import { useConfirm } from '../context/ConfirmContext';
 import './DriverForm.css'; // Reusing driver form styles
 
 const initialConductor = {
@@ -22,6 +23,7 @@ const initialConductor = {
 
 const ConductorForm = () => {
   const navigate = useNavigate();
+  const confirm = useConfirm();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [operators, setOperators] = useState([]);
@@ -65,6 +67,7 @@ const ConductorForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!await confirm('Are you sure you want to add this new Conductor?')) return;
     setLoading(true);
     setError('');
     try {

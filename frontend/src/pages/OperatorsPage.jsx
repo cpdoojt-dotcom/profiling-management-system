@@ -2,10 +2,45 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Plus, X, Bike, Truck, Bus } from 'lucide-react';
+import { useConfirm } from '../context/ConfirmContext';
 import './OperatorsPage.css';
+
+const getColorOptions = (bodyNo, vehicleType) => {
+  if (!bodyNo) return [];
+  const bn = bodyNo.toUpperCase();
+  if (vehicleType === 'Tricycle') {
+    if (bn.startsWith('1')) return ['ORANGE'];
+    if (bn.startsWith('2')) return ['GREEN'];
+    if (bn.startsWith('3')) return ['BLUE'];
+    if (bn.startsWith('4')) return ['BROWN'];
+    if (bn.startsWith('BB')) return ['SILVER'];
+    if (bn.startsWith('5')) return ['CREAM'];
+    if (bn.startsWith('6')) return ['YELLOW'];
+    if (bn.startsWith('7')) return ['RED'];
+    if (bn.startsWith('8')) return ['SKYBLUE W/ CREAM TOP'];
+    if (bn.startsWith('9')) return ['SKY BLUE W/RED TOP'];
+  } else if (vehicleType === 'Jeepney') {
+    if (bn.startsWith('JO1')) return ['YELLOW'];
+    if (bn.startsWith('JO2')) return ['ORANGE'];
+    if (bn.startsWith('JO3')) return ['RED'];
+    if (bn.startsWith('JO4')) return ['YELLOW GREEN'];
+    if (bn.startsWith('JO5')) return ['CREAM'];
+    if (bn.startsWith('JO6')) return ['BROWN'];
+    if (bn.startsWith('JO7')) return ['GREEN W/WHITE TOP'];
+    if (bn.startsWith('JO8')) return ['DARKBLUE', 'DARKBLUE W/ YELLOW TOP'];
+    if (bn.startsWith('JO9')) return ['SKYBLUE', 'SKYBLUE W/ WHITE TOP'];
+    if (bn.startsWith('J10') || bn.startsWith('J11')) return ['YELLOW W/RED TOP'];
+    if (bn.startsWith('J12') || bn.startsWith('J13')) return ['SKYBLUE W/GOLD TOP'];
+  } else if (vehicleType === 'Mini Bus') {
+    if (bn.startsWith('O-B')) return ['DIRTY WHITE WITH GREEN STRIPES'];
+    if (bn.startsWith('O-Z')) return ['WHITE WITH BLUE STRIPES'];
+  }
+  return [];
+};
 
 const OperatorsPage = () => {
   const navigate = useNavigate();
+  const confirm = useConfirm();
   const [operators, setOperators] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -112,6 +147,8 @@ const OperatorsPage = () => {
   const submitNewUnit = async (e) => {
     e.preventDefault();
     if (!selectedOperatorId || !newUnitData.bodyNo) return;
+    const actionText = editingUnitId ? 'update this unit' : 'add this new unit';
+    if (!await confirm(`Are you sure you want to ${actionText}?`)) return;
     setAddingUnit(true);
     setActionError('');
     try {
@@ -155,6 +192,7 @@ const OperatorsPage = () => {
   const handleUpdateOperator = async (e) => {
     e.preventDefault();
     if (!selectedOperatorId) return;
+    if (!await confirm('Are you sure you want to save changes to this operator profile?')) return;
     setAddingUnit(true); // Using same loading state
     setActionError('');
     try {
@@ -170,7 +208,7 @@ const OperatorsPage = () => {
 
   const handleDeleteOperator = async () => {
     if (!selectedOperatorId) return;
-    if (!window.confirm('Delete this operator profile? All associated units and drivers will be affected.')) return;
+    if (!await confirm('Delete this operator profile? All associated units and drivers will be affected.')) return;
     setAddingUnit(true);
     setActionError('');
     try {
@@ -439,14 +477,31 @@ const OperatorsPage = () => {
                       onChange={(e) => {
                         const val = e.target.value;
                         const updated = { ...newUnitData, bodyNo: val };
+                        
+                        const bn = val.toUpperCase();
+                        if (/^[1-9]/.test(bn) || bn.startsWith('BB')) updated.vehicleType = 'Tricycle';
+                        else if (bn.startsWith('JO') || /^J1[0-3]/.test(bn)) updated.vehicleType = 'Jeepney';
+                        else if (bn.startsWith('O-B') || bn.startsWith('O-Z')) updated.vehicleType = 'Mini Bus';
+                        
+                        const vehicleType = updated.vehicleType || newUnitData.vehicleType;
                         const firstChar = val.charAt(0);
-                        if (newUnitData.vehicleType === 'Tricycle') {
+                        if (vehicleType === 'Tricycle') {
                           if (val.startsWith('BB')) {
                             updated.zone = 'BB';
                           } else if (firstChar >= '1' && firstChar <= '9') {
                             updated.zone = `Zone ${firstChar}`;
                           }
                         }
+                        
+                        const colorOpts = getColorOptions(val, vehicleType);
+                        if (colorOpts.length === 1) {
+                          updated.colorCode = colorOpts[0];
+                        } else if (colorOpts.length > 1) {
+                          if (!colorOpts.includes(updated.colorCode)) {
+                            updated.colorCode = '';
+                          }
+                        }
+
                         setNewUnitData(updated);
                       }} 
                     />
@@ -457,7 +512,18 @@ const OperatorsPage = () => {
                   </div>
                   <div className="form-group">
                     <label>Color Code</label>
-                    <input type="text" className="input-field" value={newUnitData.colorCode} onChange={(e) => setNewUnitData({ ...newUnitData, colorCode: e.target.value })} />
+                    {getColorOptions(newUnitData.bodyNo, newUnitData.vehicleType).length > 1 ? (
+                      <select 
+                        className="input-field" 
+                        value={newUnitData.colorCode} 
+                        onChange={(e) => setNewUnitData({ ...newUnitData, colorCode: e.target.value })}
+                      >
+                        <option value="">-- Select Color --</option>
+                        {getColorOptions(newUnitData.bodyNo, newUnitData.vehicleType).map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    ) : (
+                      <input type="text" className="input-field" value={newUnitData.colorCode} onChange={(e) => setNewUnitData({ ...newUnitData, colorCode: e.target.value })} />
+                    )}
                   </div>
                   <div className="form-group">
                     <label>Make/Type</label>
@@ -492,6 +558,16 @@ const OperatorsPage = () => {
                             updated.zone = `Zone ${firstChar}`;
                           }
                         }
+                        
+                        const colorOpts = getColorOptions(bodyNo, val);
+                        if (colorOpts.length === 1) {
+                          updated.colorCode = colorOpts[0];
+                        } else if (colorOpts.length > 1) {
+                          if (!colorOpts.includes(updated.colorCode)) {
+                            updated.colorCode = '';
+                          }
+                        }
+
                         setNewUnitData(updated);
                       }}
                     >

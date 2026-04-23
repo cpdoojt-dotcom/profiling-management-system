@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowUpDown, Plus, Bus } from 'lucide-react';
 import axios from 'axios';
+import { useConfirm } from '../context/ConfirmContext';
 import './DriversList.css'; // Reusing drivers list styles
 
 const sortConductors = (items, sortBy, direction) => {
@@ -19,6 +20,7 @@ const sortConductors = (items, sortBy, direction) => {
 const ConductorList = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const confirm = useConfirm();
   const [conductors, setConductors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -159,6 +161,7 @@ const ConductorList = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     if (!selectedConductorId) return;
+    if (!await confirm('Are you sure you want to save changes to this conductor profile?')) return;
     setActionLoading(true);
     setActionError('');
     try {
@@ -181,7 +184,7 @@ const ConductorList = () => {
 
   const handleDelete = async () => {
     if (!selectedConductorId) return;
-    if (!window.confirm('Delete this conductor profile? This action cannot be undone.')) return;
+    if (!await confirm('Delete this conductor profile? This action cannot be undone.')) return;
     setActionLoading(true);
     setActionError('');
     try {
