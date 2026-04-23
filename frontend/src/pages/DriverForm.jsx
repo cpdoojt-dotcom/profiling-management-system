@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Save, X } from 'lucide-react';
 import { useConfirm } from '../context/ConfirmContext';
+import { useToast } from '../context/ToastContext';
 import './DriverForm.css';
 
 const initialDriver = {
@@ -31,6 +32,7 @@ const initialDriver = {
 const DriverForm = () => {
   const navigate = useNavigate();
   const confirm = useConfirm();
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [operators, setOperators] = useState([]);
@@ -111,9 +113,12 @@ const DriverForm = () => {
         payload.append('driverImage', driverImage);
       }
       await axios.post('http://localhost:5000/api/drivers', payload);
+      toast.success('Driver registered successfully!');
       navigate('/drivers');
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong. Please try again.');
+      const msg = err.response?.data?.message || 'Something went wrong. Please try again.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

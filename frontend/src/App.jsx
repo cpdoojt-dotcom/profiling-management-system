@@ -11,32 +11,35 @@ import ConductorForm from './pages/ConductorForm';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import { ConfirmProvider } from './context/ConfirmContext';
+import { ToastProvider } from './context/ToastContext';
 import './App.css';
 
 function App() {
   return (
-    <ConfirmProvider>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route 
-          path="/" 
-          element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Dashboard />} />
-          <Route path="operators" element={<OperatorsPage />} />
-          <Route path="operators/new" element={<OperatorForm />} />
-          <Route path="drivers" element={<DriversList />} />
-          <Route path="drivers/new" element={<DriverForm />} />
-          <Route path="conductors" element={<ConductorList />} />
-          <Route path="conductors/new" element={<ConductorForm />} />
-          <Route path="monitoring" element={<UnitMonitoring />} />
-        </Route>
-      </Routes>
-    </ConfirmProvider>
+    <ToastProvider>
+      <ConfirmProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route 
+            path="/" 
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Dashboard />} />
+            <Route path="operators" element={<OperatorsPage />} />
+            <Route path="operators/new" element={<OperatorForm />} />
+            <Route path="drivers" element={<DriversList />} />
+            <Route path="drivers/new" element={<DriverForm />} />
+            <Route path="conductors" element={<ConductorList />} />
+            <Route path="conductors/new" element={<ConductorForm />} />
+            <Route path="monitoring" element={<UnitMonitoring />} />
+          </Route>
+        </Routes>
+      </ConfirmProvider>
+    </ToastProvider>
   );
 }
 

@@ -16,7 +16,7 @@ const Sidebar = () => {
     <aside className="sidebar">
       <div className="sidebar-brand">
         <Users size={24} />
-        <span>Olongapo PUV Profiler</span>
+        <span>PUV-GO : PUV Profiler</span>
       </div>
       
       <nav className="sidebar-nav">

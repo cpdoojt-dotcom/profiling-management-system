@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Search, History, ArrowRight, User, MapPin, Truck, Edit, X, Save, Bike, Bus } from 'lucide-react';
 import { useConfirm } from '../context/ConfirmContext';
+import { useToast } from '../context/ToastContext';
 import './UnitMonitoring.css';
 
 const getColorOptions = (bodyNo, vehicleType) => {
@@ -39,6 +40,7 @@ const getColorOptions = (bodyNo, vehicleType) => {
 
 const UnitMonitoring = () => {
   const confirm = useConfirm();
+  const toast = useToast();
   const [query, setQuery] = useState('');
   const [units, setUnits] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState(null);
@@ -54,6 +56,7 @@ const UnitMonitoring = () => {
   const [conductorsList, setConductorsList] = useState([]);
   const [editFormData, setEditFormData] = useState({});
   const [saving, setSaving] = useState(false);
+  const [filterType, setFilterType] = useState('all');
 
   useEffect(() => {
     fetchInitialData();
@@ -96,9 +99,12 @@ const UnitMonitoring = () => {
 
   const searchUnits = async (e) => {
     e.preventDefault();
-    if (!query.trim()) return;
-    setLoading(true);
     setError('');
+    if (!query.trim()) {
+      fetchInitialData();
+      return;
+    }
+    setLoading(true);
     try {
       const res = await axios.get(`http://localhost:5000/api/units/search/${query}`);
       setUnits(res.data);
@@ -160,10 +166,12 @@ const UnitMonitoring = () => {
       updatedUnit.driver = drv;
       setSelectedUnit(updatedUnit);
       await viewHistory(updatedUnit);
+      toast.success('Unit information updated successfully!');
       setShowEditModal(false);
       fetchInitialData();
     } catch (err) {
-      alert('Failed to update unit properly.');
+      const msg = err.response?.data?.message || 'Failed to update unit properly.';
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
@@ -191,12 +199,12 @@ const UnitMonitoring = () => {
     );
   };
 
-  const getVehicleIcon = (type) => {
+  const getVehicleIcon = (type, size = 16) => {
     switch (type) {
-      case 'Tricycle': return <Bike size={16} />;
-      case 'Jeepney': return <Truck size={16} />;
-      case 'Mini Bus': return <Bus size={16} />;
-      default: return <Truck size={16} />;
+      case 'Tricycle': return <Bike size={size} />;
+      case 'Jeepney': return <Truck size={size} />;
+      case 'Mini Bus': return <Bus size={size} />;
+      default: return <Truck size={size} />;
     }
   };
 
@@ -207,47 +215,89 @@ const UnitMonitoring = () => {
         <p>Track the history and changes of any vehicle by its Body Number.</p>
       </div>
 
-      <form className="monitoring-search-wrap" onSubmit={searchUnits}>
-        <input 
-          type="text" 
-          placeholder="Enter Body Number or Plate Number..." 
-          className="input-field"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <button className="btn-primary" type="submit" disabled={loading}>
-          <Search size={18} />
-          {loading ? 'Searching...' : 'Search'}
-        </button>
-      </form>
+      <div className="monitoring-search-wrap">
+        <form style={{ display: 'flex', flexGrow: 1, gap: '1rem' }} onSubmit={searchUnits}>
+          <input 
+            type="text" 
+            placeholder="Enter Body Number or Plate Number..." 
+            className="input-field"
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              if (!e.target.value.trim()) setError('');
+            }}
+          />
+          <button className="btn-primary" type="submit" disabled={loading}>
+            <Search size={18} />
+            {loading ? 'Searching...' : 'Search'}
+          </button>
+        </form>
+        <select 
+          className="input-field" 
+          style={{ maxWidth: '200px' }} 
+          value={filterType} 
+          onChange={(e) => setFilterType(e.target.value)}
+        >
+          <option value="all">All Unit Types</option>
+          <option value="Tricycle">Tricycle</option>
+          <option value="Jeepney">Jeepney</option>
+          <option value="Mini Bus">Mini Bus</option>
+        </select>
+      </div>
 
       {error && <p className="action-error">{error}</p>}
 
-      {!selectedUnit && units.length > 0 && (
-        <div className="search-results">
-          {units.map(unit => (
-            <div key={unit._id} className="glass-panel unit-card" onClick={() => viewHistory(unit)}>
-              <h3>Body #{unit.bodyNo}</h3>
-              <p>{getVehicleIcon(unit.vehicleType)} {unit.vehicleType}</p>
-              <p><User size={14} /> <strong>Owner:</strong> {unit.operator?.firstName} {unit.operator?.lastName}</p>
-              <p>
-                <User size={14} style={{ color: 'var(--accent-color)' }} /> 
-                <strong>Driver:</strong> {
-                  unit.driver ? `${unit.driver.firstName} ${unit.driver.lastName}` : 
-                  (unit.assignedDriverName ? unit.assignedDriverName : 'Unassigned')
-                }
-              </p>
-              {unit.vehicleType === 'Mini Bus' && (
-                <p>
-                  <User size={14} style={{ color: 'var(--accent-color)' }} /> 
-                  <strong>Conductor:</strong> {
-                    unit.conductor ? `${unit.conductor.firstName} ${unit.conductor.lastName}` : 'Unassigned'
-                  }
-                </p>
-              )}
-              <p><MapPin size={14} /> {unit.zone || 'No Zone'}</p>
+      {!selectedUnit && (
+        <div className="monitoring-content">
+          {loading ? (
+            <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center' }}>
+              <p>Loading units...</p>
             </div>
-          ))}
+          ) : units.length === 0 ? (
+            <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center' }}>
+              <Truck size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+              <p>No units registered in the system yet.</p>
+            </div>
+          ) : (
+            <>
+              {units.filter(u => filterType === 'all' || u.vehicleType === filterType).length > 0 ? (
+                <div className="search-results">
+                  {units
+                    .filter(u => filterType === 'all' || u.vehicleType === filterType)
+                    .map(unit => (
+                    <div key={unit._id} className="glass-panel unit-card" onClick={() => viewHistory(unit)}>
+                      <h3>Body #{unit.bodyNo}</h3>
+                      <p>{getVehicleIcon(unit.vehicleType)} {unit.vehicleType}</p>
+                      <p><User size={14} /> <strong>Owner:</strong> {unit.operator?.firstName} {unit.operator?.lastName}</p>
+                      <p>
+                        <User size={14} style={{ color: 'var(--accent-color)' }} /> 
+                        <strong>Driver:</strong> {
+                          unit.driver ? `${unit.driver.firstName} ${unit.driver.lastName}` : 
+                          (unit.assignedDriverName ? unit.assignedDriverName : 'Unassigned')
+                        }
+                      </p>
+                      {unit.vehicleType === 'Mini Bus' && (
+                        <p>
+                          <User size={14} style={{ color: 'var(--accent-color)' }} /> 
+                          <strong>Conductor:</strong> {
+                            unit.conductor ? `${unit.conductor.firstName} ${unit.conductor.lastName}` : 'Unassigned'
+                          }
+                        </p>
+                      )}
+                      <p><MapPin size={14} /> {unit.zone || 'No Zone'}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center' }}>
+                  <div style={{ opacity: 0.2, marginBottom: '1rem' }}>
+                    {getVehicleIcon(filterType, 48)}
+                  </div>
+                  <p>No {filterType} units found.</p>
+                </div>
+              )}
+            </>
+          )}
         </div>
       )}
 

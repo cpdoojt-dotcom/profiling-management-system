@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Save, X } from 'lucide-react';
 import { useConfirm } from '../context/ConfirmContext';
+import { useToast } from '../context/ToastContext';
 import './DriverForm.css'; // Reusing driver form styles
 
 const initialConductor = {
@@ -24,6 +25,7 @@ const initialConductor = {
 const ConductorForm = () => {
   const navigate = useNavigate();
   const confirm = useConfirm();
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [operators, setOperators] = useState([]);
@@ -92,9 +94,12 @@ const ConductorForm = () => {
         payload.append('conductorImage', conductorImage);
       }
       await axios.post('http://localhost:5000/api/conductors', payload);
+      toast.success('Conductor registered successfully!');
       navigate('/conductors');
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong. Please try again.');
+      const msg = err.response?.data?.message || 'Something went wrong. Please try again.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Plus, Save, Trash2, X } from 'lucide-react';
 import { useConfirm } from '../context/ConfirmContext';
+import { useToast } from '../context/ToastContext';
 import './DriverForm.css';
 
 const getColorOptions = (bodyNo, vehicleType) => {
@@ -71,6 +72,7 @@ const initialUnit = {
 const OperatorForm = () => {
   const navigate = useNavigate();
   const confirm = useConfirm();
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [operator, setOperator] = useState(initialOperator);
@@ -149,9 +151,12 @@ const OperatorForm = () => {
         operator: normalizedOperator,
         units: normalizedUnits,
       });
+      toast.success('Operator and unit(s) registered successfully!');
       navigate('/operators');
     } catch (err) {
-      setError(err.response?.data?.message || 'Unable to save operator.');
+      const msg = err.response?.data?.message || 'Unable to save operator.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

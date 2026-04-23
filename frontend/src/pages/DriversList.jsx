@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowUpDown, Plus, Bike, Truck, Bus } from 'lucide-react';
 import axios from 'axios';
 import { useConfirm } from '../context/ConfirmContext';
+import { useToast } from '../context/ToastContext';
 import './DriversList.css';
 
 const sortDrivers = (items, sortBy, direction) => {
@@ -21,6 +22,7 @@ const DriversList = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const confirm = useConfirm();
+  const toast = useToast();
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -191,9 +193,12 @@ const DriversList = () => {
       const res = await axios.put(`http://localhost:5000/api/drivers/${selectedDriverId}`, payload);
       setDrivers((prev) => prev.map((item) => (item._id === selectedDriverId ? res.data : item)));
       setEditImageFile(null);
+      toast.success('Driver profile updated successfully!');
       setIsEditing(false);
     } catch (err) {
-      setActionError(err.response?.data?.message || 'Unable to update driver.');
+      const msg = err.response?.data?.message || 'Unable to update driver.';
+      setActionError(msg);
+      toast.error(msg);
     } finally {
       setActionLoading(false);
     }
@@ -209,9 +214,12 @@ const DriversList = () => {
       const remaining = drivers.filter((item) => item._id !== selectedDriverId);
       setDrivers(remaining);
       setSelectedDriverId(remaining[0]?._id || '');
+      toast.success('Driver profile deleted.');
       setIsEditing(false);
     } catch (err) {
-      setActionError(err.response?.data?.message || 'Unable to delete driver.');
+      const msg = err.response?.data?.message || 'Unable to delete driver.';
+      setActionError(msg);
+      toast.error(msg);
     } finally {
       setActionLoading(false);
     }

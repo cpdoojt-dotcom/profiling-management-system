@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowUpDown, Plus, Bus } from 'lucide-react';
 import axios from 'axios';
 import { useConfirm } from '../context/ConfirmContext';
+import { useToast } from '../context/ToastContext';
 import './DriversList.css'; // Reusing drivers list styles
 
 const sortConductors = (items, sortBy, direction) => {
@@ -21,6 +22,7 @@ const ConductorList = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const confirm = useConfirm();
+  const toast = useToast();
   const [conductors, setConductors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -174,9 +176,12 @@ const ConductorList = () => {
       const res = await axios.put(`http://localhost:5000/api/conductors/${selectedConductorId}`, payload);
       setConductors((prev) => prev.map((item) => (item._id === selectedConductorId ? res.data : item)));
       setEditImageFile(null);
+      toast.success('Conductor profile updated successfully!');
       setIsEditing(false);
     } catch (err) {
-      setActionError(err.response?.data?.message || 'Unable to update conductor.');
+      const msg = err.response?.data?.message || 'Unable to update conductor.';
+      setActionError(msg);
+      toast.error(msg);
     } finally {
       setActionLoading(false);
     }
@@ -192,9 +197,12 @@ const ConductorList = () => {
       const remaining = conductors.filter((item) => item._id !== selectedConductorId);
       setConductors(remaining);
       setSelectedConductorId(remaining[0]?._id || '');
+      toast.success('Conductor profile deleted.');
       setIsEditing(false);
     } catch (err) {
-      setActionError(err.response?.data?.message || 'Unable to delete conductor.');
+      const msg = err.response?.data?.message || 'Unable to delete conductor.';
+      setActionError(msg);
+      toast.error(msg);
     } finally {
       setActionLoading(false);
     }

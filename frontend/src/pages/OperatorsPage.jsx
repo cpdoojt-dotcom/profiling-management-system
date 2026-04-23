@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Plus, X, Bike, Truck, Bus } from 'lucide-react';
 import { useConfirm } from '../context/ConfirmContext';
+import { useToast } from '../context/ToastContext';
 import './OperatorsPage.css';
 
 const getColorOptions = (bodyNo, vehicleType) => {
@@ -41,6 +42,7 @@ const getColorOptions = (bodyNo, vehicleType) => {
 const OperatorsPage = () => {
   const navigate = useNavigate();
   const confirm = useConfirm();
+  const toast = useToast();
   const [operators, setOperators] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -158,9 +160,12 @@ const OperatorsPage = () => {
         await axios.post(`http://localhost:5000/api/operators/${selectedOperatorId}/units`, newUnitData);
       }
       await refreshOperators(true);
+      toast.success(editingUnitId ? 'Unit updated successfully!' : 'Unit added successfully!');
       setShowUnitModal(false);
     } catch (err) {
-      setActionError(err.response?.data?.message || 'Unable to save unit.');
+      const msg = err.response?.data?.message || 'Unable to save unit.';
+      setActionError(msg);
+      toast.error(msg);
     } finally {
       setAddingUnit(false);
     }
@@ -198,9 +203,12 @@ const OperatorsPage = () => {
     try {
       const res = await axios.put(`http://localhost:5000/api/operators/${selectedOperatorId}`, editForm);
       setOperators(prev => prev.map(op => op._id === selectedOperatorId ? { ...op, ...res.data } : op));
+      toast.success('Operator profile updated successfully!');
       setIsEditing(false);
     } catch (err) {
-      setActionError(err.response?.data?.message || 'Unable to update operator.');
+      const msg = err.response?.data?.message || 'Unable to update operator.';
+      setActionError(msg);
+      toast.error(msg);
     } finally {
       setAddingUnit(false);
     }
@@ -216,9 +224,12 @@ const OperatorsPage = () => {
       const remaining = operators.filter(op => op._id !== selectedOperatorId);
       setOperators(remaining);
       setSelectedOperatorId(remaining[0]?._id || '');
+      toast.success('Operator profile deleted.');
       setIsEditing(false);
     } catch (err) {
-      setActionError(err.response?.data?.message || 'Unable to delete operator.');
+      const msg = err.response?.data?.message || 'Unable to delete operator.';
+      setActionError(msg);
+      toast.error(msg);
     } finally {
       setAddingUnit(false);
     }

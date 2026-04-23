@@ -41,8 +41,8 @@ const Login = () => {
           <div className="logo-icon">
             <Shield size={32} />
           </div>
-          <h1>System Portal</h1>
-          <p>Profiling Management System</p>
+          <h1>PUV-GO</h1>
+          <p>PUV Profiler</p>
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">

@@ -12,6 +12,8 @@ const normalizeOperatorData = (operatorData) => ({
   firstName: operatorData.firstName,
   middleName: operatorData.middleName,
   civilStatus: operatorData.civilStatus,
+  birthdate: operatorData.birthdate,
+  birthplace: operatorData.birthplace,
   age: operatorData.age,
   addressNo: operatorData.addressNo,
   street: operatorData.street,

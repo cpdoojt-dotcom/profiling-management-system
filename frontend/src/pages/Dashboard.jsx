@@ -47,7 +47,7 @@ const Dashboard = () => {
     <div className="dashboard animate-fade-in">
       <div className="dashboard-header">
         <h1>Overview</h1>
-        <p>Monitor your PUV operators, vehicles, and drivers in real-time.</p>
+        <p>Real-time monitoring of PUV operators, vehicles, and drivers.</p>
       </div>
 
       <div className="stats-grid">
