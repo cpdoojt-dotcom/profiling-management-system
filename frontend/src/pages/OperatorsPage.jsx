@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Plus, X, Bike, Truck, Bus } from 'lucide-react';
+import { Plus, X, Bike, Truck, Bus, FileSpreadsheet } from 'lucide-react';
+import ExcelJS from 'exceljs';
 import { useConfirm } from '../context/ConfirmContext';
 import { useToast } from '../context/ToastContext';
 import './OperatorsPage.css';
@@ -46,6 +47,8 @@ const getFullName = (person) => {
     .filter(Boolean)
     .join(' ');
 };
+
+const sanitize = (value) => String(value ?? '').replace(/\r?\n|\r/g, ' ').trim();
 
 const OperatorsPage = () => {
   const navigate = useNavigate();
@@ -243,6 +246,104 @@ const OperatorsPage = () => {
     }
   };
 
+  const handleExportExcel = async () => {
+    if (operators.length === 0) {
+      toast.error('No operators available to export.');
+      return;
+    }
+
+    const headers = [
+      'NO.',
+      'FIRST NAME',
+      'MIDDLE NAME',
+      'LAST NAME',
+      'FULL NAME',
+      'CLASSIFICATION',
+      'CONTACT NO',
+      'CIVIL STATUS',
+      'AGE',
+      'BIRTHDATE',
+      'BIRTHPLACE',
+      'ADDRESS NO',
+      'STREET',
+      'PUROK',
+      'BARANGAY',
+      'CITY/MUNICIPALITY',
+      'TOTAL UNITS',
+      'TOTAL DRIVERS',
+      'TOTAL CONDUCTORS',
+      'CREATED AT',
+      'UPDATED AT',
+    ];
+
+    const rows = operators.map((operator, index) => ([
+      index + 1,
+      sanitize(operator.firstName),
+      sanitize(operator.middleName),
+      sanitize(operator.lastName),
+      sanitize(getFullName(operator)),
+      sanitize(operator.operatorType || 'FOR HIRE'),
+      sanitize(operator.contactNo),
+      sanitize(operator.civilStatus),
+      sanitize(operator.age),
+      sanitize(operator.birthdate ? new Date(operator.birthdate).toLocaleDateString('en-PH') : ''),
+      sanitize(operator.birthplace),
+      sanitize(operator.addressNo),
+      sanitize(operator.street),
+      sanitize(operator.purok),
+      sanitize(operator.barangay),
+      sanitize(operator.cityMunicipality),
+      sanitize(operator.unitCount || 0),
+      sanitize(operator.driverCount || 0),
+      sanitize(operator.conductorCount || 0),
+      sanitize(operator.createdAt ? new Date(operator.createdAt).toLocaleString('en-PH') : ''),
+      sanitize(operator.updatedAt ? new Date(operator.updatedAt).toLocaleString('en-PH') : ''),
+    ]));
+
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Operators');
+
+      worksheet.addRow(headers);
+      rows.forEach((row) => worksheet.addRow(row));
+
+      worksheet.getRow(1).height = 22;
+      worksheet.getRow(1).eachCell((cell) => {
+        cell.font = { bold: true };
+        cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: false };
+      });
+
+      for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber += 1) {
+        worksheet.getRow(rowNumber).eachCell((cell) => {
+          cell.alignment = { horizontal: 'left', vertical: 'top', wrapText: false };
+        });
+      }
+
+      worksheet.columns.forEach((column) => {
+        let maxLength = 12;
+        column.eachCell({ includeEmpty: true }, (cell) => {
+          const value = cell.value ? String(cell.value) : '';
+          maxLength = Math.max(maxLength, value.length + 2);
+        });
+        column.width = Math.min(50, maxLength);
+      });
+
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `operators-directory-${timestamp}.xlsx`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+      toast.success('Operators exported to Excel successfully.');
+    } catch (err) {
+      toast.error('Failed to export operators to Excel.');
+    }
+  };
+
   return (
     <div className="operators-page animate-fade-in">
       <div className="operators-header">
@@ -250,10 +351,16 @@ const OperatorsPage = () => {
           <h1>Operators</h1>
           <p>Manage operators, their units, and all assigned drivers.</p>
         </div>
-        <button className="btn-primary" type="button" onClick={() => navigate('/operators/new')}>
-          <Plus size={18} />
-          Add Operator
-        </button>
+        <div className="operators-header-actions">
+          <button className="btn-secondary export-btn" type="button" onClick={handleExportExcel}>
+            <FileSpreadsheet size={18} />
+            Export Excel
+          </button>
+          <button className="btn-primary" type="button" onClick={() => navigate('/operators/new')}>
+            <Plus size={18} />
+            Add Operator
+          </button>
+        </div>
       </div>
 
       <div className="glass-panel operators-search">

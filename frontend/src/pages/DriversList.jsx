@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowUpDown, Plus, Bike, Truck, Bus } from 'lucide-react';
+import { ArrowUpDown, Plus, Bike, Truck, Bus, FileSpreadsheet } from 'lucide-react';
 import axios from 'axios';
+import ExcelJS from 'exceljs';
 import { useConfirm } from '../context/ConfirmContext';
 import { useToast } from '../context/ToastContext';
 import './DriversList.css';
@@ -233,6 +234,115 @@ const DriversList = () => {
     }
   };
 
+  const handleExportExcel = async () => {
+    if (drivers.length === 0) {
+      toast.error('No drivers available to export.');
+      return;
+    }
+
+    const sanitize = (value) => String(value ?? '').replace(/\r?\n|\r/g, ' ').trim();
+    const headers = [
+      'NO.',
+      'CPDO ID',
+      'FIRST NAME',
+      'MIDDLE NAME',
+      'LAST NAME',
+      'NAME',
+      'DRIVER TYPE',
+      'STATUS',
+      'LICENSE NO',
+      'LICENSE EXPIRY DATE',
+      'LICENSE RESTRICTIONS',
+      'CONTACT NO',
+      'ADDRESS NO',
+      'STREET',
+      'PUROK',
+      'BARANGAY',
+      'CITY/MUNICIPALITY',
+      'OPERATOR NAME',
+      'OPERATOR BARANGAY',
+      'OPERATOR CITY/MUNICIPALITY',
+      'UNIT BODY NO',
+      'UNIT PLATE NO',
+      'UNIT VEHICLE TYPE',
+      'UNIT ZONE',
+      'CREATED AT',
+      'UPDATED AT',
+    ];
+
+    const rows = drivers.map((driver, index) => ([
+      index + 1,
+      sanitize(driver.cpdoId),
+      sanitize(driver.firstName),
+      sanitize(driver.middleName),
+      sanitize(driver.lastName),
+      sanitize(getFullName(driver)),
+      sanitize(driver.driverType),
+      sanitize(driver.status),
+      sanitize(driver.licenseNo),
+      sanitize(driver.licenseExpiryDate),
+      sanitize(driver.licenseRestrictions),
+      sanitize(driver.contactNo),
+      sanitize(driver.addressNo),
+      sanitize(driver.street),
+      sanitize(driver.purok),
+      sanitize(driver.barangay),
+      sanitize(driver.cityMunicipality),
+      sanitize(getFullName(driver.operator)),
+      sanitize(driver.operator?.barangay),
+      sanitize(driver.operator?.cityMunicipality),
+      sanitize(driver.unit?.bodyNo),
+      sanitize(driver.unit?.plateNo),
+      sanitize(driver.unit?.vehicleType),
+      sanitize(driver.unit?.zone),
+      sanitize(driver.createdAt ? new Date(driver.createdAt).toLocaleString('en-PH') : ''),
+      sanitize(driver.updatedAt ? new Date(driver.updatedAt).toLocaleString('en-PH') : ''),
+    ]));
+
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Drivers');
+
+      worksheet.addRow(headers);
+      rows.forEach((row) => worksheet.addRow(row));
+
+      worksheet.getRow(1).height = 22;
+      worksheet.getRow(1).eachCell((cell) => {
+        cell.font = { bold: true };
+        cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: false };
+      });
+
+      for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber += 1) {
+        worksheet.getRow(rowNumber).eachCell((cell) => {
+          cell.alignment = { horizontal: 'left', vertical: 'top', wrapText: false };
+        });
+      }
+
+      worksheet.columns.forEach((column) => {
+        let maxLength = 12;
+        column.eachCell({ includeEmpty: true }, (cell) => {
+          const value = cell.value ? String(cell.value) : '';
+          maxLength = Math.max(maxLength, value.length + 2);
+        });
+        column.width = Math.min(50, maxLength);
+      });
+
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `drivers-directory-${timestamp}.xlsx`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+      toast.success('Drivers exported to Excel successfully.');
+    } catch (err) {
+      toast.error('Failed to export drivers to Excel.');
+    }
+  };
+
   return (
     <div className="drivers-page animate-fade-in">
       <div className="drivers-header">
@@ -240,10 +350,16 @@ const DriversList = () => {
           <h1>Drivers Directory</h1>
           <p>View, sort, and inspect all saved PUV driver profiles.</p>
         </div>
-        <button className="btn-primary" type="button" onClick={() => navigate('/drivers/new')}>
-          <Plus size={18} />
-          Add Driver
-        </button>
+        <div className="drivers-header-actions">
+          <button className="btn-secondary export-btn" type="button" onClick={handleExportExcel}>
+            <FileSpreadsheet size={18} />
+            Export Excel
+          </button>
+          <button className="btn-primary" type="button" onClick={() => navigate('/drivers/new')}>
+            <Plus size={18} />
+            Add Driver
+          </button>
+        </div>
       </div>
 
       <div className="glass-panel driver-filters">

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowUpDown, Plus, Bus } from 'lucide-react';
+import { ArrowUpDown, Plus, Bus, FileSpreadsheet } from 'lucide-react';
 import axios from 'axios';
+import ExcelJS from 'exceljs';
 import { useConfirm } from '../context/ConfirmContext';
 import { useToast } from '../context/ToastContext';
 import './DriversList.css'; // Reusing drivers list styles
@@ -17,6 +18,16 @@ const sortConductors = (items, sortBy, direction) => {
 
   return direction === 'asc' ? sorted : sorted.reverse();
 };
+
+const getFullName = (person) => {
+  if (!person) return '';
+  return [person.firstName, person.middleName, person.lastName]
+    .map((part) => (part || '').trim())
+    .filter(Boolean)
+    .join(' ');
+};
+
+const sanitize = (value) => String(value ?? '').replace(/\r?\n|\r/g, ' ').trim();
 
 const ConductorList = () => {
   const navigate = useNavigate();
@@ -208,6 +219,102 @@ const ConductorList = () => {
     }
   };
 
+  const handleExportExcel = async () => {
+    if (conductors.length === 0) {
+      toast.error('No conductors available to export.');
+      return;
+    }
+
+    const headers = [
+      'NO.',
+      'FIRST NAME',
+      'MIDDLE NAME',
+      'LAST NAME',
+      'FULL NAME',
+      'GENDER',
+      'CIVIL STATUS',
+      'BIRTH PLACE',
+      'STATUS',
+      'OPERATOR NAME',
+      'OPERATOR BARANGAY',
+      'OPERATOR CITY/MUNICIPALITY',
+      'UNIT BODY NO',
+      'UNIT PLATE NO',
+      'UNIT VEHICLE TYPE',
+      'EMERGENCY CONTACT NAME',
+      'EMERGENCY CONTACT NO',
+      'EMERGENCY CONTACT ADDRESS',
+      'CREATED AT',
+      'UPDATED AT',
+    ];
+
+    const rows = conductors.map((conductor, index) => ([
+      index + 1,
+      sanitize(conductor.firstName),
+      sanitize(conductor.middleName),
+      sanitize(conductor.lastName),
+      sanitize(getFullName(conductor)),
+      sanitize(conductor.gender),
+      sanitize(conductor.civilStatus),
+      sanitize(conductor.birthPlace),
+      sanitize(conductor.status),
+      sanitize(getFullName(conductor.operator)),
+      sanitize(conductor.operator?.barangay),
+      sanitize(conductor.operator?.cityMunicipality),
+      sanitize(conductor.unit?.bodyNo),
+      sanitize(conductor.unit?.plateNo),
+      sanitize(conductor.unit?.vehicleType || 'Mini Bus'),
+      sanitize(conductor.emergencyContactName),
+      sanitize(conductor.emergencyContactNo),
+      sanitize(conductor.emergencyContactAddress),
+      sanitize(conductor.createdAt ? new Date(conductor.createdAt).toLocaleString('en-PH') : ''),
+      sanitize(conductor.updatedAt ? new Date(conductor.updatedAt).toLocaleString('en-PH') : ''),
+    ]));
+
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Conductors');
+
+      worksheet.addRow(headers);
+      rows.forEach((row) => worksheet.addRow(row));
+
+      worksheet.getRow(1).height = 22;
+      worksheet.getRow(1).eachCell((cell) => {
+        cell.font = { bold: true };
+        cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: false };
+      });
+
+      for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber += 1) {
+        worksheet.getRow(rowNumber).eachCell((cell) => {
+          cell.alignment = { horizontal: 'left', vertical: 'top', wrapText: false };
+        });
+      }
+
+      worksheet.columns.forEach((column) => {
+        let maxLength = 12;
+        column.eachCell({ includeEmpty: true }, (cell) => {
+          const value = cell.value ? String(cell.value) : '';
+          maxLength = Math.max(maxLength, value.length + 2);
+        });
+        column.width = Math.min(50, maxLength);
+      });
+
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `conductors-directory-${timestamp}.xlsx`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+      toast.success('Conductors exported to Excel successfully.');
+    } catch (err) {
+      toast.error('Failed to export conductors to Excel.');
+    }
+  };
+
   return (
     <div className="drivers-page animate-fade-in">
       <div className="drivers-header">
@@ -215,10 +322,16 @@ const ConductorList = () => {
           <h1>Conductors Directory</h1>
           <p>View, sort, and inspect all saved Mini Bus conductor profiles.</p>
         </div>
-        <button className="btn-primary" type="button" onClick={() => navigate('/conductors/new')}>
-          <Plus size={18} />
-          Add Conductor
-        </button>
+        <div className="drivers-header-actions">
+          <button className="btn-secondary export-btn" type="button" onClick={handleExportExcel}>
+            <FileSpreadsheet size={18} />
+            Export Excel
+          </button>
+          <button className="btn-primary" type="button" onClick={() => navigate('/conductors/new')}>
+            <Plus size={18} />
+            Add Conductor
+          </button>
+        </div>
       </div>
 
       <div className="glass-panel driver-filters">

@@ -19,6 +19,27 @@
   color: var(--text-secondary);
 }
 
+.drivers-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: #16a34a !important;
+  border-color: #16a34a !important;
+  color: #ffffff !important;
+}
+
+.export-btn:hover {
+  background-color: #15803d !important;
+  border-color: #15803d !important;
+  color: #ffffff !important;
+}
+
 .drivers-layout {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -232,6 +253,16 @@
     align-items: flex-start;
   }
 
+  .drivers-header-actions {
+    width: 100%;
+  }
+
+  .drivers-header-actions .btn-secondary,
+  .drivers-header-actions .btn-primary {
+    flex: 1;
+    justify-content: center;
+  }
+
   .drivers-header h1 {
     font-size: 1.4rem;
   }
@@ -265,6 +296,15 @@
 }
 
 @media (max-width: 640px) {
+  .drivers-header-actions {
+    flex-direction: column;
+  }
+
+  .drivers-header-actions .btn-secondary,
+  .drivers-header-actions .btn-primary {
+    width: 100%;
+  }
+
   .drivers-table th,
   .drivers-table td {
     padding: 0.6rem 0.45rem;
