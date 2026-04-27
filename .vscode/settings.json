@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.embeddedhtml": "html",
+        "*.erd": "json",
+        "*.vuerd": "json",
+        "plyconfig.json": "jsonc"
+    }
+}
