@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { User } from 'lucide-react';
+import { Menu, PanelLeftClose, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Header.css';
 
-const Header = () => {
+const Header = ({ isSidebarCollapsed, onToggleSidebar }) => {
   const { user } = useAuth();
   const [philippineTime, setPhilippineTime] = useState('');
   const [philippineDate, setPhilippineDate] = useState('');
@@ -39,7 +39,15 @@ const Header = () => {
 
   return (
     <header className="header">
-      <div className="header-title">Drivers Profiling Management</div>
+      <button
+        type="button"
+        className="mobile-sidebar-toggle"
+        onClick={onToggleSidebar}
+        aria-label={isSidebarCollapsed ? 'Open sidebar' : 'Close sidebar'}
+      >
+        {isSidebarCollapsed ? <Menu size={18} /> : <PanelLeftClose size={18} />}
+      </button>
+      <div className="header-title">Operators & Drivers Profiling Management</div>
       <div className="header-actions">
         <div className="ph-datetime" aria-label="Current date and time in the Philippines">
           <span className="ph-time">{philippineTime}</span>

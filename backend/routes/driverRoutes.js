@@ -5,9 +5,18 @@ import Operator from '../models/Operator.js';
 import Unit from '../models/Unit.js';
 import Conductor from '../models/Conductor.js';
 import { uploadImageBuffer } from '../config/cloudinary.js';
+import { createAuditLog } from '../utils/auditLog.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
+
+const getFullName = (person) => {
+  if (!person) return '';
+  return [person.firstName, person.middleName, person.lastName]
+    .map((part) => (part || '').trim())
+    .filter(Boolean)
+    .join(' ');
+};
 
 const parsePayload = (body) => {
   if (!body.driver) {
@@ -67,6 +76,15 @@ router.post('/', upload.single('driverImage'), async (req, res) => {
     await Unit.findByIdAndUpdate(unitId, { driver: newDriver._id });
 
     const populatedDriver = await newDriver.populate('operator unit');
+    await createAuditLog({
+      req,
+      action: 'Create',
+      module: 'Driver',
+      entityId: populatedDriver._id,
+      summary: `Created driver ${getFullName(populatedDriver)}`,
+      before: null,
+      after: populatedDriver,
+    });
     res.status(201).json(populatedDriver);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -122,6 +140,7 @@ router.put('/:id', upload.single('driverImage'), async (req, res) => {
   try {
     const driver = await Driver.findById(req.params.id);
     if (!driver) return res.status(404).json({ message: 'Driver not found' });
+    const beforeSnapshot = driver.toObject();
 
     const driverData = parsePayload(req.body);
     if (driverData.operator || driverData.unit) {
@@ -151,6 +170,15 @@ router.put('/:id', upload.single('driverImage'), async (req, res) => {
     }
 
     const updatedDriver = await Driver.findById(savedDriver._id).populate('operator unit');
+    await createAuditLog({
+      req,
+      action: 'Update',
+      module: 'Driver',
+      entityId: updatedDriver._id,
+      summary: `Updated driver ${getFullName(updatedDriver)}`,
+      before: beforeSnapshot,
+      after: updatedDriver,
+    });
     res.json(updatedDriver);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -160,8 +188,18 @@ router.put('/:id', upload.single('driverImage'), async (req, res) => {
 // Delete a driver
 router.delete('/:id', async (req, res) => {
   try {
-    const driver = await Driver.findByIdAndDelete(req.params.id);
+    const driver = await Driver.findById(req.params.id);
     if (!driver) return res.status(404).json({ message: 'Driver not found' });
+    await Driver.findByIdAndDelete(req.params.id);
+    await createAuditLog({
+      req,
+      action: 'Delete',
+      module: 'Driver',
+      entityId: driver._id,
+      summary: `Deleted driver ${getFullName(driver)}`,
+      before: driver,
+      after: null,
+    });
 
     res.json({ message: 'Driver deleted successfully' });
   } catch (err) {

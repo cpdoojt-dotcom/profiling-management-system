@@ -1,22 +1,37 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Building2, LayoutDashboard, List, Users, Settings, History } from 'lucide-react';
+import { Building2, LayoutDashboard, List, Users, Settings, History, ScrollText, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useConfirm } from '../context/ConfirmContext';
 import './Sidebar.css';
 
-const Sidebar = () => {
+const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
   const { logout } = useAuth();
+  const confirm = useConfirm();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const approved = await confirm('Are you sure you want to log out?');
+    if (!approved) return;
     logout();
     navigate('/login', { replace: true });
   };
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-brand">
-        <Users size={24} />
-        <span>PUV-GO : PUV Profiler</span>
+        <div className="sidebar-brand-main">
+          <Users size={24} />
+          <span>PUV Profiling</span>
+        </div>
+        <button
+          type="button"
+          className="sidebar-toggle"
+          onClick={onToggleCollapse}
+          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {isCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+        </button>
       </div>
       
       <nav className="sidebar-nav">
@@ -56,6 +71,13 @@ const Sidebar = () => {
         >
           <History size={20} />
           <span>Unit Monitoring</span>
+        </NavLink>
+        <NavLink
+          to="/audit-logs"
+          className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
+        >
+          <ScrollText size={20} />
+          <span>Audit Logs</span>
         </NavLink>
         <button
           type="button"

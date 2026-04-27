@@ -4,9 +4,18 @@ import Conductor from '../models/Conductor.js';
 import Operator from '../models/Operator.js';
 import Unit from '../models/Unit.js';
 import { uploadImageBuffer } from '../config/cloudinary.js';
+import { createAuditLog } from '../utils/auditLog.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
+
+const getFullName = (person) => {
+  if (!person) return '';
+  return [person.firstName, person.middleName, person.lastName]
+    .map((part) => (part || '').trim())
+    .filter(Boolean)
+    .join(' ');
+};
 
 const parsePayload = (body) => {
   if (!body.conductor) {
@@ -71,6 +80,15 @@ router.post('/', upload.single('conductorImage'), async (req, res) => {
     await Unit.findByIdAndUpdate(unitId, { conductor: newConductor._id });
 
     const populatedConductor = await newConductor.populate('operator unit');
+    await createAuditLog({
+      req,
+      action: 'Create',
+      module: 'Conductor',
+      entityId: populatedConductor._id,
+      summary: `Created conductor ${getFullName(populatedConductor)}`,
+      before: null,
+      after: populatedConductor,
+    });
     res.status(201).json(populatedConductor);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -93,6 +111,7 @@ router.put('/:id', upload.single('conductorImage'), async (req, res) => {
   try {
     const conductor = await Conductor.findById(req.params.id);
     if (!conductor) return res.status(404).json({ message: 'Conductor not found' });
+    const beforeSnapshot = conductor.toObject();
 
     const conductorData = parsePayload(req.body);
     if (conductorData.operator || conductorData.unit) {
@@ -128,6 +147,15 @@ router.put('/:id', upload.single('conductorImage'), async (req, res) => {
     }
 
     const updatedConductor = await Conductor.findById(savedConductor._id).populate('operator unit');
+    await createAuditLog({
+      req,
+      action: 'Update',
+      module: 'Conductor',
+      entityId: updatedConductor._id,
+      summary: `Updated conductor ${getFullName(updatedConductor)}`,
+      before: beforeSnapshot,
+      after: updatedConductor,
+    });
     res.json(updatedConductor);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -137,8 +165,18 @@ router.put('/:id', upload.single('conductorImage'), async (req, res) => {
 // Delete a conductor
 router.delete('/:id', async (req, res) => {
   try {
-    const conductor = await Conductor.findByIdAndDelete(req.params.id);
+    const conductor = await Conductor.findById(req.params.id);
     if (!conductor) return res.status(404).json({ message: 'Conductor not found' });
+    await Conductor.findByIdAndDelete(req.params.id);
+    await createAuditLog({
+      req,
+      action: 'Delete',
+      module: 'Conductor',
+      entityId: conductor._id,
+      summary: `Deleted conductor ${getFullName(conductor)}`,
+      before: conductor,
+      after: null,
+    });
 
     res.json({ message: 'Conductor deleted successfully' });
   } catch (err) {

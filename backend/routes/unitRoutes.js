@@ -4,8 +4,17 @@ import UnitHistory from '../models/UnitHistory.js';
 import Operator from '../models/Operator.js';
 import Driver from '../models/Driver.js';
 import Conductor from '../models/Conductor.js';
+import { createAuditLog } from '../utils/auditLog.js';
 
 const router = express.Router();
+
+const getFullName = (person) => {
+  if (!person) return 'N/A';
+  const parts = [person.firstName, person.middleName, person.lastName]
+    .map((part) => (part || '').trim())
+    .filter(Boolean);
+  return parts.length ? parts.join(' ') : 'N/A';
+};
 
 // Get all units with current operator and driver details
 router.get('/', async (req, res) => {
@@ -120,9 +129,9 @@ router.put('/:id', async (req, res) => {
     // Pre-calculate readable names for history
     const oldSnapshot = {
       ...oldData,
-      operatorName: oldData.operator ? `${oldData.operator.firstName} ${oldData.operator.lastName}` : 'N/A',
-      driverName: oldData.driver ? `${oldData.driver.firstName} ${oldData.driver.lastName}` : 'N/A',
-      conductorName: oldData.conductor ? `${oldData.conductor.firstName} ${oldData.conductor.lastName}` : 'N/A'
+      operatorName: getFullName(oldData.operator),
+      driverName: getFullName(oldData.driver),
+      conductorName: getFullName(oldData.conductor)
     };
     
     // Update fields
@@ -144,12 +153,21 @@ router.put('/:id', async (req, res) => {
 
     const newSnapshot = {
       ...newData,
-      operatorName: newData.operator ? `${newData.operator.firstName} ${newData.operator.lastName}` : 'N/A',
-      driverName: newData.driver ? `${newData.driver.firstName} ${newData.driver.lastName}` : 'N/A',
-      conductorName: newData.conductor ? `${newData.conductor.firstName} ${newData.conductor.lastName}` : 'N/A'
+      operatorName: getFullName(newData.operator),
+      driverName: getFullName(newData.driver),
+      conductorName: getFullName(newData.conductor)
     };
 
     await logUnitHistory(savedUnit._id, savedUnit.bodyNo, oldSnapshot, newSnapshot, 'Update');
+    await createAuditLog({
+      req,
+      action: 'Update',
+      module: 'Unit',
+      entityId: savedUnit._id,
+      summary: `Updated unit Body #${savedUnit.bodyNo}`,
+      before: oldData,
+      after: newData,
+    });
 
     res.json(populatedUnit);
   } catch (err) {

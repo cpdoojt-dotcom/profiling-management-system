@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import { ConfirmProvider } from './context/ConfirmContext';
 import { ToastProvider } from './context/ToastContext';
+import AuditLogs from './pages/AuditLogs';
 import './App.css';
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
             <Route path="conductors" element={<ConductorList />} />
             <Route path="conductors/new" element={<ConductorForm />} />
             <Route path="monitoring" element={<UnitMonitoring />} />
+            <Route path="audit-logs" element={<AuditLogs />} />
           </Route>
         </Routes>
       </ConfirmProvider>

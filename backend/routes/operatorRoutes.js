@@ -4,8 +4,17 @@ import Driver from '../models/Driver.js';
 import Unit from '../models/Unit.js';
 import UnitHistory from '../models/UnitHistory.js';
 import Conductor from '../models/Conductor.js';
+import { createAuditLog } from '../utils/auditLog.js';
 
 const router = express.Router();
+
+const getFullName = (person) => {
+  if (!person) return '';
+  return [person.firstName, person.middleName, person.lastName]
+    .map((part) => (part || '').trim())
+    .filter(Boolean)
+    .join(' ');
+};
 
 const normalizeOperatorData = (operatorData) => ({
   lastName: operatorData.lastName,
@@ -75,6 +84,16 @@ router.post('/', async (req, res) => {
       await logUnitHistory(unit._id, unit.bodyNo, null, unit.toObject(), 'Creation');
     }
 
+    await createAuditLog({
+      req,
+      action: 'Create',
+      module: 'Operator',
+      entityId: operator._id,
+      summary: `Created operator ${getFullName(operator)}`,
+      before: null,
+      after: operator,
+    });
+
     res.status(201).json({ ...operator.toObject(), units: createdUnits });
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -97,6 +116,15 @@ router.post('/:id/units', async (req, res) => {
     });
     
     await logUnitHistory(unit._id, unit.bodyNo, null, unit.toObject(), 'Creation');
+    await createAuditLog({
+      req,
+      action: 'Create',
+      module: 'Unit',
+      entityId: unit._id,
+      summary: `Created unit Body #${unit.bodyNo}`,
+      before: null,
+      after: unit,
+    });
     
     res.status(201).json(unit);
   } catch (err) {
@@ -109,15 +137,58 @@ router.put('/:id', async (req, res) => {
   try {
     const operator = await Operator.findById(req.params.id);
     if (!operator) return res.status(404).json({ message: 'Operator not found' });
+    const beforeSnapshot = operator.toObject();
 
     const updatedData = normalizeOperatorData(req.body);
     Object.assign(operator, updatedData);
     
     await operator.save();
+    await createAuditLog({
+      req,
+      action: 'Update',
+      module: 'Operator',
+      entityId: operator._id,
+      summary: `Updated operator ${getFullName(operator)}`,
+      before: beforeSnapshot,
+      after: operator,
+    });
     
     res.json(operator);
   } catch (err) {
     res.status(400).json({ message: err.message });
+  }
+});
+
+// Delete operator and related records
+router.delete('/:id', async (req, res) => {
+  try {
+    const operator = await Operator.findById(req.params.id);
+    if (!operator) return res.status(404).json({ message: 'Operator not found' });
+
+    const units = await Unit.find({ operator: operator._id }).select('_id');
+    const unitIds = units.map((unit) => unit._id);
+
+    await Driver.deleteMany({ operator: operator._id });
+    await Conductor.deleteMany({ operator: operator._id });
+    if (unitIds.length > 0) {
+      await UnitHistory.deleteMany({ unitId: { $in: unitIds } });
+    }
+    await Unit.deleteMany({ operator: operator._id });
+    await Operator.findByIdAndDelete(operator._id);
+
+    await createAuditLog({
+      req,
+      action: 'Delete',
+      module: 'Operator',
+      entityId: operator._id,
+      summary: `Deleted operator ${getFullName(operator)}`,
+      before: operator,
+      after: null,
+    });
+
+    res.json({ message: 'Operator deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 

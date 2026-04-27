@@ -198,3 +198,48 @@
   padding: 2rem;
   color: var(--text-secondary);
 }
+
+@media (max-width: 900px) {
+  .dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .stats-categories-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .recent-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .stat-card {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .stat-details p {
+    font-size: 1.2rem;
+  }
+
+  .recent-item {
+    padding: 0.7rem;
+    gap: 0.6rem;
+  }
+
+  .recent-item h3 {
+    font-size: 0.9rem;
+  }
+
+  .recent-item p {
+    font-size: 0.8rem;
+  }
+
+  .status-chip {
+    font-size: 0.72rem;
+    padding: 0.2rem 0.5rem;
+  }
+}

@@ -39,6 +39,14 @@ const getColorOptions = (bodyNo, vehicleType) => {
   return [];
 };
 
+const getFullName = (person) => {
+  if (!person) return '';
+  return [person.firstName, person.middleName, person.lastName]
+    .map((part) => (part || '').trim())
+    .filter(Boolean)
+    .join(' ');
+};
+
 const OperatorsPage = () => {
   const navigate = useNavigate();
   const confirm = useConfirm();
@@ -100,7 +108,7 @@ const OperatorsPage = () => {
     const query = search.trim().toLowerCase();
     if (!query) return operators;
     return operators.filter((operator) => {
-      const fullName = `${operator.firstName} ${operator.lastName}`.toLowerCase();
+      const fullName = getFullName(operator).toLowerCase();
       const unitMatches = (operator.units || []).some((unit) => (
         String(unit.bodyNo || '').toLowerCase().includes(query)
         || String(unit.plateNo || '').toLowerCase().includes(query)
@@ -278,7 +286,7 @@ const OperatorsPage = () => {
                     onClick={() => setSelectedOperatorId(operator._id)}
                   >
                     <div className="operator-card-title">
-                      {operator.firstName} {operator.lastName}
+                      {getFullName(operator)}
                     </div>
                     <p>{operator.unitCount || 0} unit(s) | {operator.driverCount} driver(s) | {operator.conductorCount || 0} conductor(s)</p>
                     <span>Contact: {operator.contactNo || '-'}</span>
@@ -388,7 +396,7 @@ const OperatorsPage = () => {
                   </button>
                 </div>
                 <div className="operator-meta">
-                  <div><span>Name:</span><strong>{selectedOperator.firstName} {selectedOperator.middleName ? selectedOperator.middleName + ' ' : ''}{selectedOperator.lastName}</strong></div>
+                  <div><span>Name:</span><strong>{getFullName(selectedOperator)}</strong></div>
                   <div><span>Classification:</span><strong>{selectedOperator.operatorType || '-'}</strong></div>
                   <div><span>Total Units:</span><strong>{selectedOperator.unitCount || 0}</strong></div>
                   <div><span>Age:</span><strong>{selectedOperator.age || '-'}</strong></div>

@@ -18,6 +18,14 @@ const sortDrivers = (items, sortBy, direction) => {
   return direction === 'asc' ? sorted : sorted.reverse();
 };
 
+const getFullName = (person) => {
+  if (!person) return '';
+  return [person.firstName, person.middleName, person.lastName]
+    .map((part) => (part || '').trim())
+    .filter(Boolean)
+    .join(' ');
+};
+
 const DriversList = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -86,7 +94,7 @@ const DriversList = () => {
   const filteredDrivers = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     return drivers.filter((driver) => {
-      const fullName = `${driver.firstName} ${driver.lastName}`.toLowerCase();
+      const fullName = getFullName(driver).toLowerCase();
       const matchesQuery = !normalizedQuery
         || fullName.includes(normalizedQuery)
         || String(driver.cpdoId || '').toLowerCase().includes(normalizedQuery)
@@ -300,7 +308,7 @@ const DriversList = () => {
                     className={selectedDriverId === driver._id ? 'selected-row' : ''}
                   >
                     <td style={{ fontWeight: '700', color: 'var(--accent-color)' }}>{driver.unit?.bodyNo || '-'}</td>
-                    <td>{driver.firstName} {driver.lastName}</td>
+                    <td>{getFullName(driver)}</td>
                     <td>{driver.unit?.vehicleType === 'Tricycle' ? (driver.unit?.zone || 'No Zone') : 'N/A'}</td>
                     <td>
                       <span className={`status-type ${String(driver.driverType || 'Tricycle').toLowerCase().replace(' ', '-')}`}>
@@ -455,11 +463,11 @@ const DriversList = () => {
               <div className="details-grid">
                 {selectedDriver.photoUrl ? (
                   <div className="details-photo-wrap">
-                    <img src={selectedDriver.photoUrl} alt={`${selectedDriver.firstName} ${selectedDriver.lastName}`} className="details-photo" />
+                    <img src={selectedDriver.photoUrl} alt={getFullName(selectedDriver)} className="details-photo" />
                   </div>
                 ) : null}
                 <div><span>CPDO ID:</span><strong>{selectedDriver.cpdoId}</strong></div>
-                <div><span>Name:</span><strong>{selectedDriver.firstName} {selectedDriver.lastName}</strong></div>
+                <div><span>Name:</span><strong>{getFullName(selectedDriver)}</strong></div>
                 <div><span>License:</span><strong>{selectedDriver.licenseNo}</strong></div>
                 <div><span>Expiry:</span><strong>{selectedDriver.licenseExpiryDate || '-'}</strong></div>
                 <div><span>Restrictions:</span><strong>{selectedDriver.licenseRestrictions || '-'}</strong></div>

@@ -9,11 +9,17 @@
   display: flex;
   flex-direction: column;
   z-index: 100;
+  transition: width 0.25s ease;
+}
+
+.sidebar.collapsed {
+  width: var(--sidebar-collapsed-width);
 }
 
 .sidebar-brand {
   height: var(--header-height);
   display: flex;
+  justify-content: space-between;
   align-items: center;
   padding: 0 1.5rem;
   font-size: 1.25rem;
@@ -21,6 +27,31 @@
   color: var(--accent-color);
   border-bottom: 1px solid var(--surface-border);
   gap: 0.75rem;
+}
+
+.sidebar-brand-main {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.sidebar-toggle {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid var(--surface-border);
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar-toggle:hover {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+  background-color: rgba(255, 255, 255, 0.06);
 }
 
 .sidebar-nav {
@@ -60,4 +91,50 @@
 .logout-item:hover {
   background-color: rgba(239, 68, 68, 0.1) !important;
   color: var(--danger) !important;
+}
+
+.sidebar.collapsed .sidebar-brand {
+  padding: 0 0.75rem;
+}
+
+.sidebar.collapsed .sidebar-brand-main span,
+.sidebar.collapsed .nav-item span {
+  display: none;
+}
+
+.sidebar.collapsed .sidebar-nav {
+  padding: 1.5rem 0.6rem;
+}
+
+.sidebar.collapsed .nav-item {
+  justify-content: center;
+  padding: 0.875rem 0.5rem;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    width: var(--sidebar-width);
+    transform: translateX(0);
+    transition: transform 0.25s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  .sidebar.collapsed {
+    width: var(--sidebar-width);
+    transform: translateX(-100%);
+  }
+
+  .sidebar.collapsed .sidebar-brand-main span,
+  .sidebar.collapsed .nav-item span {
+    display: inline;
+  }
+
+  .sidebar.collapsed .sidebar-nav {
+    padding: 1.5rem 1rem;
+  }
+
+  .sidebar.collapsed .nav-item {
+    justify-content: flex-start;
+    padding: 0.875rem 1rem;
+  }
 }
