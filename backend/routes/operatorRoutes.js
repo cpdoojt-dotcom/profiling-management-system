@@ -61,41 +61,92 @@ const logUnitHistory = async (unitId, bodyNo, oldData, newData, changeType = 'Up
   }
 };
 
-// Create operator record with at least one unit
+// Create or Update operator record with units and optional drivers/conductors
 router.post('/', async (req, res) => {
   try {
     const operatorData = req.body.operator || req.body;
-    const units = Array.isArray(req.body.units) ? req.body.units : [];
+    const unitsData = Array.isArray(req.body.units) ? req.body.units : [];
 
-    if (units.length === 0) {
+    if (unitsData.length === 0) {
       return res.status(400).json({ message: 'At least one unit is required.' });
     }
 
-    const operator = await Operator.create(normalizeOperatorData(operatorData));
-    const createdUnits = await Unit.insertMany(
-      units.map((unit) => ({
-        ...normalizeUnitData(unit),
-        operator: operator._id,
-      })),
+    // Upsert Operator (Find by Name)
+    const operator = await Operator.findOneAndUpdate(
+      { 
+        firstName: operatorData.firstName, 
+        lastName: operatorData.lastName 
+      },
+      normalizeOperatorData(operatorData),
+      { upsert: true, new: true, runValidators: true }
     );
+    
+    const createdUnits = [];
+    for (const unitData of unitsData) {
+      // Upsert Unit (Find by Operator and Body No)
+      const existingUnit = await Unit.findOne({ 
+        operator: operator._id, 
+        bodyNo: unitData.bodyNo 
+      });
 
-    // Initial history
-    for (const unit of createdUnits) {
-      await logUnitHistory(unit._id, unit.bodyNo, null, unit.toObject(), 'Creation');
+      let unit;
+      if (existingUnit) {
+        const beforeSnapshot = existingUnit.toObject();
+        Object.assign(existingUnit, normalizeUnitData(unitData));
+        unit = await existingUnit.save();
+        await logUnitHistory(unit._id, unit.bodyNo, beforeSnapshot, unit.toObject(), 'Update (Import)');
+      } else {
+        unit = await Unit.create({
+          ...normalizeUnitData(unitData),
+          operator: operator._id,
+        });
+        await logUnitHistory(unit._id, unit.bodyNo, null, unit.toObject(), 'Creation (Import)');
+      }
+      
+      createdUnits.push(unit);
+
+      // Upsert Driver
+      if (unitData.driver) {
+        const driver = await Driver.findOneAndUpdate(
+          { 
+            firstName: unitData.driver.firstName, 
+            lastName: unitData.driver.lastName 
+          },
+          { ...unitData.driver, operator: operator._id, unit: unit._id },
+          { upsert: true, new: true }
+        );
+        unit.driver = driver._id;
+        await unit.save();
+      }
+
+      // Upsert Conductor
+      if (unitData.conductor) {
+        const conductor = await Conductor.findOneAndUpdate(
+          { 
+            firstName: unitData.conductor.firstName, 
+            lastName: unitData.conductor.lastName 
+          },
+          { ...unitData.conductor, operator: operator._id, unit: unit._id },
+          { upsert: true, new: true }
+        );
+        unit.conductor = conductor._id;
+        await unit.save();
+      }
     }
 
     await createAuditLog({
       req,
-      action: 'Create',
+      action: 'Update',
       module: 'Operator',
       entityId: operator._id,
-      summary: `Created operator ${getFullName(operator)}`,
+      summary: `Imported/Updated operator ${getFullName(operator)} with ${createdUnits.length} units`,
       before: null,
       after: operator,
     });
 
     res.status(201).json({ ...operator.toObject(), units: createdUnits });
   } catch (err) {
+    console.error('Master Import Error:', err);
     res.status(400).json({ message: err.message });
   }
 });

@@ -174,6 +174,132 @@ const Dashboard = () => {
     window.location.reload();
   };
 
+  const processMasterImport = async (worksheet) => {
+    const operatorMap = new Map();
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber === 1) return; // skip header
+      const opFirstName = row.getCell(4).text?.trim();
+      const opLastName = row.getCell(3).text?.trim();
+      if (!opFirstName || !opLastName) return;
+
+      const key = `${opFirstName}-${opLastName}`.toLowerCase();
+      
+      if (!operatorMap.has(key)) {
+        operatorMap.set(key, {
+          operator: {
+            firstName: opFirstName,
+            middleName: row.getCell(5).text?.trim() || '',
+            lastName: opLastName,
+            civilStatus: row.getCell(6).text?.trim() || 'Single',
+            age: row.getCell(7).value ? Number(row.getCell(7).value) : undefined,
+            addressNo: row.getCell(8).text?.trim() || '',
+            street: row.getCell(9).text?.trim() || '',
+            purok: row.getCell(10).text?.trim() || '',
+            barangay: row.getCell(11).text?.trim() || '',
+            cityMunicipality: row.getCell(12).text?.trim() || '',
+            contactNo: row.getCell(13).text?.trim() || '',
+          },
+          units: []
+        });
+      }
+      
+      const bodyNo = row.getCell(2).text?.trim();
+      if (bodyNo) {
+        const vehicleType = row.getCell(1).text?.trim() || 'Tricycle';
+        const unit = {
+          vehicleType,
+          bodyNo,
+          ltfrbMchCaseNo: row.getCell(14).text?.trim() || '',
+          colorCode: row.getCell(15).text?.trim() || '',
+          makeType: row.getCell(16).text?.trim() || '',
+          chassisNo: row.getCell(17).text?.trim() || '',
+          motorNo: row.getCell(18).text?.trim() || '',
+          plateNo: row.getCell(19).text?.trim() || '',
+          yearModel: row.getCell(20).text?.trim() || '',
+          zone: '',
+          driver: null
+        };
+        
+        // Auto-fill Zone
+        const firstChar = bodyNo.charAt(0);
+        if (vehicleType === 'Tricycle') {
+          if (bodyNo.startsWith('BB')) {
+            unit.zone = 'BB';
+          } else if (firstChar >= '1' && firstChar <= '9') {
+            unit.zone = `Zone ${firstChar}`;
+          }
+        }
+        
+        // Auto-fill Color Code if blank
+        if (!unit.colorCode) {
+          const colorOpts = getColorOptions(bodyNo, vehicleType);
+          if (colorOpts.length > 0) {
+            unit.colorCode = colorOpts[0];
+          }
+        }
+
+        // Check for Driver in this row
+        const drFirstName = row.getCell(26).text?.trim();
+        const drLastName = row.getCell(25).text?.trim();
+        if (drFirstName && drLastName) {
+          unit.driver = {
+            cpdoId: row.getCell(21).text?.trim() || '',
+            licenseNo: row.getCell(22).text?.trim() || '',
+            licenseExpiryDate: row.getCell(23).text?.trim() || '',
+            licenseRestrictions: row.getCell(24).text?.trim() || '',
+            lastName: drLastName,
+            firstName: drFirstName,
+            middleName: row.getCell(27).text?.trim() || '',
+            civilStatus: row.getCell(28).text?.trim() || 'Single',
+            age: row.getCell(29).value ? Number(row.getCell(29).value) : undefined,
+            addressNo: row.getCell(30).text?.trim() || '',
+            street: row.getCell(31).text?.trim() || '',
+            purok: row.getCell(32).text?.trim() || '',
+            barangay: row.getCell(33).text?.trim() || '',
+            cityMunicipality: row.getCell(34).text?.trim() || '',
+            contactNo: row.getCell(35).text?.trim() || '',
+            birthMonth: row.getCell(36).text?.trim() || '',
+            birthDate: row.getCell(37).text?.trim() || '',
+            birthYear: row.getCell(38).text?.trim() || '',
+            driverType: vehicleType,
+            status: 'Active'
+          };
+        }
+
+        // Check for Conductor in this row
+        const cdFirstName = row.getCell(40).text?.trim();
+        const cdLastName = row.getCell(39).text?.trim();
+        if (cdFirstName && cdLastName) {
+          unit.conductor = {
+            lastName: cdLastName,
+            firstName: cdFirstName,
+            middleName: row.getCell(41).text?.trim() || '',
+            gender: 'Male', 
+            civilStatus: row.getCell(42).text?.trim() || 'Single',
+            age: row.getCell(43).value ? Number(row.getCell(43).value) : undefined,
+            addressNo: row.getCell(44).text?.trim() || '',
+            street: row.getCell(45).text?.trim() || '',
+            purok: row.getCell(46).text?.trim() || '',
+            barangay: row.getCell(47).text?.trim() || '',
+            cityMunicipality: row.getCell(48).text?.trim() || '',
+            contactNo: row.getCell(49).text?.trim() || '',
+            status: 'Active'
+          };
+        }
+        
+        operatorMap.get(key).units.push(unit);
+      }
+    });
+
+    const promises = Array.from(operatorMap.values()).map(data => 
+      axios.post('http://localhost:5000/api/operators', data)
+    );
+    
+    await Promise.all(promises);
+    alert('Master Import successful! All records have been created.');
+    window.location.reload();
+  };
+
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -181,17 +307,29 @@ const Dashboard = () => {
     setImporting(true);
     try {
       const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(await file.arrayBuffer());
-      const worksheet = workbook.worksheets[0];
+      const arrayBuffer = await file.arrayBuffer();
+      
+      // ExcelJS browser version only reliably supports XLSX
+      if (!file.name.toLowerCase().endsWith('.xlsx')) {
+        throw new Error('Please save your file as an "Excel Workbook (.xlsx)" in Excel before importing. CSV format is not supported in the browser.');
+      }
+      
+      await workbook.xlsx.load(arrayBuffer);
+      
+      const worksheet = workbook.worksheets[0] || workbook.getWorksheet(1);
+      if (!worksheet) throw new Error('No worksheet found in file.');
 
-      if (importType === 'Operator') {
+      if (importType === 'Master') {
+        await processMasterImport(worksheet);
+      } else if (importType === 'Operator') {
         await processOperatorImport(worksheet);
       } else {
         alert(`${importType} import logic not fully implemented yet.`);
       }
     } catch (err) {
-      console.error(err);
-      alert('Error importing file. Please ensure it matches the template format.');
+      console.error('Import Error:', err);
+      const errorMessage = err.response?.data?.message || err.message || 'Unknown error occurred.';
+      alert(`Import Failed: ${errorMessage}`);
     } finally {
       setImporting(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -225,8 +363,10 @@ const Dashboard = () => {
             <div className="import-dropdown glass-panel" style={{ 
               position: 'absolute', top: '100%', right: 0, marginTop: '0.5rem', 
               padding: '0.5rem', zIndex: 50, display: 'flex', flexDirection: 'column', gap: '0.25rem',
-              minWidth: '150px'
+              minWidth: '180px'
             }}>
+              <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start', border: 'none', background: 'var(--accent-color)', color: 'white', fontWeight: 'bold' }} onClick={() => handleImportSelection('Master')}>Master Import (All-in-1)</button>
+              <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '4px 0' }} />
               <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start', border: 'none', background: 'transparent' }} onClick={() => handleImportSelection('Operator')}>Operator</button>
               <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start', border: 'none', background: 'transparent' }} onClick={() => handleImportSelection('Unit')}>Unit</button>
               <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start', border: 'none', background: 'transparent' }} onClick={() => handleImportSelection('Driver')}>Driver</button>
