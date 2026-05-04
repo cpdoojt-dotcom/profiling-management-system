@@ -1,0 +1,4 @@
+Operator First Name,Operator Last Name,Body No,Vehicle Type,Color Code,Make Type,Chassis No,Motor No,Plate No,Year Model,Zone,LTFRB/MCH Case No
+John,Doe,101,Mini Bus,Red,Toyota,CH-1001,MO-1001,ABC-1234,2018,,LTFRB-001
+Jane,Smith,102,Tricycle,Blue,Honda,CH-1002,MO-1002,XYZ-9876,2020,Zone 1,MCH-002
+Mark,Johnson,103,Jeepney,Green,Isuzu,CH-1003,MO-1003,DEF-5678,2015,,LTFRB-003

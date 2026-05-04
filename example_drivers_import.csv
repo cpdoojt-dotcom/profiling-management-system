@@ -1,0 +1,4 @@
+CPDO ID,License No,License Expiry Date,License Restrictions,First Name,Middle Name,Last Name,Age,Civil Status,Driver Type,Status,Address No,Street,Purok,Barangay,City/Municipality,Contact No,Birth Month,Birth Date,Birth Year,Operator First Name,Operator Last Name,Unit Body No,Conductor Name
+D-0001,L01-12-123456,2028-05-10,1 2,Carlos,,Garcia,35,Married,Tricycle,Active,15,Rizal St,Purok 1,San Juan,Manila,09171234567,May,15,1989,John,Doe,101,Juan Dela Cruz
+D-0002,L02-34-654321,2027-11-20,1 2 3,Miguel,A,Reyes,42,Single,Jeepney,Active,42,Mabini St,Purok 2,San Pedro,Cebu,09189876543,November,20,1982,Jane,Smith,102,
+D-0003,L03-56-987654,2025-01-15,1 2 3,Ricardo,,Santos,29,Married,Mini Bus,Pending,8A,Luna St,Purok 3,San Jose,Davao,09191122334,January,5,1995,Mark,Johnson,103,Anna Santos
