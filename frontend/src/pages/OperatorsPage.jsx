@@ -364,13 +364,26 @@ const OperatorsPage = () => {
       </div>
 
       <div className="glass-panel operators-search">
-        <input
-          type="text"
-          className="input-field"
-          placeholder="Search by operator name, body no, or plate no..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <div style={{ position: 'relative', flexGrow: 1 }}>
+          <input
+            type="text"
+            className="input-field"
+            style={{ paddingRight: '2.5rem' }}
+            placeholder="Search by operator name, body no, or plate no..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          {search && (
+            <button 
+              type="button" 
+              className="input-clear-btn"
+              onClick={() => setSearch('')}
+              title="Clear search"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
       </div>
 
       {loading ? (
@@ -423,15 +436,15 @@ const OperatorsPage = () => {
                 <div className="form-grid-2col">
                   <div className="edit-form-group">
                     <label>First Name</label>
-                    <input className="input-field" value={editForm.firstName} onChange={e => setEditForm({ ...editForm, firstName: e.target.value })} required />
+                    <input className="input-field" value={editForm.firstName} onChange={e => setEditForm({ ...editForm, firstName: e.target.value.toUpperCase() })} required />
                   </div>
                   <div className="edit-form-group">
                     <label>Middle Name</label>
-                    <input className="input-field" value={editForm.middleName} onChange={e => setEditForm({ ...editForm, middleName: e.target.value })} />
+                    <input className="input-field" value={editForm.middleName} onChange={e => setEditForm({ ...editForm, middleName: e.target.value.toUpperCase() })} />
                   </div>
                   <div className="edit-form-group">
                     <label>Last Name</label>
-                    <input className="input-field" value={editForm.lastName} onChange={e => setEditForm({ ...editForm, lastName: e.target.value })} required />
+                    <input className="input-field" value={editForm.lastName} onChange={e => setEditForm({ ...editForm, lastName: e.target.value.toUpperCase() })} required />
                   </div>
                   <div className="edit-form-group">
                     <label>Age</label>
@@ -601,7 +614,7 @@ const OperatorsPage = () => {
                       className="input-field" 
                       value={newUnitData.bodyNo} 
                       onChange={(e) => {
-                        const val = e.target.value;
+                        const val = e.target.value.toUpperCase();
                         const updated = { ...newUnitData, bodyNo: val };
                         
                         const bn = val.toUpperCase();
@@ -634,7 +647,7 @@ const OperatorsPage = () => {
                   </div>
                   <div className="form-group">
                     <label>Plate No.</label>
-                    <input type="text" className="input-field" value={newUnitData.plateNo} onChange={(e) => setNewUnitData({ ...newUnitData, plateNo: e.target.value })} />
+                    <input type="text" className="input-field" value={newUnitData.plateNo} onChange={(e) => setNewUnitData({ ...newUnitData, plateNo: e.target.value.toUpperCase() })} />
                   </div>
                   <div className="form-group">
                     <label>Color Code</label>
@@ -653,19 +666,19 @@ const OperatorsPage = () => {
                   </div>
                   <div className="form-group">
                     <label>Make/Type</label>
-                    <input type="text" className="input-field" value={newUnitData.makeType} onChange={(e) => setNewUnitData({ ...newUnitData, makeType: e.target.value })} />
+                    <input type="text" className="input-field" value={newUnitData.makeType} onChange={(e) => setNewUnitData({ ...newUnitData, makeType: e.target.value.toUpperCase() })} />
                   </div>
                   <div className="form-group">
                     <label>Chassis No.</label>
-                    <input type="text" className="input-field" value={newUnitData.chassisNo} onChange={(e) => setNewUnitData({ ...newUnitData, chassisNo: e.target.value })} />
+                    <input type="text" className="input-field" value={newUnitData.chassisNo} onChange={(e) => setNewUnitData({ ...newUnitData, chassisNo: e.target.value.toUpperCase() })} />
                   </div>
                   <div className="form-group">
                     <label>Motor No.</label>
-                    <input type="text" className="input-field" value={newUnitData.motorNo} onChange={(e) => setNewUnitData({ ...newUnitData, motorNo: e.target.value })} />
+                    <input type="text" className="input-field" value={newUnitData.motorNo} onChange={(e) => setNewUnitData({ ...newUnitData, motorNo: e.target.value.toUpperCase() })} />
                   </div>
                   <div className="form-group">
                     <label>Year Model</label>
-                    <input type="text" className="input-field" value={newUnitData.yearModel} onChange={(e) => setNewUnitData({ ...newUnitData, yearModel: e.target.value })} />
+                    <input type="text" className="input-field" value={newUnitData.yearModel} onChange={(e) => setNewUnitData({ ...newUnitData, yearModel: e.target.value.toUpperCase() })} />
                   </div>
                   <div className="form-group">
                     <label>Vehicle Category</label>
@@ -716,7 +729,7 @@ const OperatorsPage = () => {
                   )}
                   <div className="form-group">
                     <label>Conductor Name</label>
-                    <input type="text" className="input-field" value={newUnitData.conductorName} onChange={(e) => setNewUnitData({ ...newUnitData, conductorName: e.target.value })} />
+                    <input type="text" className="input-field" value={newUnitData.conductorName} onChange={(e) => setNewUnitData({ ...newUnitData, conductorName: e.target.value.toUpperCase() })} />
                   </div>
                 </div>
               </div>

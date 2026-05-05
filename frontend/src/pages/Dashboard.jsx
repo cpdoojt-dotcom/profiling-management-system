@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Users, AlertTriangle, ShieldCheck, Bike, Truck, Bus, Upload } from 'lucide-react';
-import ExcelJS from 'exceljs';
+import * as XLSX from 'xlsx';
 import './Dashboard.css';
 
 const getColorOptions = (bodyNo, vehicleType) => {
@@ -54,11 +54,8 @@ const Dashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [showImportMenu, setShowImportMenu] = useState(false);
   const [importing, setImporting] = useState(false);
-  const menuRef = useRef(null);
   const fileInputRef = useRef(null);
-  const [importType, setImportType] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -80,107 +77,16 @@ const Dashboard = () => {
     fetchDrivers();
   }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setShowImportMenu(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleImportSelection = (type) => {
-    setShowImportMenu(false);
-    setImportType(type);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-      fileInputRef.current.click();
-    }
-  };
-
-  const processOperatorImport = async (worksheet) => {
+  const processMasterImport = async (rows) => {
     const operatorMap = new Map();
-    worksheet.eachRow((row, rowNumber) => {
-      if (rowNumber === 1) return; // skip header
-      const firstName = row.getCell(1).text?.trim();
-      const lastName = row.getCell(3).text?.trim();
-      if (!firstName || !lastName) return;
+    // Start from row index 1 to skip header
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      if (!row || row.length < 4) continue;
 
-      const key = `${firstName}-${lastName}`.toLowerCase();
-      
-      if (!operatorMap.has(key)) {
-        operatorMap.set(key, {
-          operator: {
-            firstName,
-            middleName: row.getCell(2).text?.trim() || '',
-            lastName,
-            civilStatus: row.getCell(4).text?.trim() || 'Single',
-            birthdate: row.getCell(5).text?.trim() || '',
-            birthplace: row.getCell(6).text?.trim() || '',
-            age: row.getCell(7).value ? Number(row.getCell(7).value) : undefined,
-            addressNo: row.getCell(8).text?.trim() || '',
-            street: row.getCell(9).text?.trim() || '',
-            purok: row.getCell(10).text?.trim() || '',
-            barangay: row.getCell(11).text?.trim() || '',
-            cityMunicipality: row.getCell(12).text?.trim() || '',
-            contactNo: row.getCell(13).text?.trim() || '',
-            operatorType: row.getCell(14).text?.trim() || 'FOR HIRE',
-          },
-          units: []
-        });
-      }
-      
-      const bodyNo = row.getCell(16).text?.trim();
-      if (bodyNo) {
-        const vehicleType = row.getCell(15).text?.trim() || 'Tricycle';
-        const unit = {
-          vehicleType,
-          bodyNo,
-          makeType: row.getCell(17).text?.trim() || '',
-          chassisNo: row.getCell(18).text?.trim() || '',
-          motorNo: row.getCell(19).text?.trim() || '',
-          plateNo: row.getCell(20).text?.trim() || '',
-          yearModel: row.getCell(21).text?.trim() || '',
-          ltfrbMchCaseNo: row.getCell(22).text?.trim() || '',
-          zone: '',
-          colorCode: ''
-        };
-        
-        const firstChar = bodyNo.charAt(0);
-        if (vehicleType === 'Tricycle') {
-          if (bodyNo.startsWith('BB')) {
-            unit.zone = 'BB';
-          } else if (firstChar >= '1' && firstChar <= '9') {
-            unit.zone = `Zone ${firstChar}`;
-          }
-        }
-        
-        const colorOpts = getColorOptions(bodyNo, vehicleType);
-        if (colorOpts.length > 0) {
-          unit.colorCode = colorOpts[0]; // Auto pick first available color code
-        }
-        
-        operatorMap.get(key).units.push(unit);
-      }
-    });
-
-    const promises = Array.from(operatorMap.values()).map(data => 
-      axios.post('http://localhost:5000/api/operators', data)
-    );
-    
-    await Promise.all(promises);
-    alert('Import successful! Refreshing data...');
-    window.location.reload();
-  };
-
-  const processMasterImport = async (worksheet) => {
-    const operatorMap = new Map();
-    worksheet.eachRow((row, rowNumber) => {
-      if (rowNumber === 1) return; // skip header
-      const opFirstName = row.getCell(4).text?.trim();
-      const opLastName = row.getCell(3).text?.trim();
-      if (!opFirstName || !opLastName) return;
+      const opFirstName = String(row[3] || '').trim();
+      const opLastName = String(row[2] || '').trim();
+      if (!opFirstName || !opLastName) continue;
 
       const key = `${opFirstName}-${opLastName}`.toLowerCase();
       
@@ -188,36 +94,38 @@ const Dashboard = () => {
         operatorMap.set(key, {
           operator: {
             firstName: opFirstName,
-            middleName: row.getCell(5).text?.trim() || '',
+            middleName: String(row[4] || '').trim(),
             lastName: opLastName,
-            civilStatus: row.getCell(6).text?.trim() || 'Single',
-            age: row.getCell(7).value ? Number(row.getCell(7).value) : undefined,
-            addressNo: row.getCell(8).text?.trim() || '',
-            street: row.getCell(9).text?.trim() || '',
-            purok: row.getCell(10).text?.trim() || '',
-            barangay: row.getCell(11).text?.trim() || '',
-            cityMunicipality: row.getCell(12).text?.trim() || '',
-            contactNo: row.getCell(13).text?.trim() || '',
+            civilStatus: String(row[5] || '').trim() || 'Single',
+            age: row[6] ? Number(row[6]) : undefined,
+            addressNo: String(row[7] || '').trim(),
+            street: String(row[8] || '').trim(),
+            purok: String(row[9] || '').trim(),
+            barangay: String(row[10] || '').trim(),
+            cityMunicipality: String(row[11] || '').trim(),
+            contactNo: String(row[12] || '').trim(),
+            operatorType: 'FOR HIRE',
           },
           units: []
         });
       }
       
-      const bodyNo = row.getCell(2).text?.trim();
+      const bodyNo = String(row[1] || '').trim();
       if (bodyNo) {
-        const vehicleType = row.getCell(1).text?.trim() || 'Tricycle';
+        const vehicleType = String(row[0] || '').trim() || 'Tricycle';
         const unit = {
           vehicleType,
           bodyNo,
-          ltfrbMchCaseNo: row.getCell(14).text?.trim() || '',
-          colorCode: row.getCell(15).text?.trim() || '',
-          makeType: row.getCell(16).text?.trim() || '',
-          chassisNo: row.getCell(17).text?.trim() || '',
-          motorNo: row.getCell(18).text?.trim() || '',
-          plateNo: row.getCell(19).text?.trim() || '',
-          yearModel: row.getCell(20).text?.trim() || '',
+          ltfrbMchCaseNo: String(row[13] || '').trim(),
+          colorCode: String(row[14] || '').trim(),
+          makeType: String(row[15] || '').trim(),
+          chassisNo: String(row[16] || '').trim(),
+          motorNo: String(row[17] || '').trim(),
+          plateNo: String(row[18] || '').trim(),
+          yearModel: String(row[19] || '').trim(),
           zone: '',
-          driver: null
+          driver: null,
+          conductor: null
         };
         
         // Auto-fill Zone
@@ -239,57 +147,56 @@ const Dashboard = () => {
         }
 
         // Check for Driver in this row
-        const drFirstName = row.getCell(26).text?.trim();
-        const drLastName = row.getCell(25).text?.trim();
+        const drFirstName = String(row[25] || '').trim();
+        const drLastName = String(row[24] || '').trim();
         if (drFirstName && drLastName) {
           unit.driver = {
-            cpdoId: row.getCell(21).text?.trim() || '',
-            licenseNo: row.getCell(22).text?.trim() || '',
-            licenseExpiryDate: row.getCell(23).text?.trim() || '',
-            licenseRestrictions: row.getCell(24).text?.trim() || '',
+            cpdoId: String(row[20] || '').trim(),
+            licenseNo: String(row[21] || '').trim(),
+            licenseExpiryDate: String(row[22] || '').trim(),
+            licenseRestrictions: String(row[23] || '').trim(),
             lastName: drLastName,
             firstName: drFirstName,
-            middleName: row.getCell(27).text?.trim() || '',
-            civilStatus: row.getCell(28).text?.trim() || 'Single',
-            age: row.getCell(29).value ? Number(row.getCell(29).value) : undefined,
-            addressNo: row.getCell(30).text?.trim() || '',
-            street: row.getCell(31).text?.trim() || '',
-            purok: row.getCell(32).text?.trim() || '',
-            barangay: row.getCell(33).text?.trim() || '',
-            cityMunicipality: row.getCell(34).text?.trim() || '',
-            contactNo: row.getCell(35).text?.trim() || '',
-            birthMonth: row.getCell(36).text?.trim() || '',
-            birthDate: row.getCell(37).text?.trim() || '',
-            birthYear: row.getCell(38).text?.trim() || '',
+            middleName: String(row[26] || '').trim(),
+            civilStatus: String(row[27] || '').trim() || 'Single',
+            age: row[28] ? Number(row[28]) : undefined,
+            addressNo: String(row[29] || '').trim(),
+            street: String(row[30] || '').trim(),
+            purok: String(row[31] || '').trim(),
+            barangay: String(row[32] || '').trim(),
+            cityMunicipality: String(row[33] || '').trim(),
+            contactNo: String(row[34] || '').trim(),
+            birthMonth: String(row[35] || '').trim(),
+            birthDate: String(row[36] || '').trim(),
+            birthYear: String(row[37] || '').trim(),
             driverType: vehicleType,
             status: 'Active'
           };
         }
 
         // Check for Conductor in this row
-        const cdFirstName = row.getCell(40).text?.trim();
-        const cdLastName = row.getCell(39).text?.trim();
+        const cdFirstName = String(row[39] || '').trim();
+        const cdLastName = String(row[38] || '').trim();
         if (cdFirstName && cdLastName) {
           unit.conductor = {
             lastName: cdLastName,
             firstName: cdFirstName,
-            middleName: row.getCell(41).text?.trim() || '',
-            gender: 'Male', 
-            civilStatus: row.getCell(42).text?.trim() || 'Single',
-            age: row.getCell(43).value ? Number(row.getCell(43).value) : undefined,
-            addressNo: row.getCell(44).text?.trim() || '',
-            street: row.getCell(45).text?.trim() || '',
-            purok: row.getCell(46).text?.trim() || '',
-            barangay: row.getCell(47).text?.trim() || '',
-            cityMunicipality: row.getCell(48).text?.trim() || '',
-            contactNo: row.getCell(49).text?.trim() || '',
+            middleName: String(row[40] || '').trim(),
+            civilStatus: String(row[41] || '').trim() || 'Single',
+            age: row[42] ? Number(row[42]) : undefined,
+            addressNo: String(row[43] || '').trim(),
+            street: String(row[44] || '').trim(),
+            purok: String(row[45] || '').trim(),
+            barangay: String(row[46] || '').trim(),
+            cityMunicipality: String(row[47] || '').trim(),
+            contactNo: String(row[48] || '').trim(),
             status: 'Active'
           };
         }
         
         operatorMap.get(key).units.push(unit);
       }
-    });
+    }
 
     const promises = Array.from(operatorMap.values()).map(data => 
       axios.post('http://localhost:5000/api/operators', data)
@@ -306,33 +213,31 @@ const Dashboard = () => {
 
     setImporting(true);
     try {
-      const workbook = new ExcelJS.Workbook();
-      const arrayBuffer = await file.arrayBuffer();
-      
-      // ExcelJS browser version only reliably supports XLSX
-      if (!file.name.toLowerCase().endsWith('.xlsx')) {
-        throw new Error('Please save your file as an "Excel Workbook (.xlsx)" in Excel before importing. CSV format is not supported in the browser.');
-      }
-      
-      await workbook.xlsx.load(arrayBuffer);
-      
-      const worksheet = workbook.worksheets[0] || workbook.getWorksheet(1);
-      if (!worksheet) throw new Error('No worksheet found in file.');
-
-      if (importType === 'Master') {
-        await processMasterImport(worksheet);
-      } else if (importType === 'Operator') {
-        await processOperatorImport(worksheet);
-      } else {
-        alert(`${importType} import logic not fully implemented yet.`);
-      }
+      const reader = new FileReader();
+      reader.onload = async (evt) => {
+        try {
+          const bstr = evt.target.result;
+          const wb = XLSX.read(bstr, { type: 'binary' });
+          const wsname = wb.SheetNames[0];
+          const ws = wb.Sheets[wsname];
+          const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+          
+          if (data.length < 2) throw new Error('File appears to be empty.');
+          await processMasterImport(data);
+        } catch (innerErr) {
+          alert(`Error parsing file: ${innerErr.message}`);
+          setImporting(false);
+        }
+      };
+      reader.onerror = () => {
+        alert('Error reading file.');
+        setImporting(false);
+      };
+      reader.readAsBinaryString(file);
     } catch (err) {
       console.error('Import Error:', err);
-      const errorMessage = err.response?.data?.message || err.message || 'Unknown error occurred.';
-      alert(`Import Failed: ${errorMessage}`);
-    } finally {
+      alert(`Import Failed: ${err.message}`);
       setImporting(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -346,7 +251,7 @@ const Dashboard = () => {
           <p>Real-time monitoring of PUV operators, vehicles, and drivers.</p>
         </div>
         
-        <div className="dashboard-actions" style={{ position: 'relative' }} ref={menuRef}>
+        <div className="dashboard-actions">
           <input
             type="file"
             accept=".xlsx, .xls, .csv"
@@ -354,25 +259,15 @@ const Dashboard = () => {
             ref={fileInputRef}
             onChange={handleFileChange}
           />
-          <button className="btn-primary" type="button" onClick={() => setShowImportMenu(!showImportMenu)} disabled={importing}>
+          <button 
+            className="btn-primary" 
+            type="button" 
+            onClick={() => fileInputRef.current?.click()} 
+            disabled={importing}
+          >
             <Upload size={18} />
             {importing ? 'Importing...' : 'Import Data'}
           </button>
-          
-          {showImportMenu && (
-            <div className="import-dropdown glass-panel" style={{ 
-              position: 'absolute', top: '100%', right: 0, marginTop: '0.5rem', 
-              padding: '0.5rem', zIndex: 50, display: 'flex', flexDirection: 'column', gap: '0.25rem',
-              minWidth: '180px'
-            }}>
-              <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start', border: 'none', background: 'var(--accent-color)', color: 'white', fontWeight: 'bold' }} onClick={() => handleImportSelection('Master')}>Master Import (All-in-1)</button>
-              <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '4px 0' }} />
-              <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start', border: 'none', background: 'transparent' }} onClick={() => handleImportSelection('Operator')}>Operator</button>
-              <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start', border: 'none', background: 'transparent' }} onClick={() => handleImportSelection('Unit')}>Unit</button>
-              <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start', border: 'none', background: 'transparent' }} onClick={() => handleImportSelection('Driver')}>Driver</button>
-              <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start', border: 'none', background: 'transparent' }} onClick={() => handleImportSelection('Conductor')}>Conductor</button>
-            </div>
-          )}
         </div>
       </div>
 

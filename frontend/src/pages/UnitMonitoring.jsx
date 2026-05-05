@@ -216,17 +216,30 @@ const UnitMonitoring = () => {
       </div>
 
       <div className="monitoring-search-wrap">
-        <form style={{ display: 'flex', flexGrow: 1, gap: '1rem' }} onSubmit={searchUnits}>
-          <input 
-            type="text" 
-            placeholder="Enter Body Number or Plate Number..." 
-            className="input-field"
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              if (!e.target.value.trim()) setError('');
-            }}
-          />
+        <form style={{ display: 'flex', flexGrow: 1, gap: '1rem', position: 'relative' }} onSubmit={searchUnits}>
+          <div style={{ position: 'relative', flexGrow: 1 }}>
+            <input 
+              type="text" 
+              placeholder="Enter Body Number or Plate Number..." 
+              className="input-field"
+              style={{ paddingRight: '2.5rem' }}
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                if (!e.target.value.trim()) setError('');
+              }}
+            />
+            {query && (
+              <button 
+                type="button" 
+                className="input-clear-btn"
+                onClick={() => { setQuery(''); setError(''); fetchInitialData(); }}
+                title="Clear search"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
           <button className="btn-primary" type="submit" disabled={loading}>
             <Search size={18} />
             {loading ? 'Searching...' : 'Search'}
@@ -406,6 +419,7 @@ const UnitMonitoring = () => {
                       className="input-field" 
                       value={editFormData.operator} 
                       onChange={e => {
+                        const val = e.target.value.toUpperCase();
                         const opId = e.target.value;
                         const op = operators.find(o => o._id === opId);
                         const updated = { ...editFormData, operator: opId };
@@ -494,7 +508,7 @@ const UnitMonitoring = () => {
                   )}
                   <div className="form-group">
                     <label>Plate Number</label>
-                    <input type="text" className="input-field" value={editFormData.plateNo} onChange={e => setEditFormData({...editFormData, plateNo: e.target.value})} />
+                    <input type="text" className="input-field" value={editFormData.plateNo} onChange={e => setEditFormData({...editFormData, plateNo: e.target.value.toUpperCase()})} />
                   </div>
                   <div className="form-group">
                     <label>Make/Type</label>
@@ -502,7 +516,7 @@ const UnitMonitoring = () => {
                   </div>
                   <div className="form-group">
                     <label>Year Model</label>
-                    <input type="text" className="input-field" value={editFormData.yearModel} onChange={e => setEditFormData({...editFormData, yearModel: e.target.value})} />
+                    <input type="text" className="input-field" value={editFormData.yearModel} onChange={e => setEditFormData({...editFormData, yearModel: e.target.value.toUpperCase()})} />
                   </div>
                   <div className="form-group">
                     <label>Color Code</label>
@@ -510,22 +524,22 @@ const UnitMonitoring = () => {
                       <select 
                         className="input-field" 
                         value={editFormData.colorCode} 
-                        onChange={e => setEditFormData({...editFormData, colorCode: e.target.value})}
+                        onChange={e => setEditFormData({...editFormData, colorCode: e.target.value.toUpperCase()})}
                       >
                         <option value="">-- Select Color --</option>
                         {getColorOptions(editFormData.bodyNo, editFormData.vehicleType).map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                     ) : (
-                      <input type="text" className="input-field" value={editFormData.colorCode} onChange={e => setEditFormData({...editFormData, colorCode: e.target.value})} />
+                      <input type="text" className="input-field" value={editFormData.colorCode} onChange={e => setEditFormData({...editFormData, colorCode: e.target.value.toUpperCase()})} />
                     )}
                   </div>
                   <div className="form-group">
                     <label>Chassis Number</label>
-                    <input type="text" className="input-field" value={editFormData.chassisNo} onChange={e => setEditFormData({...editFormData, chassisNo: e.target.value})} />
+                    <input type="text" className="input-field" value={editFormData.chassisNo} onChange={e => setEditFormData({...editFormData, chassisNo: e.target.value.toUpperCase()})} />
                   </div>
                   <div className="form-group">
                     <label>Motor Number</label>
-                    <input type="text" className="input-field" value={editFormData.motorNo} onChange={e => setEditFormData({...editFormData, motorNo: e.target.value})} />
+                    <input type="text" className="input-field" value={editFormData.motorNo} onChange={e => setEditFormData({...editFormData, motorNo: e.target.value.toUpperCase()})} />
                   </div>
                 </div>
               </div>

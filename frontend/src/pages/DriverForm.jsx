@@ -79,9 +79,17 @@ const DriverForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    let finalValue = value;
+    const uppercaseFields = [
+      'cpdoId', 'licenseNo', 'lastName', 'firstName', 'middleName', 
+      'civilStatus', 'barangay', 'cityMunicipality', 'street', 'purok', 'birthMonth'
+    ];
+    if (uppercaseFields.includes(name)) {
+      finalValue = value.toUpperCase();
+    }
     setDriver((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: finalValue,
     }));
   };
 

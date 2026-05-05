@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Menu, PanelLeftClose, User } from 'lucide-react';
+import { Menu, PanelLeftClose, User, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import './Header.css';
 
 const Header = ({ isSidebarCollapsed, onToggleSidebar }) => {
   const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [philippineTime, setPhilippineTime] = useState('');
   const [philippineDate, setPhilippineDate] = useState('');
 
@@ -53,6 +55,16 @@ const Header = ({ isSidebarCollapsed, onToggleSidebar }) => {
           <span className="ph-time">{philippineTime}</span>
           <span className="ph-date">{philippineDate}</span>
         </div>
+        
+        <button 
+          className="theme-toggle-btn" 
+          onClick={toggleTheme} 
+          aria-label="Toggle dark/light mode"
+          title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        >
+          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
+
         <div className="user-profile">
           <div className="avatar">
             <User size={20} />

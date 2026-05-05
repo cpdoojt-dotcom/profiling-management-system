@@ -59,6 +59,26 @@
   color: var(--text-secondary);
 }
 
+.theme-toggle-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  border: 1px solid var(--surface-border);
+  background: var(--surface-color);
+  transition: all 0.3s ease;
+}
+
+.theme-toggle-btn:hover {
+  color: var(--accent-color);
+  border-color: var(--accent-color);
+  background: rgba(59, 130, 246, 0.1);
+  transform: rotate(15deg);
+}
+
 .user-profile {
   display: flex;
   align-items: center;

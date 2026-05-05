@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowUpDown, Plus, Bus, FileSpreadsheet } from 'lucide-react';
+import { ArrowUpDown, Plus, Bus, FileSpreadsheet, X } from 'lucide-react';
 import axios from 'axios';
 import ExcelJS from 'exceljs';
 import { useConfirm } from '../context/ConfirmContext';
@@ -162,11 +162,15 @@ const ConductorList = () => {
 
   const handleEditChange = (section) => (e) => {
     const { name, value } = e.target;
+    let finalValue = value;
+    if (['firstName', 'lastName', 'middleName', 'birthPlace', 'emergencyContactName', 'civilStatus'].includes(name)) {
+      finalValue = value.toUpperCase();
+    }
     setEditForm((prev) => ({
       ...prev,
       [section]: {
         ...prev[section],
-        [name]: value,
+        [name]: finalValue,
       },
     }));
   };
@@ -335,13 +339,26 @@ const ConductorList = () => {
       </div>
 
       <div className="glass-panel driver-filters">
-        <input
-          type="text"
-          className="input-field"
-          placeholder="Search by name, body no, or plate..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+        <div style={{ position: 'relative', flexGrow: 1 }}>
+          <input
+            type="text"
+            className="input-field"
+            style={{ paddingRight: '2.5rem' }}
+            placeholder="Search by name, body no, or plate..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          {query && (
+            <button 
+              type="button" 
+              className="input-clear-btn"
+              onClick={() => setQuery('')}
+              title="Clear search"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
         <select className="input-field" value={barangayFilter} onChange={(e) => setBarangayFilter(e.target.value)}>
           <option value="all">All Barangay</option>
           {barangayOptions.map((barangay) => (

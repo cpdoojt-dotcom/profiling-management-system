@@ -80,23 +80,34 @@ const OperatorForm = () => {
 
   const handleOperatorChange = (e) => {
     const { name, value } = e.target;
-    setOperator((prev) => ({ ...prev, [name]: value }));
+    let finalValue = value;
+    const uppercaseFields = ['lastName', 'firstName', 'middleName', 'barangay', 'cityMunicipality', 'street', 'purok', 'birthplace'];
+    if (uppercaseFields.includes(name)) {
+      finalValue = value.toUpperCase();
+    }
+    setOperator((prev) => ({ ...prev, [name]: finalValue }));
   };
 
   const handleUnitChange = (index, field, value) => {
     setUnits((prev) => prev.map((unit, idx) => {
       if (idx === index) {
-        let updated = { ...unit, [field]: value };
+        let finalValue = value;
+        const uppercaseFields = ['bodyNo', 'plateNo', 'makeType', 'chassisNo', 'motorNo', 'yearModel', 'zone', 'ltfrbMchCaseNo'];
+        if (uppercaseFields.includes(field)) {
+          finalValue = value.toUpperCase();
+        }
+
+        let updated = { ...unit, [field]: finalValue };
         
         if (field === 'bodyNo') {
-          const bn = (value || '').toUpperCase();
+          const bn = (finalValue || '').toUpperCase();
           if (/^[1-9]/.test(bn) || bn.startsWith('BB')) updated.vehicleType = 'Tricycle';
           else if (bn.startsWith('JO') || /^J1[0-3]/.test(bn)) updated.vehicleType = 'Jeepney';
           else if (bn.startsWith('O-B') || bn.startsWith('O-Z')) updated.vehicleType = 'Mini Bus';
         }
         
         // Auto-fill logic
-        const bodyNo = (field === 'bodyNo' ? value : unit.bodyNo) || '';
+        const bodyNo = (field === 'bodyNo' ? finalValue : unit.bodyNo) || '';
         const vehicleType = updated.vehicleType || unit.vehicleType;
         const firstChar = bodyNo.charAt(0);
         if (vehicleType === 'Tricycle') {
