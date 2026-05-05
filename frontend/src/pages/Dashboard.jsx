@@ -154,7 +154,6 @@ const Dashboard = () => {
             cpdoId: String(row[20] || '').trim(),
             licenseNo: String(row[21] || '').trim(),
             licenseExpiryDate: String(row[22] || '').trim(),
-            licenseRestrictions: String(row[23] || '').trim(),
             lastName: drLastName,
             firstName: drFirstName,
             middleName: String(row[26] || '').trim(),

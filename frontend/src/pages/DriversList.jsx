@@ -43,13 +43,14 @@ const DriversList = () => {
   const [query, setQuery] = useState('');
   const [barangayFilter, setBarangayFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [zoneFilter, setZoneFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
   const [editImageFile, setEditImageFile] = useState(null);
   const [operators, setOperators] = useState([]);
   const [editForm, setEditForm] = useState({
     driver: {
-      cpdoId: '', firstName: '', lastName: '', middleName: '', licenseNo: '', licenseExpiryDate: '', licenseRestrictions: '', contactNo: '', status: 'Active',
+      cpdoId: '', firstName: '', lastName: '', middleName: '', licenseNo: '', licenseExpiryDate: '', contactNo: '', status: 'Active',
       addressNo: '', street: '', purok: '', barangay: '', cityMunicipality: '', operator: '', unit: ''
     },
   });
@@ -88,7 +89,12 @@ const DriversList = () => {
   }, [selectedFromQuery, typeFromQuery]);
 
   const barangayOptions = useMemo(
-    () => [...new Set(drivers.map((driver) => driver.operator?.barangay).filter(Boolean))],
+    () => [...new Set(drivers.map((driver) => driver.operator?.barangay).filter(Boolean))].sort(),
+    [drivers],
+  );
+
+  const zoneOptions = useMemo(
+    () => [...new Set(drivers.map((driver) => driver.unit?.zone).filter(Boolean))].sort(),
     [drivers],
   );
 
@@ -105,9 +111,10 @@ const DriversList = () => {
       const matchesBarangay = barangayFilter === 'all' || driver.operator?.barangay === barangayFilter;
       const matchesCategory = categoryFilter === 'all'
         || String(driver.driverType || 'Tricycle').toLowerCase() === categoryFilter.toLowerCase();
-      return matchesQuery && matchesBarangay && matchesCategory;
+      const matchesZone = zoneFilter === 'all' || driver.unit?.zone === zoneFilter;
+      return matchesQuery && matchesBarangay && matchesCategory && matchesZone;
     });
-  }, [drivers, query, barangayFilter, categoryFilter]);
+  }, [drivers, query, barangayFilter, categoryFilter, zoneFilter]);
 
   const sortedDrivers = useMemo(() => {
     if (sortBy === 'createdAt') {
@@ -127,7 +134,7 @@ const DriversList = () => {
 
   useEffect(() => {
     setPage(1);
-  }, [query, barangayFilter, categoryFilter]);
+  }, [query, barangayFilter, categoryFilter, zoneFilter]);
 
   useEffect(() => {
     if (page > totalPages) {
@@ -150,7 +157,6 @@ const DriversList = () => {
         middleName: selectedDriver.middleName || '',
         licenseNo: selectedDriver.licenseNo || '',
         licenseExpiryDate: selectedDriver.licenseExpiryDate || '',
-        licenseRestrictions: selectedDriver.licenseRestrictions || '',
         contactNo: selectedDriver.contactNo || '',
         status: selectedDriver.status || 'Active',
         addressNo: selectedDriver.addressNo || '',
@@ -239,8 +245,8 @@ const DriversList = () => {
   };
 
   const handleExportExcel = async () => {
-    if (drivers.length === 0) {
-      toast.error('No drivers available to export.');
+    if (sortedDrivers.length === 0) {
+      toast.error('No drivers matched your current filters to export.');
       return;
     }
 
@@ -256,7 +262,6 @@ const DriversList = () => {
       'STATUS',
       'LICENSE NO',
       'LICENSE EXPIRY DATE',
-      'LICENSE RESTRICTIONS',
       'CONTACT NO',
       'ADDRESS NO',
       'STREET',
@@ -274,7 +279,7 @@ const DriversList = () => {
       'UPDATED AT',
     ];
 
-    const rows = drivers.map((driver, index) => ([
+    const rows = sortedDrivers.map((driver, index) => ([
       index + 1,
       sanitize(driver.cpdoId),
       sanitize(driver.firstName),
@@ -285,7 +290,6 @@ const DriversList = () => {
       sanitize(driver.status),
       sanitize(driver.licenseNo),
       sanitize(driver.licenseExpiryDate),
-      sanitize(driver.licenseRestrictions),
       sanitize(driver.contactNo),
       sanitize(driver.addressNo),
       sanitize(driver.street),
@@ -332,13 +336,21 @@ const DriversList = () => {
       });
 
       const timestamp = new Date().toISOString().slice(0, 10);
+      let fileName = 'drivers';
+      if (zoneFilter !== 'all') fileName += `-${zoneFilter}`;
+      if (barangayFilter !== 'all') fileName += `-${barangayFilter}`;
+      if (categoryFilter !== 'all') fileName += `-${categoryFilter}`;
+      if (query.trim()) fileName += '-filtered';
+      
+      fileName += `-${timestamp}.xlsx`;
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `drivers-directory-${timestamp}.xlsx`;
+      link.download = fileName.toLowerCase().replace(/\s+/g, '-');
       link.click();
       URL.revokeObjectURL(link.href);
       toast.success('Drivers exported to Excel successfully.');
@@ -398,6 +410,12 @@ const DriversList = () => {
           <option value="Tricycle">Tricycle</option>
           <option value="Jeepney">Jeepney</option>
           <option value="Mini Bus">Mini Bus</option>
+        </select>
+        <select className="input-field" value={zoneFilter} onChange={(e) => setZoneFilter(e.target.value)}>
+          <option value="all">All Zones</option>
+          {zoneOptions.map((zone) => (
+            <option key={zone} value={zone}>{zone}</option>
+          ))}
         </select>
       </div>
 
@@ -528,10 +546,6 @@ const DriversList = () => {
                     <input type="date" name="licenseExpiryDate" className="input-field" value={editForm.driver.licenseExpiryDate} onChange={handleEditChange('driver')} />
                   </div>
                   <div className="edit-form-group">
-                    <label>Restrictions</label>
-                    <input name="licenseRestrictions" className="input-field" value={editForm.driver.licenseRestrictions} onChange={handleEditChange('driver')} />
-                  </div>
-                  <div className="edit-form-group">
                     <label>Operator</label>
                     <select name="operator" className="input-field" value={editForm.driver.operator} onChange={(e) => {
                       const opId = e.target.value;
@@ -603,7 +617,6 @@ const DriversList = () => {
                 <div><span>Name:</span><strong>{getFullName(selectedDriver)}</strong></div>
                 <div><span>License:</span><strong>{selectedDriver.licenseNo}</strong></div>
                 <div><span>Expiry:</span><strong>{selectedDriver.licenseExpiryDate || '-'}</strong></div>
-                <div><span>Restrictions:</span><strong>{selectedDriver.licenseRestrictions || '-'}</strong></div>
                 <div><span>Body No:</span><strong>{selectedDriver.unit?.bodyNo || '-'}</strong></div>
                 <div><span>Plate No:</span><strong>{selectedDriver.unit?.plateNo || '-'}</strong></div>
                 <div><span>Operator:</span><strong>{selectedDriver.operator?.firstName} {selectedDriver.operator?.lastName}</strong></div>

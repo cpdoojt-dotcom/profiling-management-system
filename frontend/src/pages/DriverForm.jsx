@@ -10,7 +10,6 @@ const initialDriver = {
   cpdoId: '',
   licenseNo: '',
   licenseExpiryDate: '',
-  licenseRestrictions: '',
   lastName: '',
   firstName: '',
   middleName: '',
@@ -207,10 +206,6 @@ const DriverForm = () => {
           <div className="form-group">
             <label>License Expiry Date</label>
             <input type="date" name="licenseExpiryDate" className="input-field" value={driver.licenseExpiryDate} onChange={handleChange} />
-          </div>
-          <div className="form-group">
-            <label>License Restrictions</label>
-            <input type="text" name="licenseRestrictions" className="input-field" value={driver.licenseRestrictions} onChange={handleChange} placeholder="e.g. 1, 2" />
           </div>
           <div className="form-group">
             <label>Last Name</label>

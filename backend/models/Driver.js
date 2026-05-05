@@ -14,7 +14,6 @@ const driverSchema = new mongoose.Schema({
   cpdoId: { type: String, required: true, unique: true, trim: true },
   licenseNo: { type: String, required: true, unique: true, trim: true },
   licenseExpiryDate: { type: String, trim: true },
-  licenseRestrictions: { type: String, trim: true },
   lastName: { type: String, required: true, trim: true },
   firstName: { type: String, required: true, trim: true },
   middleName: { type: String, trim: true },
