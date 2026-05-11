@@ -21,7 +21,9 @@ const sortConductors = (items, sortBy, direction) => {
 
 const getFullName = (person) => {
   if (!person) return '';
-  return [person.firstName, person.middleName, person.lastName]
+  const parts = [person.firstName, person.middleName, person.lastName];
+  if (person.extensionName) parts.push(person.extensionName);
+  return parts
     .map((part) => (part || '').trim())
     .filter(Boolean)
     .join(' ');
@@ -50,7 +52,7 @@ const ConductorList = () => {
   const [operators, setOperators] = useState([]);
   const [editForm, setEditForm] = useState({
     conductor: {
-      firstName: '', lastName: '', middleName: '', status: 'Active',
+      firstName: '', lastName: '', middleName: '', extensionName: '', status: 'Active',
       operator: '', unit: '',
       birthPlace: '', gender: 'Male', civilStatus: '',
       emergencyContactName: '', emergencyContactNo: '', emergencyContactAddress: ''
@@ -136,6 +138,7 @@ const ConductorList = () => {
         firstName: selectedConductor.firstName || '',
         lastName: selectedConductor.lastName || '',
         middleName: selectedConductor.middleName || '',
+        extensionName: selectedConductor.extensionName || '',
         status: selectedConductor.status || 'Active',
         operator: selectedConductor.operator?._id || selectedConductor.operator || '',
         unit: selectedConductor.unit?._id || selectedConductor.unit || '',
@@ -163,7 +166,7 @@ const ConductorList = () => {
   const handleEditChange = (section) => (e) => {
     const { name, value } = e.target;
     let finalValue = value;
-    if (['firstName', 'lastName', 'middleName', 'birthPlace', 'emergencyContactName', 'civilStatus'].includes(name)) {
+    if (['firstName', 'lastName', 'middleName', 'extensionName', 'birthPlace', 'emergencyContactName', 'civilStatus'].includes(name)) {
       finalValue = value.toUpperCase();
     }
     setEditForm((prev) => ({
@@ -234,6 +237,7 @@ const ConductorList = () => {
       'FIRST NAME',
       'MIDDLE NAME',
       'LAST NAME',
+      'EXTENSION',
       'FULL NAME',
       'GENDER',
       'CIVIL STATUS',
@@ -257,6 +261,7 @@ const ConductorList = () => {
       sanitize(conductor.firstName),
       sanitize(conductor.middleName),
       sanitize(conductor.lastName),
+      sanitize(conductor.extensionName),
       sanitize(getFullName(conductor)),
       sanitize(conductor.gender),
       sanitize(conductor.civilStatus),
@@ -402,7 +407,7 @@ const ConductorList = () => {
                     className={selectedConductorId === c._id ? 'selected-row' : ''}
                   >
                     <td style={{ fontWeight: '700', color: 'var(--accent-color)' }}>{c.unit?.bodyNo || '-'}</td>
-                    <td>{c.firstName} {c.lastName}</td>
+                    <td>{getFullName(c)}</td>
                     <td>
                       <span className={`status-type mini-bus`}>
                         <Bus size={14} /> {' '}{c.status}
@@ -471,6 +476,10 @@ const ConductorList = () => {
                   <div className="edit-form-group">
                     <label>Last Name</label>
                     <input name="lastName" className="input-field" value={editForm.conductor.lastName} onChange={handleEditChange('conductor')} required />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Extension Name (Jr., Sr., III)</label>
+                    <input name="extensionName" className="input-field" value={editForm.conductor.extensionName} onChange={handleEditChange('conductor')} placeholder="e.g. JR, SR, III" />
                   </div>
                   <div className="edit-form-group">
                     <label>Gender</label>
@@ -549,13 +558,13 @@ const ConductorList = () => {
                     <img src={selectedConductor.photoUrl} alt={`${selectedConductor.firstName} ${selectedConductor.lastName}`} className="details-photo" />
                   </div>
                 ) : null}
-                <div><span>Name:</span><strong>{selectedConductor.firstName} {selectedConductor.lastName}</strong></div>
+                <div><span>Name:</span><strong>{getFullName(selectedConductor)}</strong></div>
                 <div><span>Gender:</span><strong>{selectedConductor.gender || '-'}</strong></div>
                 <div><span>Body No:</span><strong>{selectedConductor.unit?.bodyNo || '-'}</strong></div>
                 <div><span>Plate No:</span><strong>{selectedConductor.unit?.plateNo || '-'}</strong></div>
                 <div><span>Birth Place:</span><strong>{selectedConductor.birthPlace || '-'}</strong></div>
                 <div><span>Civil Status:</span><strong>{selectedConductor.civilStatus || '-'}</strong></div>
-                <div><span>Operator:</span><strong>{selectedConductor.operator?.firstName} {selectedConductor.operator?.lastName}</strong></div>
+                <div><span>Operator:</span><strong>{getFullName(selectedConductor.operator)}</strong></div>
                 <div><span>Status:</span><strong>{selectedConductor.status || 'Active'}</strong></div>
                 <div className="details-full" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: '0.5rem', paddingTop: '0.5rem' }}>
                   <span>Notify in Emergency:</span><strong>{selectedConductor.emergencyContactName || '-'} ({selectedConductor.emergencyContactNo || '-'})</strong>

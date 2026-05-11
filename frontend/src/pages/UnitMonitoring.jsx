@@ -20,27 +20,29 @@ const getColorOptions = (bodyNo, vehicleType) => {
     if (bn.startsWith('8')) return ['SKYBLUE W/ CREAM TOP'];
     if (bn.startsWith('9')) return ['SKY BLUE W/RED TOP'];
   } else if (vehicleType === 'Jeepney') {
-    if (bn.startsWith('JO1')) return ['YELLOW'];
-    if (bn.startsWith('JO2')) return ['ORANGE'];
-    if (bn.startsWith('JO3')) return ['RED'];
-    if (bn.startsWith('JO4')) return ['YELLOW GREEN'];
-    if (bn.startsWith('JO5')) return ['CREAM'];
-    if (bn.startsWith('JO6')) return ['BROWN'];
-    if (bn.startsWith('JO7')) return ['GREEN W/WHITE TOP'];
-    if (bn.startsWith('JO8')) return ['DARKBLUE', 'DARKBLUE W/ YELLOW TOP'];
-    if (bn.startsWith('JO9')) return ['SKYBLUE', 'SKYBLUE W/ WHITE TOP'];
+    if (bn.startsWith('J01')) return ['YELLOW'];
+    if (bn.startsWith('J02')) return ['ORANGE'];
+    if (bn.startsWith('J03')) return ['RED'];
+    if (bn.startsWith('J04')) return ['YELLOW GREEN'];
+    if (bn.startsWith('J05')) return ['CREAM'];
+    if (bn.startsWith('J06')) return ['BROWN'];
+    if (bn.startsWith('J07')) return ['GREEN W/WHITE TOP'];
+    if (bn.startsWith('J08')) return ['DARKBLUE', 'DARKBLUE W/ YELLOW TOP'];
+    if (bn.startsWith('J09')) return ['SKYBLUE', 'SKYBLUE W/ WHITE TOP'];
     if (bn.startsWith('J10') || bn.startsWith('J11')) return ['YELLOW W/RED TOP'];
     if (bn.startsWith('J12') || bn.startsWith('J13')) return ['SKYBLUE W/GOLD TOP'];
   } else if (vehicleType === 'Mini Bus') {
-    if (bn.startsWith('O-B')) return ['DIRTY WHITE WITH GREEN STRIPES'];
-    if (bn.startsWith('O-Z')) return ['WHITE WITH BLUE STRIPES'];
+    if (bn.startsWith('OB') || bn.startsWith('O-B')) return ['DIRTY WHITE WITH GREEN STRIPES'];
+    if (bn.startsWith('OZ') || bn.startsWith('O-Z')) return ['WHITE WITH BLUE STRIPES'];
   }
   return [];
 };
 
 const getFullName = (person) => {
   if (!person) return '';
-  return [person.firstName, person.middleName, person.lastName]
+  const parts = [person.firstName, person.middleName, person.lastName];
+  if (person.extensionName) parts.push(person.extensionName);
+  return parts
     .map((part) => (part || '').trim())
     .filter(Boolean)
     .join(' ');
@@ -88,7 +90,7 @@ const UnitMonitoring = () => {
         if (!unit.driver) {
           const linkedDriver = allDrivers.find(d => d.unit?._id === unit._id || d.unit === unit._id);
           if (linkedDriver) {
-            return { ...unit, assignedDriverName: `${linkedDriver.firstName} ${linkedDriver.lastName}` };
+            return { ...unit, assignedDriverName: getFullName(linkedDriver) };
           }
         }
         return unit;
@@ -470,6 +472,12 @@ const UnitMonitoring = () => {
                           } else if (firstChar >= '1' && firstChar <= '9') {
                             updated.zone = `Zone ${firstChar}`;
                           }
+                        } else if (val === 'Jeepney') {
+                          const match = bodyNo.match(/^(J0[1-9]|J1[0-3])/i);
+                          if (match) updated.zone = match[1].toUpperCase();
+                        } else if (val === 'Mini Bus') {
+                          if (bodyNo.toUpperCase().startsWith('OB') || bodyNo.toUpperCase().startsWith('O-B')) updated.zone = 'OB';
+                          else if (bodyNo.toUpperCase().startsWith('OZ') || bodyNo.toUpperCase().startsWith('O-Z')) updated.zone = 'OZ';
                         }
                         
                         const colorOpts = getColorOptions(bodyNo, val);
@@ -489,12 +497,10 @@ const UnitMonitoring = () => {
                       <option value="Mini Bus">Mini Bus</option>
                     </select>
                   </div>
-                  {editFormData.vehicleType === 'Tricycle' && (
                     <div className="form-group">
-                      <label>Zone</label>
-                      <input type="text" className="input-field" value={editFormData.zone} onChange={e => setEditFormData({...editFormData, zone: e.target.value})} />
+                      <label>Zone / Route</label>
+                      <input type="text" className="input-field" value={editFormData.zone} onChange={e => setEditFormData({...editFormData, zone: e.target.value.toUpperCase()})} />
                     </div>
-                  )}
                   {(editFormData.vehicleType === 'Jeepney' || editFormData.vehicleType === 'Mini Bus') && (
                     <div className="form-group" style={{ borderColor: 'var(--accent-color)' }}>
                       <label style={{ color: 'var(--accent-color)' }}>LTFRB Case No.</label>

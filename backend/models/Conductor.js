@@ -13,6 +13,7 @@ const conductorSchema = new mongoose.Schema({
   lastName: { type: String, required: true, trim: true },
   firstName: { type: String, required: true, trim: true },
   middleName: { type: String, trim: true },
+  extensionName: { type: String, trim: true },
   civilStatus: { type: String, trim: true },
   gender: { type: String, trim: true },
   birthMonth: { type: String, trim: true },

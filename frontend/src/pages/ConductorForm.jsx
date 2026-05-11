@@ -10,6 +10,7 @@ const initialConductor = {
   lastName: '',
   firstName: '',
   middleName: '',
+  extensionName: '',
   civilStatus: '',
   gender: 'Male',
   birthMonth: '',
@@ -24,7 +25,9 @@ const initialConductor = {
 
 const getFullName = (person) => {
   if (!person) return '';
-  return [person.firstName, person.middleName, person.lastName]
+  const parts = [person.firstName, person.middleName, person.lastName];
+  if (person.extensionName) parts.push(person.extensionName);
+  return parts
     .map((part) => (part || '').trim())
     .filter(Boolean)
     .join(' ');
@@ -72,7 +75,7 @@ const ConductorForm = () => {
     let finalValue = value;
 
     // Fields that should only contain letters and spaces
-    const letterOnlyFields = ['lastName', 'firstName', 'middleName', 'civilStatus', 'birthMonth', 'birthPlace', 'emergencyContactName'];
+    const letterOnlyFields = ['lastName', 'firstName', 'middleName', 'extensionName', 'civilStatus', 'birthMonth', 'birthPlace', 'emergencyContactName'];
     if (letterOnlyFields.includes(name)) {
       finalValue = value.replace(/[^a-zA-Z\s]/g, '');
     }
@@ -83,7 +86,7 @@ const ConductorForm = () => {
     }
 
     // Standardize to uppercase for consistency
-    const uppercaseFields = ['lastName', 'firstName', 'middleName', 'civilStatus', 'birthMonth', 'birthPlace', 'emergencyContactName'];
+    const uppercaseFields = ['lastName', 'firstName', 'middleName', 'extensionName', 'civilStatus', 'birthMonth', 'birthPlace', 'emergencyContactName'];
     if (uppercaseFields.includes(name)) {
       finalValue = finalValue.toUpperCase();
     }
@@ -207,6 +210,10 @@ const ConductorForm = () => {
           <div className="form-group">
             <label>Middle Name</label>
             <input type="text" name="middleName" className="input-field" value={conductor.middleName} onChange={handleChange} />
+          </div>
+          <div className="form-group">
+            <label>Extension Name (Jr., Sr., III)</label>
+            <input type="text" name="extensionName" className="input-field" value={conductor.extensionName} onChange={handleChange} placeholder="e.g. JR, SR, III" />
           </div>
           <div className="form-group">
             <label>Gender</label>

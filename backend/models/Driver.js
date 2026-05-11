@@ -17,6 +17,7 @@ const driverSchema = new mongoose.Schema({
   lastName: { type: String, required: true, trim: true },
   firstName: { type: String, required: true, trim: true },
   middleName: { type: String, trim: true },
+  extensionName: { type: String, trim: true },
   civilStatus: { type: String, trim: true },
   age: { type: Number, min: 0 },
   addressNo: { type: String, trim: true },

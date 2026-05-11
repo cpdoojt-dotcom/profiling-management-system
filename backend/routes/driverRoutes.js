@@ -12,7 +12,9 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 const getFullName = (person) => {
   if (!person) return '';
-  return [person.firstName, person.middleName, person.lastName]
+  const parts = [person.firstName, person.middleName, person.lastName];
+  if (person.extensionName) parts.push(person.extensionName);
+  return parts
     .map((part) => (part || '').trim())
     .filter(Boolean)
     .join(' ');
@@ -67,6 +69,8 @@ router.post('/', upload.single('driverImage'), async (req, res) => {
     const driver = new Driver({
       ...driverData,
       ...nextDriverData,
+      middleName: driverData.middleName || '',
+      extensionName: driverData.extensionName || '',
       operator: operatorId,
       unit: unitId,
     });

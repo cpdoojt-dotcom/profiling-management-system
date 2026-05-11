@@ -22,27 +22,29 @@ const getColorOptions = (bodyNo, vehicleType) => {
     if (bn.startsWith('8')) return ['SKYBLUE W/ CREAM TOP'];
     if (bn.startsWith('9')) return ['SKY BLUE W/RED TOP'];
   } else if (vehicleType === 'Jeepney') {
-    if (bn.startsWith('JO1')) return ['YELLOW'];
-    if (bn.startsWith('JO2')) return ['ORANGE'];
-    if (bn.startsWith('JO3')) return ['RED'];
-    if (bn.startsWith('JO4')) return ['YELLOW GREEN'];
-    if (bn.startsWith('JO5')) return ['CREAM'];
-    if (bn.startsWith('JO6')) return ['BROWN'];
-    if (bn.startsWith('JO7')) return ['GREEN W/WHITE TOP'];
-    if (bn.startsWith('JO8')) return ['DARKBLUE', 'DARKBLUE W/ YELLOW TOP'];
-    if (bn.startsWith('JO9')) return ['SKYBLUE', 'SKYBLUE W/ WHITE TOP'];
+    if (bn.startsWith('J01')) return ['YELLOW'];
+    if (bn.startsWith('J02')) return ['ORANGE'];
+    if (bn.startsWith('J03')) return ['RED'];
+    if (bn.startsWith('J04')) return ['YELLOW GREEN'];
+    if (bn.startsWith('J05')) return ['CREAM'];
+    if (bn.startsWith('J06')) return ['BROWN'];
+    if (bn.startsWith('J07')) return ['GREEN W/WHITE TOP'];
+    if (bn.startsWith('J08')) return ['DARKBLUE', 'DARKBLUE W/ YELLOW TOP'];
+    if (bn.startsWith('J09')) return ['SKYBLUE', 'SKYBLUE W/ WHITE TOP'];
     if (bn.startsWith('J10') || bn.startsWith('J11')) return ['YELLOW W/RED TOP'];
     if (bn.startsWith('J12') || bn.startsWith('J13')) return ['SKYBLUE W/GOLD TOP'];
   } else if (vehicleType === 'Mini Bus') {
-    if (bn.startsWith('O-B')) return ['DIRTY WHITE WITH GREEN STRIPES'];
-    if (bn.startsWith('O-Z')) return ['WHITE WITH BLUE STRIPES'];
+    if (bn.startsWith('OB') || bn.startsWith('O-B')) return ['DIRTY WHITE WITH GREEN STRIPES'];
+    if (bn.startsWith('OZ') || bn.startsWith('O-Z')) return ['WHITE WITH BLUE STRIPES'];
   }
   return [];
 };
 
 const getFullName = (person) => {
   if (!person) return '';
-  return [person.firstName, person.middleName, person.lastName]
+  const parts = [person.firstName, person.middleName, person.lastName];
+  if (person.extensionName) parts.push(person.extensionName);
+  return parts
     .map((part) => (part || '').trim())
     .filter(Boolean)
     .join(' ');
@@ -63,7 +65,7 @@ const OperatorsPage = () => {
   const [selectedOperatorId, setSelectedOperatorId] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
-    lastName: '', firstName: '', middleName: '', civilStatus: '', age: '',
+    lastName: '', firstName: '', middleName: '', extensionName: '', civilStatus: '', age: '',
     addressNo: '', street: '', purok: '', barangay: '', cityMunicipality: '',
     contactNo: ''
   });
@@ -188,6 +190,7 @@ const OperatorsPage = () => {
       lastName: selectedOperator.lastName || '',
       firstName: selectedOperator.firstName || '',
       middleName: selectedOperator.middleName || '',
+      extensionName: selectedOperator.extensionName || '',
       civilStatus: selectedOperator.civilStatus || 'Single',
       birthdate: selectedOperator.birthdate || '',
       birthplace: selectedOperator.birthplace || '',
@@ -198,7 +201,7 @@ const OperatorsPage = () => {
       barangay: selectedOperator.barangay || '',
       cityMunicipality: selectedOperator.cityMunicipality || '',
       contactNo: selectedOperator.contactNo || '',
-      operatorType: 'FOR HIRE',
+      operatorType: selectedOperator.operatorType || 'FOR HIRE',
     });
     setIsEditing(true);
     setActionError('');
@@ -209,7 +212,7 @@ const OperatorsPage = () => {
     let finalValue = value;
 
     // Fields that should only contain letters and spaces
-    const letterOnlyFields = ['firstName', 'lastName', 'middleName', 'barangay', 'cityMunicipality', 'birthplace', 'civilStatus'];
+    const letterOnlyFields = ['firstName', 'lastName', 'middleName', 'extensionName', 'barangay', 'cityMunicipality', 'birthplace', 'civilStatus'];
     if (letterOnlyFields.includes(name)) {
       finalValue = value.replace(/[^a-zA-Z\s]/g, '');
     }
@@ -219,7 +222,7 @@ const OperatorsPage = () => {
       finalValue = value.replace(/\D/g, '');
     }
 
-    const uppercaseFields = ['firstName', 'lastName', 'middleName', 'barangay', 'cityMunicipality', 'birthplace'];
+    const uppercaseFields = ['firstName', 'lastName', 'middleName', 'extensionName', 'barangay', 'cityMunicipality', 'birthplace', 'street', 'purok'];
     if (uppercaseFields.includes(name)) {
       finalValue = finalValue.toUpperCase();
     }
@@ -231,7 +234,7 @@ const OperatorsPage = () => {
     e.preventDefault();
     if (!selectedOperatorId) return;
     if (!await confirm('Are you sure you want to save changes to this operator profile?')) return;
-    setAddingUnit(true); // Using same loading state
+    setAddingUnit(true); 
     setActionError('');
     try {
       const res = await axios.put(`http://localhost:5000/api/operators/${selectedOperatorId}`, editForm);
@@ -274,80 +277,42 @@ const OperatorsPage = () => {
       return;
     }
 
-    const headers = [
-      'NO.',
-      'FIRST NAME',
-      'MIDDLE NAME',
-      'LAST NAME',
-      'FULL NAME',
-      'CLASSIFICATION',
-      'CONTACT NO',
-      'CIVIL STATUS',
-      'AGE',
-      'BIRTHDATE',
-      'BIRTHPLACE',
-      'ADDRESS NO',
-      'STREET',
-      'PUROK',
-      'BARANGAY',
-      'CITY/MUNICIPALITY',
-      'TOTAL UNITS',
-      'TOTAL DRIVERS',
-      'TOTAL CONDUCTORS',
-      'CREATED AT',
-      'UPDATED AT',
-    ];
-
-    const rows = operators.map((operator, index) => ([
-      index + 1,
-      sanitize(operator.firstName),
-      sanitize(operator.middleName),
-      sanitize(operator.lastName),
-      sanitize(getFullName(operator)),
-      sanitize(operator.operatorType || 'FOR HIRE'),
-      sanitize(operator.contactNo),
-      sanitize(operator.civilStatus),
-      sanitize(operator.age),
-      sanitize(operator.birthdate ? new Date(operator.birthdate).toLocaleDateString('en-PH') : ''),
-      sanitize(operator.birthplace),
-      sanitize(operator.addressNo),
-      sanitize(operator.street),
-      sanitize(operator.purok),
-      sanitize(operator.barangay),
-      sanitize(operator.cityMunicipality),
-      sanitize(operator.unitCount || 0),
-      sanitize(operator.driverCount || 0),
-      sanitize(operator.conductorCount || 0),
-      sanitize(operator.createdAt ? new Date(operator.createdAt).toLocaleString('en-PH') : ''),
-      sanitize(operator.updatedAt ? new Date(operator.updatedAt).toLocaleString('en-PH') : ''),
-    ]));
-
     try {
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Operators');
 
-      worksheet.addRow(headers);
-      rows.forEach((row) => worksheet.addRow(row));
+      worksheet.columns = [
+        { header: 'ID', key: 'id', width: 25 },
+        { header: 'Full Name', key: 'name', width: 30 },
+        { header: 'Last Name', key: 'lastName', width: 15 },
+        { header: 'First Name', key: 'firstName', width: 15 },
+        { header: 'Middle Name', key: 'middleName', width: 15 },
+        { header: 'Extension', key: 'extensionName', width: 10 },
+        { header: 'Classification', key: 'type', width: 15 },
+        { header: 'Units', key: 'units', width: 10 },
+        { header: 'Address', key: 'address', width: 40 },
+        { header: 'Contact', key: 'contact', width: 15 },
+      ];
+
+      operators.forEach(op => {
+        worksheet.addRow({
+          id: op._id,
+          name: getFullName(op),
+          lastName: op.lastName,
+          firstName: op.firstName,
+          middleName: op.middleName,
+          extensionName: op.extensionName || '',
+          type: op.operatorType,
+          units: op.unitCount || 0,
+          address: `${op.addressNo || ''} ${op.street || ''} ${op.purok || ''} ${op.barangay || ''}, ${op.cityMunicipality || ''}`,
+          contact: op.contactNo,
+        });
+      });
 
       worksheet.getRow(1).height = 22;
       worksheet.getRow(1).eachCell((cell) => {
         cell.font = { bold: true };
-        cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: false };
-      });
-
-      for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber += 1) {
-        worksheet.getRow(rowNumber).eachCell((cell) => {
-          cell.alignment = { horizontal: 'left', vertical: 'top', wrapText: false };
-        });
-      }
-
-      worksheet.columns.forEach((column) => {
-        let maxLength = 12;
-        column.eachCell({ includeEmpty: true }, (cell) => {
-          const value = cell.value ? String(cell.value) : '';
-          maxLength = Math.max(maxLength, value.length + 2);
-        });
-        column.width = Math.min(50, maxLength);
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
       });
 
       const timestamp = new Date().toISOString().slice(0, 10);
@@ -469,6 +434,10 @@ const OperatorsPage = () => {
                     <input name="lastName" className="input-field" value={editForm.lastName} onChange={handleEditChange} required />
                   </div>
                   <div className="edit-form-group">
+                    <label>Extension Name (Jr., Sr., III)</label>
+                    <input name="extensionName" className="input-field" value={editForm.extensionName} onChange={handleEditChange} placeholder="e.g. JR, SR, III" />
+                  </div>
+                  <div className="edit-form-group">
                     <label>Age</label>
                     <input name="age" type="number" className="input-field" value={editForm.age} onChange={handleEditChange} />
                   </div>
@@ -586,7 +555,7 @@ const OperatorsPage = () => {
                   <div className="operator-drivers">
                     {selectedOperator.drivers.map((driver) => (
                       <div key={driver._id} className="operator-driver-item">
-                        <strong>{driver.firstName} {driver.lastName}</strong>
+                        <strong>{getFullName(driver)}</strong>
                         <p>CPDO ID: {driver.cpdoId} | License: {driver.licenseNo}</p>
                         <p>Assigned Unit: {driver.unit?.bodyNo || '-'}</p>
                         <p>Status: {driver.status || 'Active'}</p>
@@ -602,7 +571,7 @@ const OperatorsPage = () => {
                   <div className="operator-drivers">
                     {selectedOperator.conductors?.map((conductor) => (
                       <div key={conductor._id} className="operator-driver-item" style={{ borderLeftColor: 'var(--accent-color)' }}>
-                        <strong>{conductor.firstName} {conductor.lastName}</strong>
+                        <strong>{getFullName(conductor)}</strong>
                         <p>Status: {conductor.status || 'Active'}</p>
                         <p>Assigned Unit: {conductor.unit?.bodyNo || '-'}</p>
                         <p>Contact: {conductor.emergencyContactNo || '-'}</p>
@@ -641,8 +610,8 @@ const OperatorsPage = () => {
                         
                         const bn = val.toUpperCase();
                         if (/^[1-9]/.test(bn) || bn.startsWith('BB')) updated.vehicleType = 'Tricycle';
-                        else if (bn.startsWith('JO') || /^J1[0-3]/.test(bn)) updated.vehicleType = 'Jeepney';
-                        else if (bn.startsWith('O-B') || bn.startsWith('O-Z')) updated.vehicleType = 'Mini Bus';
+                        else if (bn.startsWith('J0') || /^J1[0-3]/.test(bn)) updated.vehicleType = 'Jeepney';
+                        else if (bn.startsWith('OB') || bn.startsWith('O-B') || bn.startsWith('OZ') || bn.startsWith('O-Z')) updated.vehicleType = 'Mini Bus';
                         
                         const vehicleType = updated.vehicleType || newUnitData.vehicleType;
                         const firstChar = val.charAt(0);
@@ -652,6 +621,12 @@ const OperatorsPage = () => {
                           } else if (firstChar >= '1' && firstChar <= '9') {
                             updated.zone = `Zone ${firstChar}`;
                           }
+                        } else if (vehicleType === 'Jeepney') {
+                          const match = val.match(/^(J0[1-9]|J1[0-3])/i);
+                          if (match) updated.zone = match[1].toUpperCase();
+                        } else if (vehicleType === 'Mini Bus') {
+                          if (val.toUpperCase().startsWith('OB') || val.toUpperCase().startsWith('O-B')) updated.zone = 'OB';
+                          else if (val.toUpperCase().startsWith('OZ') || val.toUpperCase().startsWith('O-Z')) updated.zone = 'OZ';
                         }
                         
                         const colorOpts = getColorOptions(val, vehicleType);
@@ -718,6 +693,12 @@ const OperatorsPage = () => {
                           } else if (firstChar >= '1' && firstChar <= '9') {
                             updated.zone = `Zone ${firstChar}`;
                           }
+                        } else if (val === 'Jeepney') {
+                          const match = bodyNo.match(/^(J0[1-9]|J1[0-3])/i);
+                          if (match) updated.zone = match[1].toUpperCase();
+                        } else if (val === 'Mini Bus') {
+                          if (bodyNo.toUpperCase().startsWith('OB') || bodyNo.toUpperCase().startsWith('O-B')) updated.zone = 'OB';
+                          else if (bodyNo.toUpperCase().startsWith('OZ') || bodyNo.toUpperCase().startsWith('O-Z')) updated.zone = 'OZ';
                         }
                         
                         const colorOpts = getColorOptions(bodyNo, val);
@@ -737,12 +718,10 @@ const OperatorsPage = () => {
                       <option value="Mini Bus">Mini Bus</option>
                     </select>
                   </div>
-                  {newUnitData.vehicleType === 'Tricycle' && (
                     <div className="form-group">
-                      <label>Zone</label>
-                      <input type="text" className="input-field" value={newUnitData.zone} onChange={(e) => setNewUnitData({ ...newUnitData, zone: e.target.value })} />
+                      <label>Zone / Route</label>
+                      <input type="text" className="input-field" value={newUnitData.zone} onChange={(e) => setNewUnitData({ ...newUnitData, zone: e.target.value.toUpperCase() })} />
                     </div>
-                  )}
                   {(newUnitData.vehicleType === 'Jeepney' || newUnitData.vehicleType === 'Mini Bus') && (
                     <div className="form-group" style={{ borderColor: 'var(--accent-color)' }}>
                       <label style={{ color: 'var(--accent-color)' }}>LTFRB Case No.</label>

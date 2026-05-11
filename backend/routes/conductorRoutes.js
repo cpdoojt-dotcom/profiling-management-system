@@ -11,7 +11,9 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 const getFullName = (person) => {
   if (!person) return '';
-  return [person.firstName, person.middleName, person.lastName]
+  const parts = [person.firstName, person.middleName, person.lastName];
+  if (person.extensionName) parts.push(person.extensionName);
+  return parts
     .map((part) => (part || '').trim())
     .filter(Boolean)
     .join(' ');
@@ -71,6 +73,8 @@ router.post('/', upload.single('conductorImage'), async (req, res) => {
     const conductor = new Conductor({
       ...conductorData,
       ...nextConductorData,
+      middleName: conductorData.middleName || '',
+      extensionName: conductorData.extensionName || '',
       operator: operatorId,
       unit: unitId,
     });

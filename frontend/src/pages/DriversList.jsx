@@ -21,7 +21,9 @@ const sortDrivers = (items, sortBy, direction) => {
 
 const getFullName = (person) => {
   if (!person) return '';
-  return [person.firstName, person.middleName, person.lastName]
+  const parts = [person.firstName, person.middleName, person.lastName];
+  if (person.extensionName) parts.push(person.extensionName);
+  return parts
     .map((part) => (part || '').trim())
     .filter(Boolean)
     .join(' ');
@@ -50,7 +52,7 @@ const DriversList = () => {
   const [operators, setOperators] = useState([]);
   const [editForm, setEditForm] = useState({
     driver: {
-      cpdoId: '', firstName: '', lastName: '', middleName: '', licenseNo: '', licenseExpiryDate: '', contactNo: '', status: 'Active',
+      cpdoId: '', firstName: '', lastName: '', middleName: '', extensionName: '', licenseNo: '', licenseExpiryDate: '', contactNo: '', status: 'Active',
       addressNo: '', street: '', purok: '', barangay: '', cityMunicipality: '', operator: '', unit: ''
     },
   });
@@ -155,6 +157,7 @@ const DriversList = () => {
         firstName: selectedDriver.firstName || '',
         lastName: selectedDriver.lastName || '',
         middleName: selectedDriver.middleName || '',
+        extensionName: selectedDriver.extensionName || '',
         licenseNo: selectedDriver.licenseNo || '',
         licenseExpiryDate: selectedDriver.licenseExpiryDate || '',
         contactNo: selectedDriver.contactNo || '',
@@ -196,7 +199,7 @@ const DriversList = () => {
       finalValue = value.replace(/\D/g, '');
     }
 
-    if (['cpdoId', 'licenseNo', 'firstName', 'lastName', 'middleName', 'barangay', 'cityMunicipality'].includes(name)) {
+    if (['cpdoId', 'licenseNo', 'firstName', 'lastName', 'middleName', 'extensionName', 'barangay', 'cityMunicipality'].includes(name)) {
       finalValue = finalValue.toUpperCase();
     }
     setEditForm((prev) => ({
@@ -269,6 +272,7 @@ const DriversList = () => {
       'FIRST NAME',
       'MIDDLE NAME',
       'LAST NAME',
+      'EXTENSION',
       'NAME',
       'DRIVER TYPE',
       'STATUS',
@@ -297,6 +301,7 @@ const DriversList = () => {
       sanitize(driver.firstName),
       sanitize(driver.middleName),
       sanitize(driver.lastName),
+      sanitize(driver.extensionName),
       sanitize(getFullName(driver)),
       sanitize(driver.driverType),
       sanitize(driver.status),
@@ -548,6 +553,10 @@ const DriversList = () => {
                   <div className="edit-form-group">
                     <label>Last Name</label>
                     <input name="lastName" className="input-field" value={editForm.driver.lastName} onChange={handleEditChange('driver')} required />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Extension Name (Jr., Sr., III)</label>
+                    <input name="extensionName" className="input-field" value={editForm.driver.extensionName} onChange={handleEditChange('driver')} placeholder="e.g. JR, SR, III" />
                   </div>
                   <div className="edit-form-group">
                     <label>License No.</label>

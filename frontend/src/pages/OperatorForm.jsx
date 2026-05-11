@@ -21,20 +21,20 @@ const getColorOptions = (bodyNo, vehicleType) => {
     if (bn.startsWith('8')) return ['SKYBLUE W/ CREAM TOP'];
     if (bn.startsWith('9')) return ['SKY BLUE W/RED TOP'];
   } else if (vehicleType === 'Jeepney') {
-    if (bn.startsWith('JO1')) return ['YELLOW'];
-    if (bn.startsWith('JO2')) return ['ORANGE'];
-    if (bn.startsWith('JO3')) return ['RED'];
-    if (bn.startsWith('JO4')) return ['YELLOW GREEN'];
-    if (bn.startsWith('JO5')) return ['CREAM'];
-    if (bn.startsWith('JO6')) return ['BROWN'];
-    if (bn.startsWith('JO7')) return ['GREEN W/WHITE TOP'];
-    if (bn.startsWith('JO8')) return ['DARKBLUE', 'DARKBLUE W/ YELLOW TOP'];
-    if (bn.startsWith('JO9')) return ['SKYBLUE', 'SKYBLUE W/ WHITE TOP'];
+    if (bn.startsWith('J01')) return ['YELLOW'];
+    if (bn.startsWith('J02')) return ['ORANGE'];
+    if (bn.startsWith('J03')) return ['RED'];
+    if (bn.startsWith('J04')) return ['YELLOW GREEN'];
+    if (bn.startsWith('J05')) return ['CREAM'];
+    if (bn.startsWith('J06')) return ['BROWN'];
+    if (bn.startsWith('J07')) return ['GREEN W/WHITE TOP'];
+    if (bn.startsWith('J08')) return ['DARKBLUE', 'DARKBLUE W/ YELLOW TOP'];
+    if (bn.startsWith('J09')) return ['SKYBLUE', 'SKYBLUE W/ WHITE TOP'];
     if (bn.startsWith('J10') || bn.startsWith('J11')) return ['YELLOW W/RED TOP'];
     if (bn.startsWith('J12') || bn.startsWith('J13')) return ['SKYBLUE W/GOLD TOP'];
   } else if (vehicleType === 'Mini Bus') {
-    if (bn.startsWith('O-B')) return ['DIRTY WHITE WITH GREEN STRIPES'];
-    if (bn.startsWith('O-Z')) return ['WHITE WITH BLUE STRIPES'];
+    if (bn.startsWith('OB') || bn.startsWith('O-B')) return ['DIRTY WHITE WITH GREEN STRIPES'];
+    if (bn.startsWith('OZ') || bn.startsWith('O-Z')) return ['WHITE WITH BLUE STRIPES'];
   }
   return [];
 };
@@ -43,6 +43,7 @@ const initialOperator = {
   lastName: '',
   firstName: '',
   middleName: '',
+  extensionName: '',
   civilStatus: 'Single',
   birthdate: '',
   birthplace: '',
@@ -83,7 +84,7 @@ const OperatorForm = () => {
     let finalValue = value;
     
     // Fields that should only contain letters and spaces
-    const letterOnlyFields = ['lastName', 'firstName', 'middleName', 'civilStatus', 'birthplace', 'barangay', 'cityMunicipality'];
+    const letterOnlyFields = ['lastName', 'firstName', 'middleName', 'extensionName', 'civilStatus', 'birthplace', 'barangay', 'cityMunicipality'];
     if (letterOnlyFields.includes(name)) {
       finalValue = value.replace(/[^a-zA-Z\s]/g, '');
     }
@@ -93,7 +94,7 @@ const OperatorForm = () => {
       finalValue = value.replace(/\D/g, '');
     }
 
-    const uppercaseFields = ['lastName', 'firstName', 'middleName', 'barangay', 'cityMunicipality', 'street', 'purok', 'birthplace'];
+    const uppercaseFields = ['lastName', 'firstName', 'middleName', 'extensionName', 'barangay', 'cityMunicipality', 'street', 'purok', 'birthplace'];
     if (uppercaseFields.includes(name)) {
       finalValue = finalValue.toUpperCase();
     }
@@ -120,8 +121,8 @@ const OperatorForm = () => {
         if (field === 'bodyNo') {
           const bn = (finalValue || '').toUpperCase();
           if (/^[1-9]/.test(bn) || bn.startsWith('BB')) updated.vehicleType = 'Tricycle';
-          else if (bn.startsWith('JO') || /^J1[0-3]/.test(bn)) updated.vehicleType = 'Jeepney';
-          else if (bn.startsWith('O-B') || bn.startsWith('O-Z')) updated.vehicleType = 'Mini Bus';
+          else if (bn.startsWith('J0') || /^J1[0-3]/.test(bn)) updated.vehicleType = 'Jeepney';
+          else if (bn.startsWith('OB') || bn.startsWith('O-B') || bn.startsWith('OZ') || bn.startsWith('O-Z')) updated.vehicleType = 'Mini Bus';
         }
         
         // Auto-fill logic
@@ -133,6 +134,18 @@ const OperatorForm = () => {
             updated.zone = 'BB';
           } else if (firstChar >= '1' && firstChar <= '9') {
             updated.zone = `Zone ${firstChar}`;
+          }
+        } else if (vehicleType === 'Jeepney') {
+          const match = bodyNo.match(/^(J0[1-9]|J1[0-3])/i);
+          if (match) {
+            updated.zone = match[1].toUpperCase();
+          }
+        } else if (vehicleType === 'Mini Bus') {
+          const bnUpper = bodyNo.toUpperCase();
+          if (bnUpper.startsWith('OB') || bnUpper.startsWith('O-B')) {
+            updated.zone = 'OB';
+          } else if (bnUpper.startsWith('OZ') || bnUpper.startsWith('O-Z')) {
+            updated.zone = 'OZ';
           }
         }
         
@@ -218,6 +231,10 @@ const OperatorForm = () => {
           <div className="form-group">
             <label>Middle Name</label>
             <input type="text" name="middleName" className="input-field" value={operator.middleName} onChange={handleOperatorChange} />
+          </div>
+          <div className="form-group">
+            <label>Extension Name (Jr., Sr., III)</label>
+            <input type="text" name="extensionName" className="input-field" value={operator.extensionName} onChange={handleOperatorChange} placeholder="e.g. JR, SR, III" />
           </div>
           <div className="form-group">
             <label>Civil Status</label>
@@ -351,12 +368,10 @@ const OperatorForm = () => {
                   <option value="Mini Bus">Mini Bus</option>
                 </select>
               </div>
-              {unit.vehicleType === 'Tricycle' && (
-                <div className="form-group animate-fade-in" style={{ borderColor: 'var(--accent-color)' }}>
-                  <label style={{ color: 'var(--accent-color)' }}>Tricycle Zone</label>
-                  <input required type="text" className="input-field" style={{ borderColor: 'var(--accent-color)' }} value={unit.zone} placeholder="Enter Zone Name..." onChange={(e) => handleUnitChange(index, 'zone', e.target.value)} />
-                </div>
-              )}
+              <div className="form-group animate-fade-in" style={{ borderColor: 'var(--accent-color)' }}>
+                <label style={{ color: 'var(--accent-color)' }}>Zone / Route</label>
+                <input required type="text" className="input-field" style={{ borderColor: 'var(--accent-color)' }} value={unit.zone} placeholder="Enter Zone Name..." onChange={(e) => handleUnitChange(index, 'zone', e.target.value)} />
+              </div>
               {(unit.vehicleType === 'Jeepney' || unit.vehicleType === 'Mini Bus') && (
                 <div className="form-group animate-fade-in" style={{ borderColor: 'var(--accent-color)' }}>
                   <label style={{ color: 'var(--accent-color)' }}>LTFRB/MCH Case No.</label>

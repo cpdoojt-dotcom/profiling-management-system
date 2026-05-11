@@ -10,7 +10,9 @@ const router = express.Router();
 
 const getFullName = (person) => {
   if (!person) return '';
-  return [person.firstName, person.middleName, person.lastName]
+  const parts = [person.firstName, person.middleName, person.lastName];
+  if (person.extensionName) parts.push(person.extensionName);
+  return parts
     .map((part) => (part || '').trim())
     .filter(Boolean)
     .join(' ');
@@ -19,7 +21,8 @@ const getFullName = (person) => {
 const normalizeOperatorData = (operatorData) => ({
   lastName: operatorData.lastName,
   firstName: operatorData.firstName,
-  middleName: operatorData.middleName,
+  middleName: operatorData.middleName || '',
+  extensionName: operatorData.extensionName || '',
   civilStatus: operatorData.civilStatus,
   birthdate: operatorData.birthdate,
   birthplace: operatorData.birthplace,
@@ -31,7 +34,7 @@ const normalizeOperatorData = (operatorData) => ({
   cityMunicipality: operatorData.cityMunicipality,
   contactNo: operatorData.contactNo,
   ltfrbMchCaseNo: operatorData.ltfrbMchCaseNo,
-  operatorType: operatorData.operatorType || 'Tricycle',
+  operatorType: operatorData.operatorType || 'FOR HIRE',
 });
 
 const normalizeUnitData = (unitData) => ({
@@ -71,11 +74,13 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ message: 'At least one unit is required.' });
     }
 
-    // Upsert Operator (Find by Name)
+    // Upsert Operator (Find by Full Name)
     const operator = await Operator.findOneAndUpdate(
       { 
         firstName: operatorData.firstName, 
-        lastName: operatorData.lastName 
+        middleName: operatorData.middleName || '',
+        lastName: operatorData.lastName,
+        extensionName: operatorData.extensionName || ''
       },
       normalizeOperatorData(operatorData),
       { upsert: true, new: true, runValidators: true }

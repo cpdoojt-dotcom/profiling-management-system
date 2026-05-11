@@ -13,6 +13,7 @@ const initialDriver = {
   lastName: '',
   firstName: '',
   middleName: '',
+  extensionName: '',
   civilStatus: '',
   age: '',
   addressNo: '',
@@ -30,7 +31,9 @@ const initialDriver = {
 
 const getFullName = (person) => {
   if (!person) return '';
-  return [person.firstName, person.middleName, person.lastName]
+  const parts = [person.firstName, person.middleName, person.lastName];
+  if (person.extensionName) parts.push(person.extensionName);
+  return parts
     .map((part) => (part || '').trim())
     .filter(Boolean)
     .join(' ');
@@ -89,7 +92,7 @@ const DriverForm = () => {
     let finalValue = value;
 
     // Fields that should only contain letters and spaces
-    const letterOnlyFields = ['lastName', 'firstName', 'middleName', 'civilStatus', 'barangay', 'cityMunicipality', 'birthMonth'];
+    const letterOnlyFields = ['lastName', 'firstName', 'middleName', 'extensionName', 'civilStatus', 'barangay', 'cityMunicipality', 'birthMonth'];
     if (letterOnlyFields.includes(name)) {
       finalValue = value.replace(/[^a-zA-Z\s]/g, '');
     }
@@ -100,7 +103,7 @@ const DriverForm = () => {
     }
 
     const uppercaseFields = [
-      'cpdoId', 'licenseNo', 'lastName', 'firstName', 'middleName', 
+      'cpdoId', 'licenseNo', 'lastName', 'firstName', 'middleName', 'extensionName',
       'civilStatus', 'barangay', 'cityMunicipality', 'street', 'purok', 'birthMonth'
     ];
     if (uppercaseFields.includes(name)) {
@@ -238,6 +241,10 @@ const DriverForm = () => {
           <div className="form-group">
             <label>Middle Name</label>
             <input type="text" name="middleName" className="input-field" value={driver.middleName} onChange={handleChange} />
+          </div>
+          <div className="form-group">
+            <label>Extension Name (Jr., Sr., III)</label>
+            <input type="text" name="extensionName" className="input-field" value={driver.extensionName} onChange={handleChange} placeholder="e.g. JR, SR, III" />
           </div>
           <div className="form-group">
             <label>Civil Status</label>

@@ -20,20 +20,20 @@ const getColorOptions = (bodyNo, vehicleType) => {
     if (bn.startsWith('8')) return ['SKYBLUE W/ CREAM TOP'];
     if (bn.startsWith('9')) return ['SKY BLUE W/RED TOP'];
   } else if (vehicleType === 'Jeepney') {
-    if (bn.startsWith('JO1')) return ['YELLOW'];
-    if (bn.startsWith('JO2')) return ['ORANGE'];
-    if (bn.startsWith('JO3')) return ['RED'];
-    if (bn.startsWith('JO4')) return ['YELLOW GREEN'];
-    if (bn.startsWith('JO5')) return ['CREAM'];
-    if (bn.startsWith('JO6')) return ['BROWN'];
-    if (bn.startsWith('JO7')) return ['GREEN W/WHITE TOP'];
-    if (bn.startsWith('JO8')) return ['DARKBLUE', 'DARKBLUE W/ YELLOW TOP'];
-    if (bn.startsWith('JO9')) return ['SKYBLUE', 'SKYBLUE W/ WHITE TOP'];
+    if (bn.startsWith('J01')) return ['YELLOW'];
+    if (bn.startsWith('J02')) return ['ORANGE'];
+    if (bn.startsWith('J03')) return ['RED'];
+    if (bn.startsWith('J04')) return ['YELLOW GREEN'];
+    if (bn.startsWith('J05')) return ['CREAM'];
+    if (bn.startsWith('J06')) return ['BROWN'];
+    if (bn.startsWith('J07')) return ['GREEN W/WHITE TOP'];
+    if (bn.startsWith('J08')) return ['DARKBLUE', 'DARKBLUE W/ YELLOW TOP'];
+    if (bn.startsWith('J09')) return ['SKYBLUE', 'SKYBLUE W/ WHITE TOP'];
     if (bn.startsWith('J10') || bn.startsWith('J11')) return ['YELLOW W/RED TOP'];
     if (bn.startsWith('J12') || bn.startsWith('J13')) return ['SKYBLUE W/GOLD TOP'];
   } else if (vehicleType === 'Mini Bus') {
-    if (bn.startsWith('O-B')) return ['DIRTY WHITE WITH GREEN STRIPES'];
-    if (bn.startsWith('O-Z')) return ['WHITE WITH BLUE STRIPES'];
+    if (bn.startsWith('OB') || bn.startsWith('O-B')) return ['DIRTY WHITE WITH GREEN STRIPES'];
+    if (bn.startsWith('OZ') || bn.startsWith('O-Z')) return ['WHITE WITH BLUE STRIPES'];
   }
   return [];
 };
@@ -103,15 +103,16 @@ const Dashboard = () => {
           operator: {
             firstName: opFirstName,
             middleName: String(row[4] || '').trim(),
+            extensionName: String(row[5] || '').trim(),
             lastName: opLastName,
-            civilStatus: String(row[5] || '').trim() || 'Single',
-            age: row[6] ? Number(row[6]) : undefined,
-            addressNo: String(row[7] || '').trim(),
-            street: String(row[8] || '').trim(),
-            purok: String(row[9] || '').trim(),
-            barangay: String(row[10] || '').trim(),
-            cityMunicipality: String(row[11] || '').trim(),
-            contactNo: String(row[12] || '').trim(),
+            civilStatus: String(row[6] || '').trim() || 'Single',
+            age: row[7] ? Number(row[7]) : undefined,
+            addressNo: String(row[8] || '').trim(),
+            street: String(row[9] || '').trim(),
+            purok: String(row[10] || '').trim(),
+            barangay: String(row[11] || '').trim(),
+            cityMunicipality: String(row[12] || '').trim(),
+            contactNo: String(row[13] || '').trim(),
             operatorType: 'FOR HIRE',
           },
           units: []
@@ -124,13 +125,13 @@ const Dashboard = () => {
         const unit = {
           vehicleType,
           bodyNo,
-          ltfrbMchCaseNo: String(row[13] || '').trim(),
-          colorCode: String(row[14] || '').trim(),
-          makeType: String(row[15] || '').trim(),
-          chassisNo: String(row[16] || '').trim(),
-          motorNo: String(row[17] || '').trim(),
-          plateNo: String(row[18] || '').trim(),
-          yearModel: String(row[19] || '').trim(),
+          ltfrbMchCaseNo: String(row[14] || '').trim(),
+          colorCode: String(row[15] || '').trim(),
+          makeType: String(row[16] || '').trim(),
+          chassisNo: String(row[17] || '').trim(),
+          motorNo: String(row[18] || '').trim(),
+          plateNo: String(row[19] || '').trim(),
+          yearModel: String(row[20] || '').trim(),
           zone: '',
           driver: null,
           conductor: null
@@ -144,6 +145,13 @@ const Dashboard = () => {
           } else if (firstChar >= '1' && firstChar <= '9') {
             unit.zone = `Zone ${firstChar}`;
           }
+        } else if (vehicleType === 'Jeepney') {
+          const match = bodyNo.match(/^(J0[1-9]|J1[0-3])/i);
+          if (match) unit.zone = match[1].toUpperCase();
+        } else if (vehicleType === 'Mini Bus') {
+          const bnUpper = bodyNo.toUpperCase();
+          if (bnUpper.startsWith('OB') || bnUpper.startsWith('O-B')) unit.zone = 'OB';
+          else if (bnUpper.startsWith('OZ') || bnUpper.startsWith('O-Z')) unit.zone = 'OZ';
         }
         
         // Auto-fill Color Code if blank
@@ -155,48 +163,51 @@ const Dashboard = () => {
         }
 
         // Check for Driver in this row
-        const drFirstName = String(row[25] || '').trim();
-        const drLastName = String(row[24] || '').trim();
+        const drFirstName = String(row[26] || '').trim();
+        const drLastName = String(row[25] || '').trim();
         if (drFirstName && drLastName) {
           unit.driver = {
-            cpdoId: String(row[20] || '').trim(),
-            licenseNo: String(row[21] || '').trim(),
-            licenseExpiryDate: String(row[22] || '').trim(),
+            cpdoId: String(row[21] || '').trim(),
+            licenseNo: String(row[22] || '').trim(),
+            licenseExpiryDate: String(row[23] || '').trim(),
             lastName: drLastName,
             firstName: drFirstName,
-            middleName: String(row[26] || '').trim(),
-            civilStatus: String(row[27] || '').trim() || 'Single',
-            age: row[28] ? Number(row[28]) : undefined,
-            addressNo: String(row[29] || '').trim(),
-            street: String(row[30] || '').trim(),
-            purok: String(row[31] || '').trim(),
-            barangay: String(row[32] || '').trim(),
-            cityMunicipality: String(row[33] || '').trim(),
-            contactNo: String(row[34] || '').trim(),
-            birthMonth: String(row[35] || '').trim(),
-            birthDate: String(row[36] || '').trim(),
-            birthYear: String(row[37] || '').trim(),
+            middleName: String(row[27] || '').trim(),
+            extensionName: String(row[28] || '').trim(),
+            civilStatus: String(row[29] || '').trim() || 'Single',
+            age: row[30] ? Number(row[30]) : undefined,
+            addressNo: String(row[31] || '').trim(),
+            street: String(row[32] || '').trim(),
+            purok: String(row[33] || '').trim(),
+            barangay: String(row[34] || '').trim(),
+            cityMunicipality: String(row[35] || '').trim(),
+            contactNo: String(row[36] || '').trim(),
+            birthMonth: String(row[37] || '').trim(),
+            birthDate: String(row[38] || '').trim(),
+            birthYear: String(row[39] || '').trim(),
             driverType: vehicleType,
             status: 'Active'
           };
         }
 
         // Check for Conductor in this row
-        const cdFirstName = String(row[39] || '').trim();
-        const cdLastName = String(row[38] || '').trim();
+        const cdFirstName = String(row[41] || '').trim();
+        const cdLastName = String(row[40] || '').trim();
         if (cdFirstName && cdLastName) {
           unit.conductor = {
             lastName: cdLastName,
             firstName: cdFirstName,
-            middleName: String(row[40] || '').trim(),
-            civilStatus: String(row[41] || '').trim() || 'Single',
-            age: row[42] ? Number(row[42]) : undefined,
-            addressNo: String(row[43] || '').trim(),
-            street: String(row[44] || '').trim(),
-            purok: String(row[45] || '').trim(),
-            barangay: String(row[46] || '').trim(),
-            cityMunicipality: String(row[47] || '').trim(),
-            contactNo: String(row[48] || '').trim(),
+            middleName: String(row[42] || '').trim(),
+            extensionName: String(row[43] || '').trim(),
+            civilStatus: String(row[44] || '').trim() || 'Single',
+            age: row[45] ? Number(row[45]) : undefined,
+            addressNo: String(row[46] || '').trim(),
+            street: String(row[47] || '').trim(),
+            purok: String(row[48] || '').trim(),
+            barangay: String(row[49] || '').trim(),
+            cityMunicipality: String(row[50] || '').trim(),
+            contactNo: String(row[51] || '').trim(),
+            conductorType: vehicleType,
             status: 'Active'
           };
         }
@@ -212,6 +223,38 @@ const Dashboard = () => {
     await Promise.all(promises);
     alert('Master Import successful! All records have been created.');
     window.location.reload();
+  };
+
+  const downloadTemplate = () => {
+    const headers = [
+      'Vehicle Category', 'Body No', 'Operator Last Name', 'Operator First Name', 'Operator Middle Name', 'Operator Extension Name',
+      'Operator Civil Status', 'Operator Age', 'Operator Address No', 'Operator Street', 'Operator Purok', 
+      'Operator Barangay', 'Operator City/Municipality', 'Operator Contact No', 'LTFRB/MCH Case No', 'Color Code', 
+      'Make/Type', 'Chassis No', 'Motor No', 'Plate No', 'Year Model', 'Driver CPDO ID', 'Driver License No', 
+      'Driver License Expiry Date', 'SKIPPED_COLUMN', 'Driver Last Name', 'Driver First Name', 'Driver Middle Name', 'Driver Extension Name',
+      'Driver Civil Status', 'Driver Age', 'Driver Address No', 'Driver Street', 'Driver Purok', 'Driver Barangay', 
+      'Driver City/Municipality', 'Driver Contact No', 'Driver Birth Month', 'Driver Birth Date', 'Driver Birth Year', 
+      'Conductor Last Name', 'Conductor First Name', 'Conductor Middle Name', 'Conductor Extension Name', 'Conductor Civil Status', 'Conductor Age', 
+      'Conductor Address No', 'Conductor Street', 'Conductor Purok', 'Conductor Barangay', 'Conductor City/Municipality', 
+      'Conductor Contact No'
+    ];
+    
+    const sampleRow = [
+      'Jeepney', 'J01-101', 'DELA CRUZ', 'JUAN', 'SANTOS', 'JR', 'Married', '45', '123', 'MAHARLIKA HWY', 'PUROK 1', 
+      'BARANGAY 1', 'CITY NAME', '09123456789', '2024-ABC-123', 'YELLOW', 'ISUZU', 'CH-123', 'MO-123', 'NQR-123', '2022',
+      '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
+    ];
+
+    const csvContent = [headers, sampleRow].map(e => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "master_import_template.csv");
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleFileChange = async (e) => {
@@ -258,7 +301,14 @@ const Dashboard = () => {
           <p>Real-time monitoring of PUV operators, vehicles, and drivers.</p>
         </div>
         
-        <div className="dashboard-actions">
+        <div className="dashboard-actions" style={{ display: 'flex', gap: '0.75rem' }}>
+          <button 
+            className="btn-secondary" 
+            type="button" 
+            onClick={downloadTemplate}
+          >
+            Download Template
+          </button>
           <input
             type="file"
             accept=".xlsx, .xls, .csv"
