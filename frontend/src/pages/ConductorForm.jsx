@@ -13,6 +13,12 @@ const initialConductor = {
   extensionName: '',
   civilStatus: '',
   gender: 'Male',
+  addressNo: '',
+  street: '',
+  purok: '',
+  barangay: '',
+  cityMunicipality: '',
+  contactNo: '',
   birthMonth: '',
   birthDate: '',
   birthYear: '',
@@ -81,12 +87,12 @@ const ConductorForm = () => {
     }
 
     // Fields that should only contain numbers
-    if (name === 'emergencyContactNo') {
+    if (name === 'emergencyContactNo' || name === 'contactNo') {
       finalValue = value.replace(/\D/g, '');
     }
 
     // Standardize to uppercase for consistency
-    const uppercaseFields = ['lastName', 'firstName', 'middleName', 'extensionName', 'civilStatus', 'birthMonth', 'birthPlace', 'emergencyContactName'];
+    const uppercaseFields = ['lastName', 'firstName', 'middleName', 'extensionName', 'civilStatus', 'birthMonth', 'birthPlace', 'emergencyContactName', 'addressNo', 'street', 'purok', 'barangay', 'cityMunicipality'];
     if (uppercaseFields.includes(name)) {
       finalValue = finalValue.toUpperCase();
     }
@@ -241,6 +247,30 @@ const ConductorForm = () => {
           <div className="form-group">
             <label>Birth Place</label>
             <input type="text" name="birthPlace" className="input-field" value={conductor.birthPlace} onChange={handleChange} />
+          </div>
+          <div className="form-group">
+            <label>Address No.</label>
+            <input type="text" name="addressNo" className="input-field" value={conductor.addressNo} onChange={handleChange} />
+          </div>
+          <div className="form-group">
+            <label>Street</label>
+            <input type="text" name="street" className="input-field" value={conductor.street} onChange={handleChange} />
+          </div>
+          <div className="form-group">
+            <label>Purok</label>
+            <input type="text" name="purok" className="input-field" value={conductor.purok} onChange={handleChange} />
+          </div>
+          <div className="form-group">
+            <label>Barangay</label>
+            <input type="text" name="barangay" className="input-field" value={conductor.barangay} onChange={handleChange} />
+          </div>
+          <div className="form-group">
+            <label>City/Municipality</label>
+            <input type="text" name="cityMunicipality" className="input-field" value={conductor.cityMunicipality} onChange={handleChange} />
+          </div>
+          <div className="form-group">
+            <label>Contact No.</label>
+            <input type="text" name="contactNo" className="input-field" value={conductor.contactNo} onChange={handleChange} />
           </div>
           <div className="form-group">
             <label>Status</label>

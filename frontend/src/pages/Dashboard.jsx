@@ -447,7 +447,6 @@ const Dashboard = () => {
                   <h3>{getFullName(driver)}</h3>
                   <p>{driver.licenseNo} | Body #{driver.unit?.bodyNo || '-'} | Plate {driver.unit?.plateNo || '-'}</p>
                 </div>
-                <span className="status-chip">{driver.status || 'Active'}</span>
               </Link>
             ))}
           </div>

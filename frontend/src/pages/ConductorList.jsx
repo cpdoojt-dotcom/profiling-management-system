@@ -5,6 +5,7 @@ import axios from 'axios';
 import ExcelJS from 'exceljs';
 import { useConfirm } from '../context/ConfirmContext';
 import { useToast } from '../context/ToastContext';
+import { formatAddress } from '../utils/formatUtils';
 import './DriversList.css'; // Reusing drivers list styles
 
 const sortConductors = (items, sortBy, direction) => {
@@ -54,7 +55,8 @@ const ConductorList = () => {
     conductor: {
       firstName: '', lastName: '', middleName: '', extensionName: '', status: 'Active',
       operator: '', unit: '',
-      birthPlace: '', gender: 'Male', civilStatus: '',
+      birthPlace: '', gender: 'Male', civilStatus: '', age: '',
+      addressNo: '', street: '', purok: '', barangay: '', cityMunicipality: '', contactNo: '',
       emergencyContactName: '', emergencyContactNo: '', emergencyContactAddress: ''
     },
   });
@@ -143,8 +145,15 @@ const ConductorList = () => {
         operator: selectedConductor.operator?._id || selectedConductor.operator || '',
         unit: selectedConductor.unit?._id || selectedConductor.unit || '',
         birthPlace: selectedConductor.birthPlace || '',
+        age: selectedConductor.age || '',
         gender: selectedConductor.gender || 'Male',
         civilStatus: selectedConductor.civilStatus || '',
+        addressNo: selectedConductor.addressNo || '',
+        street: selectedConductor.street || '',
+        purok: selectedConductor.purok || '',
+        barangay: selectedConductor.barangay || '',
+        cityMunicipality: selectedConductor.cityMunicipality || '',
+        contactNo: selectedConductor.contactNo || '',
         emergencyContactName: selectedConductor.emergencyContactName || '',
         emergencyContactNo: selectedConductor.emergencyContactNo || '',
         emergencyContactAddress: selectedConductor.emergencyContactAddress || '',
@@ -166,7 +175,7 @@ const ConductorList = () => {
   const handleEditChange = (section) => (e) => {
     const { name, value } = e.target;
     let finalValue = value;
-    if (['firstName', 'lastName', 'middleName', 'extensionName', 'birthPlace', 'emergencyContactName', 'civilStatus'].includes(name)) {
+    if (['firstName', 'lastName', 'middleName', 'extensionName', 'birthPlace', 'emergencyContactName', 'civilStatus', 'addressNo', 'street', 'purok', 'barangay', 'cityMunicipality'].includes(name)) {
       finalValue = value.toUpperCase();
     }
     setEditForm((prev) => ({
@@ -242,6 +251,8 @@ const ConductorList = () => {
       'GENDER',
       'CIVIL STATUS',
       'BIRTH PLACE',
+      'ADDRESS',
+      'CONTACT NO',
       'STATUS',
       'OPERATOR NAME',
       'OPERATOR BARANGAY',
@@ -266,6 +277,8 @@ const ConductorList = () => {
       sanitize(conductor.gender),
       sanitize(conductor.civilStatus),
       sanitize(conductor.birthPlace),
+      sanitize(formatAddress(conductor)),
+      sanitize(conductor.contactNo),
       sanitize(conductor.status),
       sanitize(getFullName(conductor.operator)),
       sanitize(conductor.operator?.barangay),
@@ -519,6 +532,34 @@ const ConductorList = () => {
                     <input name="birthPlace" className="input-field" value={editForm.conductor.birthPlace} onChange={handleEditChange('conductor')} />
                   </div>
                   <div className="edit-form-group">
+                    <label>Age</label>
+                    <input name="age" type="number" className="input-field" value={editForm.conductor.age} onChange={handleEditChange('conductor')} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Address No.</label>
+                    <input name="addressNo" className="input-field" value={editForm.conductor.addressNo} onChange={handleEditChange('conductor')} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Street</label>
+                    <input name="street" className="input-field" value={editForm.conductor.street} onChange={handleEditChange('conductor')} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Purok</label>
+                    <input name="purok" className="input-field" value={editForm.conductor.purok} onChange={handleEditChange('conductor')} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Barangay</label>
+                    <input name="barangay" className="input-field" value={editForm.conductor.barangay} onChange={handleEditChange('conductor')} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>City/Municipality</label>
+                    <input name="cityMunicipality" className="input-field" value={editForm.conductor.cityMunicipality} onChange={handleEditChange('conductor')} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Contact No.</label>
+                    <input name="contactNo" className="input-field" value={editForm.conductor.contactNo} onChange={handleEditChange('conductor')} />
+                  </div>
+                  <div className="edit-form-group">
                     <label>Status</label>
                     <select name="status" className="input-field" value={editForm.conductor.status} onChange={handleEditChange('conductor')}>
                       <option value="Active">Active</option>
@@ -563,7 +604,10 @@ const ConductorList = () => {
                 <div><span>Body No:</span><strong>{selectedConductor.unit?.bodyNo || '-'}</strong></div>
                 <div><span>Plate No:</span><strong>{selectedConductor.unit?.plateNo || '-'}</strong></div>
                 <div><span>Birth Place:</span><strong>{selectedConductor.birthPlace || '-'}</strong></div>
+                <div><span>Age:</span><strong>{selectedConductor.age || '-'}</strong></div>
                 <div><span>Civil Status:</span><strong>{selectedConductor.civilStatus || '-'}</strong></div>
+                <div><span>Contact:</span><strong>{selectedConductor.contactNo || '-'}</strong></div>
+                <div className="details-full"><span>Complete Address:</span><strong>{formatAddress(selectedConductor)}</strong></div>
                 <div><span>Operator:</span><strong>{getFullName(selectedConductor.operator)}</strong></div>
                 <div><span>Status:</span><strong>{selectedConductor.status || 'Active'}</strong></div>
                 <div className="details-full" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: '0.5rem', paddingTop: '0.5rem' }}>

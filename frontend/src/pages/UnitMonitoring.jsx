@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Search, History, ArrowRight, User, MapPin, Truck, Edit, X, Save, Bike, Bus } from 'lucide-react';
 import { useConfirm } from '../context/ConfirmContext';
 import { useToast } from '../context/ToastContext';
+import { formatAddress } from '../utils/formatUtils';
 import './UnitMonitoring.css';
 
 const getColorOptions = (bodyNo, vehicleType) => {
@@ -308,6 +309,7 @@ const UnitMonitoring = () => {
                         </p>
                       )}
                       <p><MapPin size={14} /> {unit.zone || 'No Zone'}</p>
+                      <p><MapPin size={14} style={{ color: 'var(--text-secondary)' }} /> <small>{formatAddress(unit.operator)}</small></p>
                     </div>
                   ))}
                 </div>

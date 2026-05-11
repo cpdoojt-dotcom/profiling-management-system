@@ -5,6 +5,7 @@ import axios from 'axios';
 import ExcelJS from 'exceljs';
 import { useConfirm } from '../context/ConfirmContext';
 import { useToast } from '../context/ToastContext';
+import { formatAddress } from '../utils/formatUtils';
 import './DriversList.css';
 
 const sortDrivers = (items, sortBy, direction) => {
@@ -52,7 +53,8 @@ const DriversList = () => {
   const [operators, setOperators] = useState([]);
   const [editForm, setEditForm] = useState({
     driver: {
-      cpdoId: '', firstName: '', lastName: '', middleName: '', extensionName: '', licenseNo: '', licenseExpiryDate: '', contactNo: '', status: 'Active',
+      cpdoId: '', firstName: '', lastName: '', middleName: '', extensionName: '', licenseNo: '', licenseExpiryDate: '', contactNo: '',
+      age: '', birthplace: '',
       addressNo: '', street: '', purok: '', barangay: '', cityMunicipality: '', operator: '', unit: ''
     },
   });
@@ -161,12 +163,13 @@ const DriversList = () => {
         licenseNo: selectedDriver.licenseNo || '',
         licenseExpiryDate: selectedDriver.licenseExpiryDate || '',
         contactNo: selectedDriver.contactNo || '',
-        status: selectedDriver.status || 'Active',
         addressNo: selectedDriver.addressNo || '',
         street: selectedDriver.street || '',
         purok: selectedDriver.purok || '',
         barangay: selectedDriver.barangay || '',
         cityMunicipality: selectedDriver.cityMunicipality || '',
+        birthplace: selectedDriver.birthplace || '',
+        age: selectedDriver.age || '',
         operator: selectedDriver.operator?._id || '',
         unit: selectedDriver.unit?._id || '',
       },
@@ -199,7 +202,7 @@ const DriversList = () => {
       finalValue = value.replace(/\D/g, '');
     }
 
-    if (['cpdoId', 'licenseNo', 'firstName', 'lastName', 'middleName', 'extensionName', 'barangay', 'cityMunicipality'].includes(name)) {
+    if (['cpdoId', 'licenseNo', 'firstName', 'lastName', 'middleName', 'extensionName', 'barangay', 'cityMunicipality', 'birthplace'].includes(name)) {
       finalValue = finalValue.toUpperCase();
     }
     setEditForm((prev) => ({
@@ -275,15 +278,10 @@ const DriversList = () => {
       'EXTENSION',
       'NAME',
       'DRIVER TYPE',
-      'STATUS',
       'LICENSE NO',
       'LICENSE EXPIRY DATE',
       'CONTACT NO',
-      'ADDRESS NO',
-      'STREET',
-      'PUROK',
-      'BARANGAY',
-      'CITY/MUNICIPALITY',
+      'COMPLETE ADDRESS',
       'OPERATOR NAME',
       'OPERATOR BARANGAY',
       'OPERATOR CITY/MUNICIPALITY',
@@ -304,15 +302,10 @@ const DriversList = () => {
       sanitize(driver.extensionName),
       sanitize(getFullName(driver)),
       sanitize(driver.driverType),
-      sanitize(driver.status),
       sanitize(driver.licenseNo),
       sanitize(driver.licenseExpiryDate),
       sanitize(driver.contactNo),
-      sanitize(driver.addressNo),
-      sanitize(driver.street),
-      sanitize(driver.purok),
-      sanitize(driver.barangay),
-      sanitize(driver.cityMunicipality),
+      sanitize(formatAddress(driver)),
       sanitize(getFullName(driver.operator)),
       sanitize(driver.operator?.barangay),
       sanitize(driver.operator?.cityMunicipality),
@@ -588,6 +581,14 @@ const DriversList = () => {
                     </select>
                   </div>
                   <div className="edit-form-group">
+                    <label>Birthplace</label>
+                    <input name="birthplace" className="input-field" value={editForm.driver.birthplace} onChange={handleEditChange('driver')} />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Age</label>
+                    <input name="age" type="number" className="input-field" value={editForm.driver.age} onChange={handleEditChange('driver')} />
+                  </div>
+                  <div className="edit-form-group">
                     <label>Contact No.</label>
                     <input name="contactNo" className="input-field" value={editForm.driver.contactNo} onChange={handleEditChange('driver')} />
                   </div>
@@ -610,14 +611,6 @@ const DriversList = () => {
                   <div className="edit-form-group">
                     <label>City/Municipality</label>
                     <input name="cityMunicipality" className="input-field" value={editForm.driver.cityMunicipality} onChange={handleEditChange('driver')} />
-                  </div>
-                  <div className="edit-form-group">
-                    <label>Status</label>
-                    <select name="status" className="input-field" value={editForm.driver.status} onChange={handleEditChange('driver')}>
-                      <option value="Active">Active</option>
-                      <option value="Pending">Pending</option>
-                      <option value="Inactive">Inactive</option>
-                    </select>
                   </div>
                 </div>
                 <div className="edit-actions">
@@ -642,9 +635,10 @@ const DriversList = () => {
                 <div><span>Plate No:</span><strong>{selectedDriver.unit?.plateNo || '-'}</strong></div>
                 <div><span>Operator:</span><strong>{getFullName(selectedDriver.operator)}</strong></div>
                 <div><span>Operator Area:</span><strong>{selectedDriver.operator?.barangay || '-'}, {selectedDriver.operator?.cityMunicipality || '-'}</strong></div>
+                <div><span>Birthplace:</span><strong>{selectedDriver.birthplace || '-'}</strong></div>
+                <div><span>Age:</span><strong>{selectedDriver.age || '-'}</strong></div>
                 <div><span>Contact:</span><strong>{selectedDriver.contactNo || '-'}</strong></div>
-                <div><span>Status:</span><strong>{selectedDriver.status || 'Active'}</strong></div>
-                <div className="details-full"><span>Driver Address:</span><strong>{selectedDriver.addressNo || '-'} {selectedDriver.street || ''} {selectedDriver.purok || ''} {selectedDriver.barangay || ''} {selectedDriver.cityMunicipality || ''}</strong></div>
+                <div className="details-full"><span>Driver Address:</span><strong>{formatAddress(selectedDriver)}</strong></div>
               </div>
             )}
           </div>

@@ -5,6 +5,7 @@ import { Plus, X, Bike, Truck, Bus, FileSpreadsheet } from 'lucide-react';
 import ExcelJS from 'exceljs';
 import { useConfirm } from '../context/ConfirmContext';
 import { useToast } from '../context/ToastContext';
+import { formatAddress } from '../utils/formatUtils';
 import './OperatorsPage.css';
 
 const getColorOptions = (bodyNo, vehicleType) => {
@@ -304,7 +305,7 @@ const OperatorsPage = () => {
           extensionName: op.extensionName || '',
           type: op.operatorType,
           units: op.unitCount || 0,
-          address: `${op.addressNo || ''} ${op.street || ''} ${op.purok || ''} ${op.barangay || ''}, ${op.cityMunicipality || ''}`,
+          address: formatAddress(op),
           contact: op.contactNo,
         });
       });
@@ -397,6 +398,7 @@ const OperatorsPage = () => {
                     </div>
                     <p>{operator.unitCount || 0} unit(s) | {operator.driverCount} driver(s) | {operator.conductorCount || 0} conductor(s)</p>
                     <span>Contact: {operator.contactNo || '-'}</span>
+                    <span className="operator-card-address">{formatAddress(operator)}</span>
                   </button>
                 ))}
               </div>
@@ -515,7 +517,7 @@ const OperatorsPage = () => {
                   <div><span>Birthdate:</span><strong>{selectedOperator.birthdate ? new Date(selectedOperator.birthdate).toLocaleDateString() : '-'}</strong></div>
                   <div><span>Birthplace:</span><strong>{selectedOperator.birthplace || '-'}</strong></div>
                   <div><span>Contact:</span><strong>{selectedOperator.contactNo || '-'}</strong></div>
-                  <div><span>Area:</span><strong>{selectedOperator.barangay || '-'}, {selectedOperator.cityMunicipality || '-'}</strong></div>
+                  <div><span>Address:</span><strong>{formatAddress(selectedOperator)}</strong></div>
                 </div>
 
                 <h3>Units ({selectedOperator.unitCount || 0})</h3>
