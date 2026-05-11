@@ -22,6 +22,14 @@ const initialConductor = {
   status: 'Active',
 };
 
+const getFullName = (person) => {
+  if (!person) return '';
+  return [person.firstName, person.middleName, person.lastName]
+    .map((part) => (part || '').trim())
+    .filter(Boolean)
+    .join(' ');
+};
+
 const ConductorForm = () => {
   const navigate = useNavigate();
   const confirm = useConfirm();
@@ -61,9 +69,28 @@ const ConductorForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    let finalValue = value;
+
+    // Fields that should only contain letters and spaces
+    const letterOnlyFields = ['lastName', 'firstName', 'middleName', 'civilStatus', 'birthMonth', 'birthPlace', 'emergencyContactName'];
+    if (letterOnlyFields.includes(name)) {
+      finalValue = value.replace(/[^a-zA-Z\s]/g, '');
+    }
+
+    // Fields that should only contain numbers
+    if (name === 'emergencyContactNo') {
+      finalValue = value.replace(/\D/g, '');
+    }
+
+    // Standardize to uppercase for consistency
+    const uppercaseFields = ['lastName', 'firstName', 'middleName', 'civilStatus', 'birthMonth', 'birthPlace', 'emergencyContactName'];
+    if (uppercaseFields.includes(name)) {
+      finalValue = finalValue.toUpperCase();
+    }
+
     setConductor((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: finalValue,
     }));
   };
 
@@ -133,7 +160,7 @@ const ConductorForm = () => {
             <option value="">Choose operator...</option>
             {operators.map((operator) => (
               <option key={operator._id} value={operator._id}>
-                {operator.firstName} {operator.lastName}
+                {getFullName(operator)}
               </option>
             ))}
           </select>

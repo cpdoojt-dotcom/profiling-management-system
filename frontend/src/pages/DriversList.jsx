@@ -184,8 +184,20 @@ const DriversList = () => {
   const handleEditChange = (section) => (e) => {
     const { name, value } = e.target;
     let finalValue = value;
+
+    // Fields that should only contain letters and spaces
+    const letterOnlyFields = ['firstName', 'lastName', 'middleName', 'barangay', 'cityMunicipality'];
+    if (letterOnlyFields.includes(name)) {
+      finalValue = value.replace(/[^a-zA-Z\s]/g, '');
+    }
+
+    // Fields that should only contain numbers
+    if (name === 'contactNo') {
+      finalValue = value.replace(/\D/g, '');
+    }
+
     if (['cpdoId', 'licenseNo', 'firstName', 'lastName', 'middleName', 'barangay', 'cityMunicipality'].includes(name)) {
-      finalValue = value.toUpperCase();
+      finalValue = finalValue.toUpperCase();
     }
     setEditForm((prev) => ({
       ...prev,
@@ -619,7 +631,7 @@ const DriversList = () => {
                 <div><span>Expiry:</span><strong>{selectedDriver.licenseExpiryDate || '-'}</strong></div>
                 <div><span>Body No:</span><strong>{selectedDriver.unit?.bodyNo || '-'}</strong></div>
                 <div><span>Plate No:</span><strong>{selectedDriver.unit?.plateNo || '-'}</strong></div>
-                <div><span>Operator:</span><strong>{selectedDriver.operator?.firstName} {selectedDriver.operator?.lastName}</strong></div>
+                <div><span>Operator:</span><strong>{getFullName(selectedDriver.operator)}</strong></div>
                 <div><span>Operator Area:</span><strong>{selectedDriver.operator?.barangay || '-'}, {selectedDriver.operator?.cityMunicipality || '-'}</strong></div>
                 <div><span>Contact:</span><strong>{selectedDriver.contactNo || '-'}</strong></div>
                 <div><span>Status:</span><strong>{selectedDriver.status || 'Active'}</strong></div>

@@ -198,11 +198,33 @@ const OperatorsPage = () => {
       barangay: selectedOperator.barangay || '',
       cityMunicipality: selectedOperator.cityMunicipality || '',
       contactNo: selectedOperator.contactNo || '',
-      contactNo: selectedOperator.contactNo || '',
       operatorType: 'FOR HIRE',
     });
     setIsEditing(true);
     setActionError('');
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    let finalValue = value;
+
+    // Fields that should only contain letters and spaces
+    const letterOnlyFields = ['firstName', 'lastName', 'middleName', 'barangay', 'cityMunicipality', 'birthplace', 'civilStatus'];
+    if (letterOnlyFields.includes(name)) {
+      finalValue = value.replace(/[^a-zA-Z\s]/g, '');
+    }
+
+    // Fields that should only contain numbers
+    if (name === 'contactNo') {
+      finalValue = value.replace(/\D/g, '');
+    }
+
+    const uppercaseFields = ['firstName', 'lastName', 'middleName', 'barangay', 'cityMunicipality', 'birthplace'];
+    if (uppercaseFields.includes(name)) {
+      finalValue = finalValue.toUpperCase();
+    }
+
+    setEditForm(prev => ({ ...prev, [name]: finalValue }));
   };
 
   const handleUpdateOperator = async (e) => {
@@ -436,23 +458,23 @@ const OperatorsPage = () => {
                 <div className="form-grid-2col">
                   <div className="edit-form-group">
                     <label>First Name</label>
-                    <input className="input-field" value={editForm.firstName} onChange={e => setEditForm({ ...editForm, firstName: e.target.value.toUpperCase() })} required />
+                    <input name="firstName" className="input-field" value={editForm.firstName} onChange={handleEditChange} required />
                   </div>
                   <div className="edit-form-group">
                     <label>Middle Name</label>
-                    <input className="input-field" value={editForm.middleName} onChange={e => setEditForm({ ...editForm, middleName: e.target.value.toUpperCase() })} />
+                    <input name="middleName" className="input-field" value={editForm.middleName} onChange={handleEditChange} />
                   </div>
                   <div className="edit-form-group">
                     <label>Last Name</label>
-                    <input className="input-field" value={editForm.lastName} onChange={e => setEditForm({ ...editForm, lastName: e.target.value.toUpperCase() })} required />
+                    <input name="lastName" className="input-field" value={editForm.lastName} onChange={handleEditChange} required />
                   </div>
                   <div className="edit-form-group">
                     <label>Age</label>
-                    <input type="number" className="input-field" value={editForm.age} onChange={e => setEditForm({ ...editForm, age: e.target.value })} />
+                    <input name="age" type="number" className="input-field" value={editForm.age} onChange={handleEditChange} />
                   </div>
                    <div className="edit-form-group">
                     <label>Civil Status</label>
-                    <select className="input-field" value={editForm.civilStatus} onChange={e => setEditForm({ ...editForm, civilStatus: e.target.value })}>
+                    <select name="civilStatus" className="input-field" value={editForm.civilStatus} onChange={handleEditChange}>
                       <option value="Single">Single</option>
                       <option value="Married">Married</option>
                       <option value="Widowed">Widowed</option>
@@ -461,35 +483,35 @@ const OperatorsPage = () => {
                   </div>
                   <div className="edit-form-group">
                     <label>Birthdate</label>
-                    <input type="date" className="input-field" value={editForm.birthdate ? editForm.birthdate.split('T')[0] : ''} onChange={e => setEditForm({ ...editForm, birthdate: e.target.value })} />
+                    <input name="birthdate" type="date" className="input-field" value={editForm.birthdate ? editForm.birthdate.split('T')[0] : ''} onChange={handleEditChange} />
                   </div>
                   <div className="edit-form-group">
                     <label>Birthplace</label>
-                    <input type="text" className="input-field" value={editForm.birthplace} onChange={e => setEditForm({ ...editForm, birthplace: e.target.value })} />
+                    <input name="birthplace" type="text" className="input-field" value={editForm.birthplace} onChange={handleEditChange} />
                   </div>
                   <div className="edit-form-group">
                     <label>Contact No.</label>
-                    <input className="input-field" value={editForm.contactNo} onChange={e => setEditForm({ ...editForm, contactNo: e.target.value })} />
+                    <input name="contactNo" className="input-field" value={editForm.contactNo} onChange={handleEditChange} />
                   </div>
                   <div className="edit-form-group">
                     <label>Address No.</label>
-                    <input className="input-field" value={editForm.addressNo} onChange={e => setEditForm({ ...editForm, addressNo: e.target.value })} />
+                    <input name="addressNo" className="input-field" value={editForm.addressNo} onChange={handleEditChange} />
                   </div>
                   <div className="edit-form-group">
                     <label>Street</label>
-                    <input className="input-field" value={editForm.street} onChange={e => setEditForm({ ...editForm, street: e.target.value })} />
+                    <input name="street" className="input-field" value={editForm.street} onChange={handleEditChange} />
                   </div>
                   <div className="edit-form-group">
                     <label>Purok</label>
-                    <input className="input-field" value={editForm.purok} onChange={e => setEditForm({ ...editForm, purok: e.target.value })} />
+                    <input name="purok" className="input-field" value={editForm.purok} onChange={handleEditChange} />
                   </div>
                   <div className="edit-form-group">
                     <label>Barangay</label>
-                    <input className="input-field" value={editForm.barangay} onChange={e => setEditForm({ ...editForm, barangay: e.target.value })} />
+                    <input name="barangay" className="input-field" value={editForm.barangay} onChange={handleEditChange} />
                   </div>
                   <div className="edit-form-group">
                     <label>City/Municipality</label>
-                    <input className="input-field" value={editForm.cityMunicipality} onChange={e => setEditForm({ ...editForm, cityMunicipality: e.target.value })} />
+                    <input name="cityMunicipality" className="input-field" value={editForm.cityMunicipality} onChange={handleEditChange} />
                   </div>
                   <div className="edit-form-group">
                     <label>Classification</label>

@@ -38,6 +38,14 @@ const getColorOptions = (bodyNo, vehicleType) => {
   return [];
 };
 
+const getFullName = (person) => {
+  if (!person) return '';
+  return [person.firstName, person.middleName, person.lastName]
+    .map((part) => (part || '').trim())
+    .filter(Boolean)
+    .join(' ');
+};
+
 const Dashboard = () => {
   const [drivers, setDrivers] = useState([]);
   const [summary, setSummary] = useState({ 
@@ -379,7 +387,7 @@ const Dashboard = () => {
                   )}
                 </div>
                 <div className="recent-center">
-                  <h3>{driver.firstName} {driver.lastName}</h3>
+                  <h3>{getFullName(driver)}</h3>
                   <p>{driver.licenseNo} | Body #{driver.unit?.bodyNo || '-'} | Plate {driver.unit?.plateNo || '-'}</p>
                 </div>
                 <span className="status-chip">{driver.status || 'Active'}</span>

@@ -28,6 +28,14 @@ const initialDriver = {
   driverType: 'Tricycle',
 };
 
+const getFullName = (person) => {
+  if (!person) return '';
+  return [person.firstName, person.middleName, person.lastName]
+    .map((part) => (part || '').trim())
+    .filter(Boolean)
+    .join(' ');
+};
+
 const DriverForm = () => {
   const navigate = useNavigate();
   const confirm = useConfirm();
@@ -79,12 +87,24 @@ const DriverForm = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     let finalValue = value;
+
+    // Fields that should only contain letters and spaces
+    const letterOnlyFields = ['lastName', 'firstName', 'middleName', 'civilStatus', 'barangay', 'cityMunicipality', 'birthMonth'];
+    if (letterOnlyFields.includes(name)) {
+      finalValue = value.replace(/[^a-zA-Z\s]/g, '');
+    }
+
+    // Fields that should only contain numbers
+    if (name === 'contactNo') {
+      finalValue = value.replace(/\D/g, '');
+    }
+
     const uppercaseFields = [
       'cpdoId', 'licenseNo', 'lastName', 'firstName', 'middleName', 
       'civilStatus', 'barangay', 'cityMunicipality', 'street', 'purok', 'birthMonth'
     ];
     if (uppercaseFields.includes(name)) {
-      finalValue = value.toUpperCase();
+      finalValue = finalValue.toUpperCase();
     }
     setDriver((prev) => ({
       ...prev,
@@ -159,7 +179,7 @@ const DriverForm = () => {
             <option value="">Choose operator...</option>
             {operators.map((operator) => (
               <option key={operator._id} value={operator._id}>
-                {operator.firstName} {operator.lastName}
+                {getFullName(operator)}
               </option>
             ))}
           </select>

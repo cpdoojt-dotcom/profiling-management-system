@@ -81,9 +81,21 @@ const OperatorForm = () => {
   const handleOperatorChange = (e) => {
     const { name, value } = e.target;
     let finalValue = value;
+    
+    // Fields that should only contain letters and spaces
+    const letterOnlyFields = ['lastName', 'firstName', 'middleName', 'civilStatus', 'birthplace', 'barangay', 'cityMunicipality'];
+    if (letterOnlyFields.includes(name)) {
+      finalValue = value.replace(/[^a-zA-Z\s]/g, '');
+    }
+
+    // Fields that should only contain numbers
+    if (name === 'contactNo') {
+      finalValue = value.replace(/\D/g, '');
+    }
+
     const uppercaseFields = ['lastName', 'firstName', 'middleName', 'barangay', 'cityMunicipality', 'street', 'purok', 'birthplace'];
     if (uppercaseFields.includes(name)) {
-      finalValue = value.toUpperCase();
+      finalValue = finalValue.toUpperCase();
     }
     setOperator((prev) => ({ ...prev, [name]: finalValue }));
   };
@@ -92,9 +104,15 @@ const OperatorForm = () => {
     setUnits((prev) => prev.map((unit, idx) => {
       if (idx === index) {
         let finalValue = value;
-        const uppercaseFields = ['bodyNo', 'plateNo', 'makeType', 'chassisNo', 'motorNo', 'yearModel', 'zone', 'ltfrbMchCaseNo'];
+        
+        // Fields that should only contain letters and spaces
+        if (field === 'colorCode') {
+          finalValue = value.replace(/[^a-zA-Z\s]/g, '');
+        }
+
+        const uppercaseFields = ['bodyNo', 'plateNo', 'makeType', 'chassisNo', 'motorNo', 'yearModel', 'zone', 'ltfrbMchCaseNo', 'colorCode'];
         if (uppercaseFields.includes(field)) {
-          finalValue = value.toUpperCase();
+          finalValue = finalValue.toUpperCase();
         }
 
         let updated = { ...unit, [field]: finalValue };

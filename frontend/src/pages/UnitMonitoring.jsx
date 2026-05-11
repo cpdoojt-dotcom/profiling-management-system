@@ -38,6 +38,14 @@ const getColorOptions = (bodyNo, vehicleType) => {
   return [];
 };
 
+const getFullName = (person) => {
+  if (!person) return '';
+  return [person.firstName, person.middleName, person.lastName]
+    .map((part) => (part || '').trim())
+    .filter(Boolean)
+    .join(' ');
+};
+
 const UnitMonitoring = () => {
   const confirm = useConfirm();
   const toast = useToast();
@@ -281,11 +289,11 @@ const UnitMonitoring = () => {
                     <div key={unit._id} className="glass-panel unit-card" onClick={() => viewHistory(unit)}>
                       <h3>Body #{unit.bodyNo}</h3>
                       <p>{getVehicleIcon(unit.vehicleType)} {unit.vehicleType}</p>
-                      <p><User size={14} /> <strong>Owner:</strong> {unit.operator?.firstName} {unit.operator?.lastName}</p>
+                      <p><User size={14} /> <strong>Owner:</strong> {getFullName(unit.operator)}</p>
                       <p>
                         <User size={14} style={{ color: 'var(--accent-color)' }} /> 
                         <strong>Driver:</strong> {
-                          unit.driver ? `${unit.driver.firstName} ${unit.driver.lastName}` : 
+                          unit.driver ? getFullName(unit.driver) : 
                           (unit.assignedDriverName ? unit.assignedDriverName : 'Unassigned')
                         }
                       </p>
@@ -293,7 +301,7 @@ const UnitMonitoring = () => {
                         <p>
                           <User size={14} style={{ color: 'var(--accent-color)' }} /> 
                           <strong>Conductor:</strong> {
-                            unit.conductor ? `${unit.conductor.firstName} ${unit.conductor.lastName}` : 'Unassigned'
+                            unit.conductor ? getFullName(unit.conductor) : 'Unassigned'
                           }
                         </p>
                       )}
@@ -334,7 +342,7 @@ const UnitMonitoring = () => {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
                 {assignedDrivers.map(drv => (
                   <div key={drv._id} className="driver-mini-card" style={{ padding: '0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    <strong style={{ display: 'block', fontSize: '1rem', color: '#fff' }}>{drv.firstName} {drv.lastName}</strong>
+                    <strong style={{ display: 'block', fontSize: '1rem', color: '#fff' }}>{getFullName(drv)}</strong>
                     <span style={{ fontSize: '0.85rem', opacity: 0.7 }}>License: {drv.licenseNo}</span>
                     <div style={{ fontSize: '0.85rem', marginTop: '0.4rem', color: 'var(--accent-color)', fontWeight: '600' }}>Status: {drv.status || 'Active'}</div>
                   </div>
@@ -351,7 +359,7 @@ const UnitMonitoring = () => {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
                 {assignedConductors.map(cond => (
                   <div key={cond._id} className="driver-mini-card" style={{ padding: '0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    <strong style={{ display: 'block', fontSize: '1rem', color: '#fff' }}>{cond.firstName} {cond.lastName}</strong>
+                    <strong style={{ display: 'block', fontSize: '1rem', color: '#fff' }}>{getFullName(cond)}</strong>
                     <div style={{ fontSize: '0.85rem', marginTop: '0.4rem', color: 'var(--accent-color)', fontWeight: '600' }}>Status: {cond.status || 'Active'}</div>
                   </div>
                 ))}
@@ -428,7 +436,7 @@ const UnitMonitoring = () => {
                       }}
                     >
                       {operators.map(op => (
-                        <option key={op._id} value={op._id}>{op.firstName} {op.lastName}</option>
+                        <option key={op._id} value={op._id}>{getFullName(op)}</option>
                       ))}
                     </select>
                   </div>
@@ -440,7 +448,7 @@ const UnitMonitoring = () => {
                         const isAssigned = assignedDrivers.some(ad => ad._id === drv._id);
                         return (
                           <option key={drv._id} value={drv._id}>
-                            {drv.firstName} {drv.lastName} {isAssigned ? '(Assigned to this Unit)' : ''}
+                            {getFullName(drv)} {isAssigned ? '(Assigned to this Unit)' : ''}
                           </option>
                         );
                       })}
@@ -500,7 +508,7 @@ const UnitMonitoring = () => {
                         <option value="">-- No Conductor Assigned --</option>
                         {conductorsList.map(c => (
                           <option key={c._id} value={c._id}>
-                            {c.firstName} {c.lastName} (ID: {c.cpdoId})
+                            {getFullName(c)} (ID: {c.cpdoId})
                           </option>
                         ))}
                       </select>
@@ -530,7 +538,7 @@ const UnitMonitoring = () => {
                         {getColorOptions(editFormData.bodyNo, editFormData.vehicleType).map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                     ) : (
-                      <input type="text" className="input-field" value={editFormData.colorCode} onChange={e => setEditFormData({...editFormData, colorCode: e.target.value.toUpperCase()})} />
+                      <input type="text" className="input-field" value={editFormData.colorCode} onChange={e => setEditFormData({...editFormData, colorCode: e.target.value.replace(/[^a-zA-Z\s]/g, '').toUpperCase()})} />
                     )}
                   </div>
                   <div className="form-group">
