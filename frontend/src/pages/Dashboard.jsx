@@ -106,13 +106,15 @@ const Dashboard = () => {
             extensionName: String(row[5] || '').trim(),
             lastName: opLastName,
             civilStatus: String(row[6] || '').trim() || 'Single',
-            age: row[7] ? Number(row[7]) : undefined,
-            addressNo: String(row[8] || '').trim(),
-            street: String(row[9] || '').trim(),
-            purok: String(row[10] || '').trim(),
-            barangay: String(row[11] || '').trim(),
-            cityMunicipality: String(row[12] || '').trim(),
-            contactNo: String(row[13] || '').trim(),
+            birthdate: row[7] ? new Date(row[7]) : undefined,
+            birthplace: String(row[8] || '').trim(),
+            age: row[9] ? Number(row[9]) : undefined,
+            addressNo: String(row[10] || '').trim(),
+            street: String(row[11] || '').trim(),
+            purok: String(row[12] || '').trim(),
+            barangay: String(row[13] || '').trim(),
+            cityMunicipality: String(row[14] || '').trim(),
+            contactNo: String(row[15] || '').trim(),
             operatorType: 'FOR HIRE',
           },
           units: []
@@ -125,13 +127,13 @@ const Dashboard = () => {
         const unit = {
           vehicleType,
           bodyNo,
-          ltfrbMchCaseNo: String(row[14] || '').trim(),
-          colorCode: String(row[15] || '').trim(),
-          makeType: String(row[16] || '').trim(),
-          chassisNo: String(row[17] || '').trim(),
-          motorNo: String(row[18] || '').trim(),
-          plateNo: String(row[19] || '').trim(),
-          yearModel: String(row[20] || '').trim(),
+          ltfrbMchCaseNo: String(row[16] || '').trim(),
+          colorCode: String(row[17] || '').trim(),
+          makeType: String(row[18] || '').trim(),
+          chassisNo: String(row[19] || '').trim(),
+          motorNo: String(row[20] || '').trim(),
+          plateNo: String(row[21] || '').trim(),
+          yearModel: String(row[22] || '').trim(),
           zone: '',
           driver: null,
           conductor: null
@@ -163,50 +165,55 @@ const Dashboard = () => {
         }
 
         // Check for Driver in this row
-        const drFirstName = String(row[26] || '').trim();
-        const drLastName = String(row[25] || '').trim();
+        const drFirstName = String(row[28] || '').trim();
+        const drLastName = String(row[27] || '').trim();
         if (drFirstName && drLastName) {
           unit.driver = {
-            cpdoId: String(row[21] || '').trim(),
-            licenseNo: String(row[22] || '').trim(),
-            licenseExpiryDate: String(row[23] || '').trim(),
+            cpdoId: String(row[23] || '').trim(),
+            licenseNo: String(row[24] || '').trim(),
+            licenseExpiryDate: String(row[25] || '').trim(),
             lastName: drLastName,
             firstName: drFirstName,
-            middleName: String(row[27] || '').trim(),
-            extensionName: String(row[28] || '').trim(),
-            civilStatus: String(row[29] || '').trim() || 'Single',
-            age: row[30] ? Number(row[30]) : undefined,
-            addressNo: String(row[31] || '').trim(),
-            street: String(row[32] || '').trim(),
-            purok: String(row[33] || '').trim(),
-            barangay: String(row[34] || '').trim(),
-            cityMunicipality: String(row[35] || '').trim(),
-            contactNo: String(row[36] || '').trim(),
-            birthMonth: String(row[37] || '').trim(),
-            birthDate: String(row[38] || '').trim(),
-            birthYear: String(row[39] || '').trim(),
+            middleName: String(row[29] || '').trim(),
+            extensionName: String(row[30] || '').trim(),
+            civilStatus: String(row[31] || '').trim() || 'Single',
+            birthMonth: String(row[32] || '').trim(),
+            birthDate: String(row[33] || '').trim(),
+            birthYear: String(row[34] || '').trim(),
+            birthplace: String(row[35] || '').trim(),
+            age: row[36] ? Number(row[36]) : undefined,
+            addressNo: String(row[37] || '').trim(),
+            street: String(row[38] || '').trim(),
+            purok: String(row[39] || '').trim(),
+            barangay: String(row[40] || '').trim(),
+            cityMunicipality: String(row[41] || '').trim(),
+            contactNo: String(row[42] || '').trim(),
             driverType: vehicleType,
             status: 'Active'
           };
         }
 
         // Check for Conductor in this row
-        const cdFirstName = String(row[41] || '').trim();
-        const cdLastName = String(row[40] || '').trim();
+        const cdFirstName = String(row[44] || '').trim();
+        const cdLastName = String(row[43] || '').trim();
         if (cdFirstName && cdLastName) {
           unit.conductor = {
             lastName: cdLastName,
             firstName: cdFirstName,
-            middleName: String(row[42] || '').trim(),
-            extensionName: String(row[43] || '').trim(),
-            civilStatus: String(row[44] || '').trim() || 'Single',
-            age: row[45] ? Number(row[45]) : undefined,
-            addressNo: String(row[46] || '').trim(),
-            street: String(row[47] || '').trim(),
-            purok: String(row[48] || '').trim(),
-            barangay: String(row[49] || '').trim(),
-            cityMunicipality: String(row[50] || '').trim(),
-            contactNo: String(row[51] || '').trim(),
+            middleName: String(row[45] || '').trim(),
+            extensionName: String(row[46] || '').trim(),
+            civilStatus: String(row[47] || '').trim() || 'Single',
+            birthMonth: String(row[48] || '').trim(),
+            birthDate: String(row[49] || '').trim(),
+            birthYear: String(row[50] || '').trim(),
+            birthPlace: String(row[51] || '').trim(),
+            age: row[52] ? Number(row[52]) : undefined,
+            addressNo: String(row[53] || '').trim(),
+            street: String(row[54] || '').trim(),
+            purok: String(row[55] || '').trim(),
+            barangay: String(row[56] || '').trim(),
+            cityMunicipality: String(row[57] || '').trim(),
+            contactNo: String(row[58] || '').trim(),
             conductorType: vehicleType,
             status: 'Active'
           };
@@ -228,21 +235,21 @@ const Dashboard = () => {
   const downloadTemplate = () => {
     const headers = [
       'Vehicle Category', 'Body No', 'Operator Last Name', 'Operator First Name', 'Operator Middle Name', 'Operator Extension Name',
-      'Operator Civil Status', 'Operator Age', 'Operator Address No', 'Operator Street', 'Operator Purok', 
+      'Operator Civil Status', 'Operator Birthdate', 'Operator Birthplace', 'Operator Age', 'Operator Address No', 'Operator Street', 'Operator Purok', 
       'Operator Barangay', 'Operator City/Municipality', 'Operator Contact No', 'LTFRB/MCH Case No', 'Color Code', 
       'Make/Type', 'Chassis No', 'Motor No', 'Plate No', 'Year Model', 'Driver CPDO ID', 'Driver License No', 
       'Driver License Expiry Date', 'SKIPPED_COLUMN', 'Driver Last Name', 'Driver First Name', 'Driver Middle Name', 'Driver Extension Name',
-      'Driver Civil Status', 'Driver Age', 'Driver Address No', 'Driver Street', 'Driver Purok', 'Driver Barangay', 
-      'Driver City/Municipality', 'Driver Contact No', 'Driver Birth Month', 'Driver Birth Date', 'Driver Birth Year', 
-      'Conductor Last Name', 'Conductor First Name', 'Conductor Middle Name', 'Conductor Extension Name', 'Conductor Civil Status', 'Conductor Age', 
+      'Driver Civil Status', 'Driver Birth Month', 'Driver Birth Date', 'Driver Birth Year', 'Driver Birthplace', 'Driver Age', 'Driver Address No', 'Driver Street', 'Driver Purok', 'Driver Barangay', 
+      'Driver City/Municipality', 'Driver Contact No', 'Conductor Last Name', 'Conductor First Name', 'Conductor Middle Name', 'Conductor Extension Name', 'Conductor Civil Status', 
+      'Conductor Birth Month', 'Conductor Birth Date', 'Conductor Birth Year', 'Conductor Birthplace', 'Conductor Age', 
       'Conductor Address No', 'Conductor Street', 'Conductor Purok', 'Conductor Barangay', 'Conductor City/Municipality', 
       'Conductor Contact No'
     ];
     
     const sampleRow = [
-      'Jeepney', 'J01-101', 'DELA CRUZ', 'JUAN', 'SANTOS', 'JR', 'Married', '45', '123', 'MAHARLIKA HWY', 'PUROK 1', 
+      'Jeepney', 'J01-101', 'DELA CRUZ', 'JUAN', 'SANTOS', 'JR', 'Married', '1980-01-01', 'CITY NAME', '45', '123', 'MAHARLIKA HWY', 'PUROK 1', 
       'BARANGAY 1', 'CITY NAME', '09123456789', '2024-ABC-123', 'YELLOW', 'ISUZU', 'CH-123', 'MO-123', 'NQR-123', '2022',
-      '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
+      '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
     ];
 
     const csvContent = [headers, sampleRow].map(e => e.join(",")).join("\n");
