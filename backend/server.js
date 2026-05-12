@@ -12,6 +12,7 @@ import operatorRoutes from './routes/operatorRoutes.js';
 import unitRoutes from './routes/unitRoutes.js';
 import conductorRoutes from './routes/conductorRoutes.js';
 import auditLogRoutes from './routes/auditLogRoutes.js';
+import { protect } from './middleware/authMiddleware.js';
 
 dotenv.config();
 
@@ -23,12 +24,12 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/api/drivers', driverRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/operators', operatorRoutes);
-app.use('/api/units', unitRoutes);
-app.use('/api/conductors', conductorRoutes);
-app.use('/api/audit-logs', auditLogRoutes);
+app.use('/api/drivers', protect, driverRoutes);
+app.use('/api/operators', protect, operatorRoutes);
+app.use('/api/units', protect, unitRoutes);
+app.use('/api/conductors', protect, conductorRoutes);
+app.use('/api/audit-logs', protect, auditLogRoutes);
 
 // Connect to MongoDB
 const connectDB = async () => {

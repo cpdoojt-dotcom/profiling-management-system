@@ -3,12 +3,20 @@ import axios from 'axios';
 
 const AuthContext = createContext(null);
 
-const API_URL = 'http://localhost:5000/api/auth';
+const API_URL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api/auth` : 'http://localhost:5000/api/auth';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    delete axios.defaults.headers.common['Authorization'];
+    setToken(null);
+    setUser(null);
+  };
 
   useEffect(() => {
     // If we have a token stored, restore the user session
@@ -18,7 +26,23 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
     setLoading(false);
-  }, []);
+
+    // Add a response interceptor to handle expired tokens globally
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response && error.response.status === 401) {
+          // Token expired or invalid
+          logout();
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+    };
+  }, [token]);
 
   const login = async (email, password) => {
     const res = await axios.post(`${API_URL}/login`, { email, password });
@@ -31,14 +55,6 @@ export const AuthProvider = ({ children }) => {
     setToken(newToken);
     setUser(userData);
     return userData;
-  };
-
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    delete axios.defaults.headers.common['Authorization'];
-    setToken(null);
-    setUser(null);
   };
 
   return (

@@ -87,6 +87,14 @@ const extractBearerToken = (authorizationHeader = '') => {
 };
 
 const getActorFromRequest = async (req) => {
+  if (req.user) {
+    return {
+      actorId: req.user._id,
+      actorEmail: req.user.email,
+      actorRole: req.user.role,
+    };
+  }
+
   const fallbackActor = {
     actorId: null,
     actorEmail: 'system@local',
