@@ -1,5 +1,9 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import dns from 'dns';
+
+// Fix for local network resolution errors
+dns.setServers(['8.8.8.8', '8.8.4.4']);
 import cors from 'cors';
 import dotenv from 'dotenv';
 import driverRoutes from './routes/driverRoutes.js';
@@ -27,13 +31,20 @@ app.use('/api/conductors', conductorRoutes);
 app.use('/api/audit-logs', auditLogRoutes);
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.log('Connected to MongoDB');
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      dbName: 'profiling_system_db' // Assuming default DB name, can be adjusted
+    });
+    console.log('Connected to MongoDB Atlas successfully');
+    
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
     });
-  })
-  .catch((err) => {
+  } catch (err) {
     console.error('MongoDB connection error:', err);
-  });
+    process.exit(1);
+  }
+};
+
+connectDB();
