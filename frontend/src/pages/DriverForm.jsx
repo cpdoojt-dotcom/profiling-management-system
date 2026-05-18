@@ -54,7 +54,7 @@ const DriverForm = () => {
   useEffect(() => {
     const fetchOperators = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/operators');
+        const res = await axios.get('/api/operators');
         setOperators(res.data);
         if (res.data[0]?._id) {
           setSelectedOperatorId(res.data[0]._id);
@@ -142,7 +142,7 @@ const DriverForm = () => {
       if (driverImage) {
         payload.append('driverImage', driverImage);
       }
-      await axios.post('http://localhost:5000/api/drivers', payload);
+      await axios.post('/api/drivers', payload);
       toast.success('Driver registered successfully!');
       navigate('/drivers');
     } catch (err) {

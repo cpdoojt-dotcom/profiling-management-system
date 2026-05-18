@@ -49,7 +49,7 @@ const AuditLogs = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.get(`http://localhost:5000/api/audit-logs?${queryParams}`);
+      const res = await axios.get(`/api/audit-logs?${queryParams}`);
       setLogs(res.data.data || []);
       setPagination((prev) => ({
         ...prev,

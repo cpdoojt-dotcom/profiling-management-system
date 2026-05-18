@@ -54,7 +54,7 @@ const ConductorForm = () => {
   useEffect(() => {
     const fetchOperators = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/operators');
+        const res = await axios.get('/api/operators');
         const miniBusOperators = res.data.filter(op => 
           op.operatorType === 'Mini Bus' || (op.units && op.units.some(u => u.vehicleType === 'Mini Bus'))
         );
@@ -129,7 +129,7 @@ const ConductorForm = () => {
       if (conductorImage) {
         payload.append('conductorImage', conductorImage);
       }
-      await axios.post('http://localhost:5000/api/conductors', payload);
+      await axios.post('/api/conductors', payload);
       toast.success('Conductor registered successfully!');
       navigate('/conductors');
     } catch (err) {

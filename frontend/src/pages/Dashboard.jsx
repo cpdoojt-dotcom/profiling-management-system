@@ -102,8 +102,8 @@ const Dashboard = () => {
   const fetchDriversData = async () => {
     try {
       const [driversRes, summaryRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/drivers'),
-        axios.get('http://localhost:5000/api/drivers/meta/summary'),
+        axios.get('/api/drivers'),
+        axios.get('/api/drivers/meta/summary'),
       ]);
       setDrivers(driversRes.data);
       setSummary(summaryRes.data);
@@ -263,7 +263,7 @@ const Dashboard = () => {
     }
 
     const promises = Array.from(operatorMap.values()).map(data => 
-      axios.post('http://localhost:5000/api/operators', data)
+      axios.post('/api/operators', data)
     );
     
     await Promise.all(promises);

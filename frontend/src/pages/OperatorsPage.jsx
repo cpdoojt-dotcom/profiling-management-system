@@ -83,7 +83,7 @@ const OperatorsPage = () => {
   useEffect(() => {
     const fetchOperators = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/operators');
+        const res = await axios.get('/api/operators');
         setOperators(res.data);
         if (res.data[0]?._id) {
           setSelectedOperatorId(res.data[0]._id);
@@ -99,7 +99,7 @@ const OperatorsPage = () => {
   }, []);
 
   const refreshOperators = async (keepSelected = true) => {
-    const res = await axios.get('http://localhost:5000/api/operators');
+    const res = await axios.get('/api/operators');
     setOperators(res.data);
     if (!keepSelected) {
       setSelectedOperatorId(res.data[0]?._id || '');
@@ -169,9 +169,9 @@ const OperatorsPage = () => {
     setActionError('');
     try {
       if (editingUnitId) {
-        await axios.put(`http://localhost:5000/api/units/${editingUnitId}`, newUnitData);
+        await axios.put(`/api/units/${editingUnitId}`, newUnitData);
       } else {
-        await axios.post(`http://localhost:5000/api/operators/${selectedOperatorId}/units`, newUnitData);
+        await axios.post(`/api/operators/${selectedOperatorId}/units`, newUnitData);
       }
       await refreshOperators(true);
       toast.success(editingUnitId ? 'Unit updated successfully!' : 'Unit added successfully!');
@@ -238,7 +238,7 @@ const OperatorsPage = () => {
     setAddingUnit(true); 
     setActionError('');
     try {
-      const res = await axios.put(`http://localhost:5000/api/operators/${selectedOperatorId}`, editForm);
+      const res = await axios.put(`/api/operators/${selectedOperatorId}`, editForm);
       setOperators(prev => prev.map(op => op._id === selectedOperatorId ? { ...op, ...res.data } : op));
       toast.success('Operator profile updated successfully!');
       setIsEditing(false);
@@ -257,7 +257,7 @@ const OperatorsPage = () => {
     setAddingUnit(true);
     setActionError('');
     try {
-      await axios.delete(`http://localhost:5000/api/operators/${selectedOperatorId}`);
+      await axios.delete(`/api/operators/${selectedOperatorId}`);
       const remaining = operators.filter(op => op._id !== selectedOperatorId);
       setOperators(remaining);
       setSelectedOperatorId(remaining[0]?._id || '');

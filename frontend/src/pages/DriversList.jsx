@@ -101,7 +101,7 @@ const DriversList = () => {
   const typeFromQuery = searchParams.get('type');
 
   const fetchDrivers = async () => {
-    const res = await axios.get('http://localhost:5000/api/drivers');
+    const res = await axios.get('/api/drivers');
     setDrivers(res.data);
   };
 
@@ -109,7 +109,7 @@ const DriversList = () => {
     const loadDriversAndOperators = async () => {
       try {
         await fetchDrivers();
-        const opRes = await axios.get('http://localhost:5000/api/operators');
+        const opRes = await axios.get('/api/operators');
         setOperators(opRes.data);
       } catch (err) {
         setError(err.response?.data?.message || 'Unable to load data.');
@@ -267,7 +267,7 @@ const DriversList = () => {
         payload.append('driverImage', editImageFile);
       }
 
-      const res = await axios.put(`http://localhost:5000/api/drivers/${selectedDriverId}`, payload);
+      const res = await axios.put(`/api/drivers/${selectedDriverId}`, payload);
       setDrivers((prev) => prev.map((item) => (item._id === selectedDriverId ? res.data : item)));
       setEditImageFile(null);
       toast.success('Driver profile updated successfully!');
@@ -287,7 +287,7 @@ const DriversList = () => {
     setActionLoading(true);
     setActionError('');
     try {
-      await axios.delete(`http://localhost:5000/api/drivers/${selectedDriverId}`);
+      await axios.delete(`/api/drivers/${selectedDriverId}`);
       const remaining = drivers.filter((item) => item._id !== selectedDriverId);
       setDrivers(remaining);
       setSelectedDriverId(remaining[0]?._id || '');

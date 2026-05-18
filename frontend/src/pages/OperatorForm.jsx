@@ -189,7 +189,7 @@ const OperatorForm = () => {
         ...unit,
       }));
 
-      await axios.post('http://localhost:5000/api/operators', {
+      await axios.post('/api/operators', {
         operator: normalizedOperator,
         units: normalizedUnits,
       });

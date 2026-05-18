@@ -86,7 +86,7 @@ const ConductorList = () => {
   const selectedFromQuery = searchParams.get('conductorId');
 
   const fetchConductors = async () => {
-    const res = await axios.get('http://localhost:5000/api/conductors');
+    const res = await axios.get('/api/conductors');
     setConductors(res.data);
   };
 
@@ -94,7 +94,7 @@ const ConductorList = () => {
     const loadData = async () => {
       try {
         await fetchConductors();
-        const opRes = await axios.get('http://localhost:5000/api/operators');
+        const opRes = await axios.get('/api/operators');
         setOperators(opRes.data.filter(op => op.operatorType === 'Mini Bus' || (op.units?.some(u => u.vehicleType === 'Mini Bus'))));
       } catch (err) {
         setError(err.response?.data?.message || 'Unable to load data.');
@@ -224,7 +224,7 @@ const ConductorList = () => {
         payload.append('conductorImage', editImageFile);
       }
 
-      const res = await axios.put(`http://localhost:5000/api/conductors/${selectedConductorId}`, payload);
+      const res = await axios.put(`/api/conductors/${selectedConductorId}`, payload);
       setConductors((prev) => prev.map((item) => (item._id === selectedConductorId ? res.data : item)));
       setEditImageFile(null);
       toast.success('Conductor profile updated successfully!');
@@ -244,7 +244,7 @@ const ConductorList = () => {
     setActionLoading(true);
     setActionError('');
     try {
-      await axios.delete(`http://localhost:5000/api/conductors/${selectedConductorId}`);
+      await axios.delete(`/api/conductors/${selectedConductorId}`);
       const remaining = conductors.filter((item) => item._id !== selectedConductorId);
       setConductors(remaining);
       setSelectedConductorId(remaining[0]?._id || '');

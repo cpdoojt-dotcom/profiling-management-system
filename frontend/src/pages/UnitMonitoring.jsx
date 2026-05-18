@@ -77,10 +77,10 @@ const UnitMonitoring = () => {
     setLoading(true);
     try {
       const [unitsRes, opsRes, driversRes, conductorsRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/units'),
-        axios.get('http://localhost:5000/api/operators'),
-        axios.get('http://localhost:5000/api/drivers'),
-        axios.get('http://localhost:5000/api/conductors')
+        axios.get('/api/units'),
+        axios.get('/api/operators'),
+        axios.get('/api/drivers'),
+        axios.get('/api/conductors')
       ]);
 
       // Cross-reference drivers with units to fill in "Unassigned" gaps visually
@@ -117,7 +117,7 @@ const UnitMonitoring = () => {
     }
     setLoading(true);
     try {
-      const res = await axios.get(`http://localhost:5000/api/units/search/${query}`);
+      const res = await axios.get(`/api/units/search/${query}`);
       setUnits(res.data);
       if (res.data.length === 0) setError('No units found with that body or plate number.');
     } catch (err) {
@@ -131,7 +131,7 @@ const UnitMonitoring = () => {
     setSelectedUnit(unit);
     setLoading(true);
     try {
-      const res = await axios.get(`http://localhost:5000/api/units/history/${unit.bodyNo}`);
+      const res = await axios.get(`/api/units/history/${unit.bodyNo}`);
       setHistory(res.data.history || []);
       setAssignedDrivers(res.data.drivers || []);
       setAssignedConductors(res.data.conductors || []);
@@ -169,7 +169,7 @@ const UnitMonitoring = () => {
     if (!await confirm('Are you sure you want to save changes to this unit?')) return;
     setSaving(true);
     try {
-      const res = await axios.put(`http://localhost:5000/api/units/${selectedUnit._id}`, editFormData);
+      const res = await axios.put(`/api/units/${selectedUnit._id}`, editFormData);
       const updatedUnit = { ...selectedUnit, ...res.data };
       const ops = operators.find(o => o._id === editFormData.operator);
       const drv = driversList.find(d => d._id === editFormData.driver);
