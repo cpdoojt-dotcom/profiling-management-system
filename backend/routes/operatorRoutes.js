@@ -48,6 +48,7 @@ const normalizeUnitData = (unitData) => ({
   vehicleType: unitData.vehicleType || 'Tricycle',
   zone: unitData.zone,
   conductorName: unitData.conductorName,
+  ltfrbMchCaseNo: unitData.ltfrbMchCaseNo,
 });
 
 const logUnitHistory = async (unitId, bodyNo, oldData, newData, changeType = 'Update') => {

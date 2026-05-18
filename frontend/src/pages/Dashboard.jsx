@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Users, AlertTriangle, ShieldCheck, Bike, Truck, Bus, Upload } from 'lucide-react';
+import { Users, AlertTriangle, ShieldCheck, Bike, Truck, Bus, Upload, CheckCircle2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { useToast } from '../context/ToastContext';
 import './Dashboard.css';
 
 const getColorOptions = (bodyNo, vehicleType) => {
@@ -38,6 +39,35 @@ const getColorOptions = (bodyNo, vehicleType) => {
   return [];
 };
 
+const parseExcelDate = (val) => {
+  if (!val) return '';
+  const num = Number(val);
+  if (!isNaN(num) && num > 0) {
+    const date = new Date(Math.round((num - 25569) * 86400 * 1000));
+    if (!isNaN(date.getTime())) {
+      return date.toISOString().split('T')[0];
+    }
+  }
+  
+  if (typeof val === 'string') {
+    const trimmed = val.trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+      return trimmed;
+    }
+    const d = new Date(trimmed);
+    if (!isNaN(d.getTime())) {
+      return d.toISOString().split('T')[0];
+    }
+    return trimmed;
+  }
+  
+  if (val instanceof Date && !isNaN(val.getTime())) {
+    return val.toISOString().split('T')[0];
+  }
+  
+  return String(val).trim();
+};
+
 const getFullName = (person) => {
   if (!person) return '';
   return [person.firstName, person.middleName, person.lastName]
@@ -63,30 +93,36 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [importing, setImporting] = useState(false);
+  const [importSummary, setImportSummary] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
+  const toast = useToast();
+
+  const fetchDriversData = async () => {
+    try {
+      const [driversRes, summaryRes] = await Promise.all([
+        axios.get('http://localhost:5000/api/drivers'),
+        axios.get('http://localhost:5000/api/drivers/meta/summary'),
+      ]);
+      setDrivers(driversRes.data);
+      setSummary(summaryRes.data);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Unable to load dashboard data.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchDrivers = async () => {
-      try {
-        const [driversRes, summaryRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/drivers'),
-          axios.get('http://localhost:5000/api/drivers/meta/summary'),
-        ]);
-        setDrivers(driversRes.data);
-        setSummary(summaryRes.data);
-      } catch (err) {
-        setError(err.response?.data?.message || 'Unable to load dashboard data.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDrivers();
+    fetchDriversData();
   }, []);
 
   const processMasterImport = async (rows) => {
     const operatorMap = new Map();
+    let unitCount = 0;
+    let driverCount = 0;
+    let conductorCount = 0;
     // Start from row index 1 to skip header
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
@@ -106,7 +142,7 @@ const Dashboard = () => {
             extensionName: String(row[5] || '').trim(),
             lastName: opLastName,
             civilStatus: String(row[6] || '').trim() || 'Single',
-            birthdate: row[7] ? new Date(row[7]) : undefined,
+            birthdate: row[7] ? new Date(parseExcelDate(row[7])) : undefined,
             birthplace: String(row[8] || '').trim(),
             age: row[9] ? Number(row[9]) : undefined,
             addressNo: String(row[10] || '').trim(),
@@ -123,6 +159,7 @@ const Dashboard = () => {
       
       const bodyNo = String(row[1] || '').trim();
       if (bodyNo) {
+        unitCount++;
         const vehicleType = String(row[0] || '').trim() || 'Tricycle';
         const unit = {
           vehicleType,
@@ -168,10 +205,11 @@ const Dashboard = () => {
         const drFirstName = String(row[28] || '').trim();
         const drLastName = String(row[27] || '').trim();
         if (drFirstName && drLastName) {
+          driverCount++;
           unit.driver = {
             cpdoId: String(row[23] || '').trim(),
             licenseNo: String(row[24] || '').trim(),
-            licenseExpiryDate: String(row[25] || '').trim(),
+            licenseExpiryDate: parseExcelDate(row[25]),
             lastName: drLastName,
             firstName: drFirstName,
             middleName: String(row[29] || '').trim(),
@@ -197,6 +235,7 @@ const Dashboard = () => {
         const cdFirstName = String(row[44] || '').trim();
         const cdLastName = String(row[43] || '').trim();
         if (cdFirstName && cdLastName) {
+          conductorCount++;
           unit.conductor = {
             lastName: cdLastName,
             firstName: cdFirstName,
@@ -228,8 +267,19 @@ const Dashboard = () => {
     );
     
     await Promise.all(promises);
-    alert('Master Import successful! All records have been created.');
-    window.location.reload();
+    
+    setImportSummary({
+      rows: rows.length - 1,
+      operators: operatorMap.size,
+      units: unitCount,
+      drivers: driverCount,
+      conductors: conductorCount
+    });
+    setImporting(false);
+    setShowSuccessModal(true);
+    toast.success('Master Data Import successful!');
+    
+    fetchDriversData();
   };
 
   const downloadTemplate = () => {
@@ -282,18 +332,18 @@ const Dashboard = () => {
           if (data.length < 2) throw new Error('File appears to be empty.');
           await processMasterImport(data);
         } catch (innerErr) {
-          alert(`Error parsing file: ${innerErr.message}`);
+          toast.error(`Error parsing file: ${innerErr.message}`);
           setImporting(false);
         }
       };
       reader.onerror = () => {
-        alert('Error reading file.');
+        toast.error('Error reading file.');
         setImporting(false);
       };
       reader.readAsBinaryString(file);
     } catch (err) {
       console.error('Import Error:', err);
-      alert(`Import Failed: ${err.message}`);
+      toast.error(`Import Failed: ${err.message}`);
       setImporting(false);
     }
   };
@@ -358,7 +408,7 @@ const Dashboard = () => {
 
         <div className="stat-card glass-panel">
           <div className="stat-icon" style={{color: 'var(--warning)', backgroundColor: 'rgba(245, 158, 11, 0.15)'}}>
-            <AlertTriangle size={24} />
+            <Bus size={24} />
           </div>
           <div className="stat-details">
             <h3>Total PUV Units</h3>
@@ -452,6 +502,72 @@ const Dashboard = () => {
           </div>
         )}
       </div>
+
+      {/* Modern, premium glassmorphism importing overlay */}
+      {importing && (
+        <div className="import-loading-overlay">
+          <div className="import-spinner"></div>
+          <p>Processing Master CSV Data</p>
+          <span>Uploading and building database profiles, please wait...</span>
+        </div>
+      )}
+
+      {/* Modern, premium glassmorphism success modal */}
+      {showSuccessModal && importSummary && (
+        <div className="modal-overlay">
+          <div className="modal-content animate-fade-in" style={{ maxWidth: '450px', textAlign: 'center', padding: '2.5rem' }}>
+            <div className="success-pulse-icon" style={{ margin: '0 auto 1.5rem auto' }}>
+              <CheckCircle2 size={48} style={{ color: 'var(--success)' }} />
+            </div>
+            <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem', color: '#fff' }}>Import Completed!</h2>
+            <p style={{ opacity: 0.7, marginBottom: '2rem', fontSize: '0.95rem', lineHeight: '1.5' }}>
+              All records from your CSV file have been successfully processed, validated, and saved to secure storage.
+            </p>
+                     <div className="import-stats-summary" style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(4, 1fr)', 
+              gap: '0.75rem', 
+              marginBottom: '2.5rem',
+              background: 'rgba(255, 255, 255, 0.03)',
+              padding: '1.25rem 0.75rem',
+              borderRadius: '12px',
+              border: '1px solid rgba(255, 255, 255, 0.08)'
+            }}>
+              <div>
+                <span style={{ display: 'block', fontSize: '0.75rem', opacity: 0.6, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Operators</span>
+                <strong style={{ fontSize: '1.35rem', color: 'var(--accent-color)' }}>{importSummary.operators}</strong>
+              </div>
+              <div>
+                <span style={{ display: 'block', fontSize: '0.75rem', opacity: 0.6, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Units</span>
+                <strong style={{ fontSize: '1.35rem', color: 'var(--success)' }}>{importSummary.units}</strong>
+              </div>
+              <div>
+                <span style={{ display: 'block', fontSize: '0.75rem', opacity: 0.6, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Drivers</span>
+                <strong style={{ fontSize: '1.35rem', color: 'var(--warning)' }}>{importSummary.drivers}</strong>
+              </div>
+              <div>
+                <span style={{ display: 'block', fontSize: '0.75rem', opacity: 0.6, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Conductors</span>
+                <strong style={{ fontSize: '1.35rem', color: '#60a5fa' }}>{importSummary.conductors}</strong>
+              </div>
+            </div>
+            
+            <button 
+              className="btn-primary" 
+              style={{ 
+                width: '120px', 
+                margin: '0 auto', 
+                display: 'block', 
+                padding: '0.6rem 1.5rem', 
+                fontSize: '0.95rem', 
+                borderRadius: '8px' 
+              }}
+              onClick={() => setShowSuccessModal(false)}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

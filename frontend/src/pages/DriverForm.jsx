@@ -280,7 +280,12 @@ const DriverForm = () => {
           </div>
           <div className="form-group">
             <label>Birth Month</label>
-            <input type="text" name="birthMonth" className="input-field" value={driver.birthMonth} onChange={handleChange} />
+            <select name="birthMonth" className="input-field" value={driver.birthMonth} onChange={handleChange}>
+              <option value="">-- Month --</option>
+              {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map(m => (
+                <option key={m} value={m}>{m}</option>
+              ))}
+            </select>
           </div>
           <div className="form-group">
             <label>Birth Date</label>

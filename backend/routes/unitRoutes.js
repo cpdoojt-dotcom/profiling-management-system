@@ -85,7 +85,8 @@ const logUnitHistory = async (unitId, bodyNo, oldData, newData, changeType = 'Up
         yearModel: 'Year Model',
         chassisNo: 'Chassis No',
         motorNo: 'Motor No',
-        zone: 'Zone'
+        zone: 'Zone',
+        ltfrbMchCaseNo: 'LTFRB Case No'
       };
 
       Object.keys(mapping).forEach(key => {
@@ -135,7 +136,7 @@ router.put('/:id', async (req, res) => {
     };
     
     // Update fields
-    const fields = ['bodyNo', 'plateNo', 'colorCode', 'makeType', 'chassisNo', 'motorNo', 'yearModel', 'vehicleType', 'zone', 'conductor', 'operator', 'driver'];
+    const fields = ['bodyNo', 'plateNo', 'colorCode', 'makeType', 'chassisNo', 'motorNo', 'yearModel', 'vehicleType', 'zone', 'conductor', 'operator', 'driver', 'ltfrbMchCaseNo'];
     fields.forEach(field => {
       if (req.body[field] !== undefined) {
         // Convert empty strings to null for ObjectIds to prevent Mongoose errors

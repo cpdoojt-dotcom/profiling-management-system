@@ -30,6 +30,43 @@ const getFullName = (person) => {
     .join(' ');
 };
 
+const formatDateDisplay = (dateStr) => {
+  if (!dateStr) return '-';
+  const num = Number(dateStr);
+  if (!isNaN(num) && num > 0) {
+    const date = new Date(Math.round((num - 25569) * 86400 * 1000));
+    if (!isNaN(date.getTime())) {
+      return date.toLocaleDateString('en-US');
+    }
+  }
+  
+  const d = new Date(dateStr);
+  if (!isNaN(d.getTime())) {
+    return d.toLocaleDateString('en-US');
+  }
+  return dateStr;
+};
+
+const getFormattedBirthdate = (person) => {
+  if (!person || !person.birthMonth) return '-';
+  const monthStr = person.birthMonth.trim();
+  const dateVal = person.birthDate;
+  const yearVal = person.birthYear;
+  
+  const month = monthStr.charAt(0).toUpperCase() + monthStr.slice(1).toLowerCase();
+  
+  if (dateVal && yearVal) {
+    return `${month} ${dateVal}, ${yearVal}`;
+  }
+  if (dateVal) {
+    return `${month} ${dateVal}`;
+  }
+  if (yearVal) {
+    return `${month}, ${yearVal}`;
+  }
+  return month;
+};
+
 const DriversList = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -54,7 +91,7 @@ const DriversList = () => {
   const [editForm, setEditForm] = useState({
     driver: {
       cpdoId: '', firstName: '', lastName: '', middleName: '', extensionName: '', licenseNo: '', licenseExpiryDate: '', contactNo: '',
-      age: '', birthplace: '',
+      age: '', birthplace: '', birthMonth: '', birthDate: '', birthYear: '',
       addressNo: '', street: '', purok: '', barangay: '', cityMunicipality: '', operator: '', unit: ''
     },
   });
@@ -170,6 +207,9 @@ const DriversList = () => {
         cityMunicipality: selectedDriver.cityMunicipality || '',
         birthplace: selectedDriver.birthplace || '',
         age: selectedDriver.age || '',
+        birthMonth: selectedDriver.birthMonth || '',
+        birthDate: selectedDriver.birthDate || '',
+        birthYear: selectedDriver.birthYear || '',
         operator: selectedDriver.operator?._id || '',
         unit: selectedDriver.unit?._id || '',
       },
@@ -289,6 +329,7 @@ const DriversList = () => {
       'UNIT PLATE NO',
       'UNIT VEHICLE TYPE',
       'UNIT ZONE',
+      'UNIT LTFRB CASE NO',
       'CREATED AT',
       'UPDATED AT',
     ];
@@ -313,6 +354,7 @@ const DriversList = () => {
       sanitize(driver.unit?.plateNo),
       sanitize(driver.unit?.vehicleType),
       sanitize(driver.unit?.zone),
+      sanitize(driver.unit?.ltfrbMchCaseNo),
       sanitize(driver.createdAt ? new Date(driver.createdAt).toLocaleString('en-PH') : ''),
       sanitize(driver.updatedAt ? new Date(driver.updatedAt).toLocaleString('en-PH') : ''),
     ]));
@@ -589,6 +631,23 @@ const DriversList = () => {
                     <input name="age" type="number" className="input-field" value={editForm.driver.age} onChange={handleEditChange('driver')} />
                   </div>
                   <div className="edit-form-group">
+                    <label>Birth Month</label>
+                    <select name="birthMonth" className="input-field" value={editForm.driver.birthMonth} onChange={handleEditChange('driver')}>
+                      <option value="">-- Month --</option>
+                      {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map(m => (
+                        <option key={m} value={m}>{m}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Birth Date (Day)</label>
+                    <input name="birthDate" type="number" min="1" max="31" className="input-field" value={editForm.driver.birthDate} onChange={handleEditChange('driver')} placeholder="DD" />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Birth Year</label>
+                    <input name="birthYear" type="number" min="1900" max="2100" className="input-field" value={editForm.driver.birthYear} onChange={handleEditChange('driver')} placeholder="YYYY" />
+                  </div>
+                  <div className="edit-form-group">
                     <label>Contact No.</label>
                     <input name="contactNo" className="input-field" value={editForm.driver.contactNo} onChange={handleEditChange('driver')} />
                   </div>
@@ -630,12 +689,13 @@ const DriversList = () => {
                 <div><span>CPDO ID:</span><strong>{selectedDriver.cpdoId}</strong></div>
                 <div><span>Name:</span><strong>{getFullName(selectedDriver)}</strong></div>
                 <div><span>License:</span><strong>{selectedDriver.licenseNo}</strong></div>
-                <div><span>Expiry:</span><strong>{selectedDriver.licenseExpiryDate || '-'}</strong></div>
+                <div><span>Expiry:</span><strong>{formatDateDisplay(selectedDriver.licenseExpiryDate)}</strong></div>
                 <div><span>Body No:</span><strong>{selectedDriver.unit?.bodyNo || '-'}</strong></div>
                 <div><span>Plate No:</span><strong>{selectedDriver.unit?.plateNo || '-'}</strong></div>
                 <div><span>Operator:</span><strong>{getFullName(selectedDriver.operator)}</strong></div>
                 <div><span>Operator Area:</span><strong>{selectedDriver.operator?.barangay || '-'}, {selectedDriver.operator?.cityMunicipality || '-'}</strong></div>
                 <div><span>Birthplace:</span><strong>{selectedDriver.birthplace || '-'}</strong></div>
+                <div><span>Birthdate:</span><strong>{getFormattedBirthdate(selectedDriver)}</strong></div>
                 <div><span>Age:</span><strong>{selectedDriver.age || '-'}</strong></div>
                 <div><span>Contact:</span><strong>{selectedDriver.contactNo || '-'}</strong></div>
                 <div className="details-full"><span>Driver Address:</span><strong>{formatAddress(selectedDriver)}</strong></div>

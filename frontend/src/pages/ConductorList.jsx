@@ -30,6 +30,26 @@ const getFullName = (person) => {
     .join(' ');
 };
 
+const getFormattedBirthdate = (person) => {
+  if (!person || !person.birthMonth) return '-';
+  const monthStr = person.birthMonth.trim();
+  const dateVal = person.birthDate;
+  const yearVal = person.birthYear;
+  
+  const month = monthStr.charAt(0).toUpperCase() + monthStr.slice(1).toLowerCase();
+  
+  if (dateVal && yearVal) {
+    return `${month} ${dateVal}, ${yearVal}`;
+  }
+  if (dateVal) {
+    return `${month} ${dateVal}`;
+  }
+  if (yearVal) {
+    return `${month}, ${yearVal}`;
+  }
+  return month;
+};
+
 const sanitize = (value) => String(value ?? '').replace(/\r?\n|\r/g, ' ').trim();
 
 const ConductorList = () => {
@@ -56,6 +76,7 @@ const ConductorList = () => {
       firstName: '', lastName: '', middleName: '', extensionName: '', status: 'Active',
       operator: '', unit: '',
       birthPlace: '', gender: 'Male', civilStatus: '', age: '',
+      birthMonth: '', birthDate: '', birthYear: '',
       addressNo: '', street: '', purok: '', barangay: '', cityMunicipality: '', contactNo: '',
       emergencyContactName: '', emergencyContactNo: '', emergencyContactAddress: ''
     },
@@ -148,6 +169,9 @@ const ConductorList = () => {
         age: selectedConductor.age || '',
         gender: selectedConductor.gender || 'Male',
         civilStatus: selectedConductor.civilStatus || '',
+        birthMonth: selectedConductor.birthMonth || '',
+        birthDate: selectedConductor.birthDate || '',
+        birthYear: selectedConductor.birthYear || '',
         addressNo: selectedConductor.addressNo || '',
         street: selectedConductor.street || '',
         purok: selectedConductor.purok || '',
@@ -260,6 +284,7 @@ const ConductorList = () => {
       'UNIT BODY NO',
       'UNIT PLATE NO',
       'UNIT VEHICLE TYPE',
+      'UNIT LTFRB CASE NO',
       'EMERGENCY CONTACT NAME',
       'EMERGENCY CONTACT NO',
       'EMERGENCY CONTACT ADDRESS',
@@ -286,6 +311,7 @@ const ConductorList = () => {
       sanitize(conductor.unit?.bodyNo),
       sanitize(conductor.unit?.plateNo),
       sanitize(conductor.unit?.vehicleType || 'Mini Bus'),
+      sanitize(conductor.unit?.ltfrbMchCaseNo),
       sanitize(conductor.emergencyContactName),
       sanitize(conductor.emergencyContactNo),
       sanitize(conductor.emergencyContactAddress),
@@ -536,6 +562,23 @@ const ConductorList = () => {
                     <input name="age" type="number" className="input-field" value={editForm.conductor.age} onChange={handleEditChange('conductor')} />
                   </div>
                   <div className="edit-form-group">
+                    <label>Birth Month</label>
+                    <select name="birthMonth" className="input-field" value={editForm.conductor.birthMonth} onChange={handleEditChange('conductor')}>
+                      <option value="">-- Month --</option>
+                      {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map(m => (
+                        <option key={m} value={m}>{m}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Birth Date (Day)</label>
+                    <input name="birthDate" type="number" min="1" max="31" className="input-field" value={editForm.conductor.birthDate} onChange={handleEditChange('conductor')} placeholder="DD" />
+                  </div>
+                  <div className="edit-form-group">
+                    <label>Birth Year</label>
+                    <input name="birthYear" type="number" min="1900" max="2100" className="input-field" value={editForm.conductor.birthYear} onChange={handleEditChange('conductor')} placeholder="YYYY" />
+                  </div>
+                  <div className="edit-form-group">
                     <label>Address No.</label>
                     <input name="addressNo" className="input-field" value={editForm.conductor.addressNo} onChange={handleEditChange('conductor')} />
                   </div>
@@ -604,6 +647,7 @@ const ConductorList = () => {
                 <div><span>Body No:</span><strong>{selectedConductor.unit?.bodyNo || '-'}</strong></div>
                 <div><span>Plate No:</span><strong>{selectedConductor.unit?.plateNo || '-'}</strong></div>
                 <div><span>Birth Place:</span><strong>{selectedConductor.birthPlace || '-'}</strong></div>
+                <div><span>Birthdate:</span><strong>{getFormattedBirthdate(selectedConductor)}</strong></div>
                 <div><span>Age:</span><strong>{selectedConductor.age || '-'}</strong></div>
                 <div><span>Civil Status:</span><strong>{selectedConductor.civilStatus || '-'}</strong></div>
                 <div><span>Contact:</span><strong>{selectedConductor.contactNo || '-'}</strong></div>
