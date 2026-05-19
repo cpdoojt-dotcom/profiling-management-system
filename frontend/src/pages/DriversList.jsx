@@ -512,7 +512,7 @@ const DriversList = () => {
                   >
                     <td style={{ fontWeight: '700', color: 'var(--accent-color)' }}>{driver.unit?.bodyNo || '-'}</td>
                     <td>{getFullName(driver)}</td>
-                    <td>{driver.unit?.vehicleType === 'Tricycle' ? (driver.unit?.zone || 'No Zone') : 'N/A'}</td>
+                    <td>{driver.unit?.zone || 'No Zone'}</td>
                     <td>
                       <span className={`status-type ${String(driver.driverType || 'Tricycle').toLowerCase().replace(' ', '-')}`}>
                         {driver.driverType === 'Jeepney' ? <Truck size={14} /> : 
@@ -602,6 +602,16 @@ const DriversList = () => {
                     <input type="date" name="licenseExpiryDate" className="input-field" value={editForm.driver.licenseExpiryDate} onChange={handleEditChange('driver')} />
                   </div>
                   <div className="edit-form-group">
+                    <label>Civil Status</label>
+                    <select name="civilStatus" className="input-field" value={editForm.driver.civilStatus} onChange={handleEditChange('driver')}>
+                      <option value="">Select Civil Status...</option>
+                      <option value="Single">Single</option>
+                      <option value="Married">Married</option>
+                      <option value="Widowed">Widowed</option>
+                      <option value="Separated">Separated</option>
+                    </select>
+                  </div>
+                  <div className="edit-form-group">
                     <label>Operator</label>
                     <select name="operator" className="input-field" value={editForm.driver.operator} onChange={(e) => {
                       const opId = e.target.value;
@@ -689,7 +699,8 @@ const DriversList = () => {
                 <div><span>CPDO ID:</span><strong>{selectedDriver.cpdoId}</strong></div>
                 <div><span>Name:</span><strong>{getFullName(selectedDriver)}</strong></div>
                 <div><span>License:</span><strong>{selectedDriver.licenseNo}</strong></div>
-                <div><span>Expiry:</span><strong>{formatDateDisplay(selectedDriver.licenseExpiryDate)}</strong></div>
+                <div><span>Drivers License Expiry:</span><strong>{formatDateDisplay(selectedDriver.licenseExpiryDate)}</strong></div>
+                <div><span>Civil Status:</span><strong>{selectedDriver.civilStatus || '-'}</strong></div>
                 <div><span>Body No:</span><strong>{selectedDriver.unit?.bodyNo || '-'}</strong></div>
                 <div><span>Plate No:</span><strong>{selectedDriver.unit?.plateNo || '-'}</strong></div>
                 <div><span>Operator:</span><strong>{getFullName(selectedDriver.operator)}</strong></div>

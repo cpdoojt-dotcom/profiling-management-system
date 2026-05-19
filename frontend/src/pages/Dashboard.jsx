@@ -165,12 +165,12 @@ const Dashboard = () => {
           vehicleType,
           bodyNo,
           ltfrbMchCaseNo: String(row[16] || '').trim(),
-          colorCode: String(row[17] || '').trim(),
-          makeType: String(row[18] || '').trim(),
-          chassisNo: String(row[19] || '').trim(),
-          motorNo: String(row[20] || '').trim(),
-          plateNo: String(row[21] || '').trim(),
-          yearModel: String(row[22] || '').trim(),
+          colorCode: '',
+          makeType: String(row[17] || '').trim(),
+          chassisNo: String(row[18] || '').trim(),
+          motorNo: String(row[19] || '').trim(),
+          plateNo: String(row[20] || '').trim(),
+          yearModel: String(row[21] || '').trim(),
           zone: '',
           driver: null,
           conductor: null
@@ -202,57 +202,57 @@ const Dashboard = () => {
         }
 
         // Check for Driver in this row
-        const drFirstName = String(row[28] || '').trim();
-        const drLastName = String(row[27] || '').trim();
+        const drFirstName = String(row[26] || '').trim();
+        const drLastName = String(row[25] || '').trim();
         if (drFirstName && drLastName) {
           driverCount++;
           unit.driver = {
-            cpdoId: String(row[23] || '').trim(),
-            licenseNo: String(row[24] || '').trim(),
-            licenseExpiryDate: parseExcelDate(row[25]),
+            cpdoId: String(row[22] || '').trim(),
+            licenseNo: String(row[23] || '').trim(),
+            licenseExpiryDate: parseExcelDate(row[24]),
             lastName: drLastName,
             firstName: drFirstName,
-            middleName: String(row[29] || '').trim(),
-            extensionName: String(row[30] || '').trim(),
-            civilStatus: String(row[31] || '').trim() || 'Single',
-            birthMonth: String(row[32] || '').trim(),
-            birthDate: String(row[33] || '').trim(),
-            birthYear: String(row[34] || '').trim(),
-            birthplace: String(row[35] || '').trim(),
-            age: row[36] ? Number(row[36]) : undefined,
-            addressNo: String(row[37] || '').trim(),
-            street: String(row[38] || '').trim(),
-            purok: String(row[39] || '').trim(),
-            barangay: String(row[40] || '').trim(),
-            cityMunicipality: String(row[41] || '').trim(),
-            contactNo: String(row[42] || '').trim(),
+            middleName: String(row[27] || '').trim(),
+            extensionName: String(row[28] || '').trim(),
+            civilStatus: String(row[29] || '').trim() || 'Single',
+            birthMonth: String(row[30] || '').trim(),
+            birthDate: row[31] ? Number(row[31]) : undefined,
+            birthYear: row[32] ? Number(row[32]) : undefined,
+            birthplace: String(row[33] || '').trim(),
+            age: row[34] ? Number(row[34]) : undefined,
+            addressNo: String(row[35] || '').trim(),
+            street: String(row[36] || '').trim(),
+            purok: String(row[37] || '').trim(),
+            barangay: String(row[38] || '').trim(),
+            cityMunicipality: String(row[39] || '').trim(),
+            contactNo: String(row[40] || '').trim(),
             driverType: vehicleType,
             status: 'Active'
           };
         }
 
         // Check for Conductor in this row
-        const cdFirstName = String(row[44] || '').trim();
-        const cdLastName = String(row[43] || '').trim();
+        const cdFirstName = String(row[42] || '').trim();
+        const cdLastName = String(row[41] || '').trim();
         if (cdFirstName && cdLastName) {
           conductorCount++;
           unit.conductor = {
             lastName: cdLastName,
             firstName: cdFirstName,
-            middleName: String(row[45] || '').trim(),
-            extensionName: String(row[46] || '').trim(),
-            civilStatus: String(row[47] || '').trim() || 'Single',
-            birthMonth: String(row[48] || '').trim(),
-            birthDate: String(row[49] || '').trim(),
-            birthYear: String(row[50] || '').trim(),
-            birthPlace: String(row[51] || '').trim(),
-            age: row[52] ? Number(row[52]) : undefined,
-            addressNo: String(row[53] || '').trim(),
-            street: String(row[54] || '').trim(),
-            purok: String(row[55] || '').trim(),
-            barangay: String(row[56] || '').trim(),
-            cityMunicipality: String(row[57] || '').trim(),
-            contactNo: String(row[58] || '').trim(),
+            middleName: String(row[43] || '').trim(),
+            extensionName: String(row[44] || '').trim(),
+            civilStatus: String(row[45] || '').trim() || 'Single',
+            birthMonth: String(row[46] || '').trim(),
+            birthDate: row[47] ? Number(row[47]) : undefined,
+            birthYear: row[48] ? Number(row[48]) : undefined,
+            birthPlace: String(row[49] || '').trim(),
+            age: row[50] ? Number(row[50]) : undefined,
+            addressNo: String(row[51] || '').trim(),
+            street: String(row[52] || '').trim(),
+            purok: String(row[53] || '').trim(),
+            barangay: String(row[54] || '').trim(),
+            cityMunicipality: String(row[55] || '').trim(),
+            contactNo: String(row[56] || '').trim(),
             conductorType: vehicleType,
             status: 'Active'
           };
@@ -286,9 +286,9 @@ const Dashboard = () => {
     const headers = [
       'Vehicle Category', 'Body No', 'Operator Last Name', 'Operator First Name', 'Operator Middle Name', 'Operator Extension Name',
       'Operator Civil Status', 'Operator Birthdate', 'Operator Birthplace', 'Operator Age', 'Operator Address No', 'Operator Street', 'Operator Purok', 
-      'Operator Barangay', 'Operator City/Municipality', 'Operator Contact No', 'LTFRB/MCH Case No', 'Color Code', 
+      'Operator Barangay', 'Operator City/Municipality', 'Operator Contact No', 'LTFRB/MCH Case No', 
       'Make/Type', 'Chassis No', 'Motor No', 'Plate No', 'Year Model', 'Driver CPDO ID', 'Driver License No', 
-      'Driver License Expiry Date', 'SKIPPED_COLUMN', 'Driver Last Name', 'Driver First Name', 'Driver Middle Name', 'Driver Extension Name',
+      'Driver License Expiry Date', 'Driver Last Name', 'Driver First Name', 'Driver Middle Name', 'Driver Extension Name',
       'Driver Civil Status', 'Driver Birth Month', 'Driver Birth Date', 'Driver Birth Year', 'Driver Birthplace', 'Driver Age', 'Driver Address No', 'Driver Street', 'Driver Purok', 'Driver Barangay', 
       'Driver City/Municipality', 'Driver Contact No', 'Conductor Last Name', 'Conductor First Name', 'Conductor Middle Name', 'Conductor Extension Name', 'Conductor Civil Status', 
       'Conductor Birth Month', 'Conductor Birth Date', 'Conductor Birth Year', 'Conductor Birthplace', 'Conductor Age', 
@@ -298,7 +298,7 @@ const Dashboard = () => {
     
     const sampleRow = [
       'Jeepney', 'J01-101', 'DELA CRUZ', 'JUAN', 'SANTOS', 'JR', 'Married', '1980-01-01', 'CITY NAME', '45', '123', 'MAHARLIKA HWY', 'PUROK 1', 
-      'BARANGAY 1', 'CITY NAME', '09123456789', '2024-ABC-123', 'YELLOW', 'ISUZU', 'CH-123', 'MO-123', 'NQR-123', '2022',
+      'BARANGAY 1', 'CITY NAME', '09123456789', '2024-ABC-123', 'ISUZU', 'CH-123', 'MO-123', 'NQR-123', '2022',
       '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
     ];
 

@@ -534,7 +534,7 @@ const OperatorsPage = () => {
                           {unit.vehicleType === 'Tricycle' ? <Bike size={14} /> : 
                            unit.vehicleType === 'Jeepney' ? <Truck size={14} /> : 
                            <Bus size={14} />} 
-                          {' '}{unit.vehicleType} | {unit.vehicleType === 'Tricycle' ? (unit.zone || 'No Zone') : (unit.ltfrbMchCaseNo || 'No LTFRB No.')}
+                          {' '}{unit.vehicleType} | {unit.zone ? `Zone: ${unit.zone}` : 'No Zone'}{unit.vehicleType !== 'Tricycle' ? ` | LTFRB: ${unit.ltfrbMchCaseNo || 'None'}` : ''}
                         </p>
                         <p>
                           Conductor: {
