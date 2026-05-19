@@ -207,7 +207,7 @@ const DriversList = () => {
         cityMunicipality: selectedDriver.cityMunicipality || '',
         birthplace: selectedDriver.birthplace || '',
         age: selectedDriver.age || '',
-        birthMonth: selectedDriver.birthMonth || '',
+        birthMonth: selectedDriver.birthMonth ? (selectedDriver.birthMonth.charAt(0).toUpperCase() + selectedDriver.birthMonth.slice(1).toLowerCase()) : '',
         birthDate: selectedDriver.birthDate || '',
         birthYear: selectedDriver.birthYear || '',
         operator: selectedDriver.operator?._id || '',

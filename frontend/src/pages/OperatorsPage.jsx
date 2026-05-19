@@ -235,7 +235,7 @@ const OperatorsPage = () => {
     e.preventDefault();
     if (!selectedOperatorId) return;
     if (!await confirm('Are you sure you want to save changes to this operator profile?')) return;
-    setAddingUnit(true); 
+    setAddingUnit(true);
     setActionError('');
     try {
       const res = await axios.put(`/api/operators/${selectedOperatorId}`, editForm);
@@ -362,8 +362,8 @@ const OperatorsPage = () => {
             onChange={(e) => setSearch(e.target.value)}
           />
           {search && (
-            <button 
-              type="button" 
+            <button
+              type="button"
               className="input-clear-btn"
               onClick={() => setSearch('')}
               title="Clear search"
@@ -417,7 +417,7 @@ const OperatorsPage = () => {
             </div>
 
             {actionError && <p className="operators-state" style={{ color: 'var(--danger)', marginBottom: '1rem' }}>{actionError}</p>}
-            
+
             {!selectedOperator ? (
               <p className="operators-state">Select an operator to view details and assigned drivers.</p>
             ) : isEditing ? (
@@ -443,7 +443,7 @@ const OperatorsPage = () => {
                     <label>Age</label>
                     <input name="age" type="number" className="input-field" value={editForm.age} onChange={handleEditChange} />
                   </div>
-                   <div className="edit-form-group">
+                  <div className="edit-form-group">
                     <label>Civil Status</label>
                     <select name="civilStatus" className="input-field" value={editForm.civilStatus} onChange={handleEditChange}>
                       <option value="Single">Single</option>
@@ -486,11 +486,11 @@ const OperatorsPage = () => {
                   </div>
                   <div className="edit-form-group">
                     <label>Classification</label>
-                    <input 
-                      readOnly 
-                      className="input-field" 
-                      style={{ background: 'var(--surface-bg)', opacity: 0.7 }} 
-                      value={editForm.operatorType} 
+                    <input
+                      readOnly
+                      className="input-field"
+                      style={{ background: 'var(--surface-bg)', opacity: 0.7 }}
+                      value={editForm.operatorType}
                     />
                   </div>
                 </div>
@@ -531,16 +531,16 @@ const OperatorsPage = () => {
                         </div>
                         <p>Plate: {unit.plateNo || '-'}</p>
                         <p>
-                          {unit.vehicleType === 'Tricycle' ? <Bike size={14} /> : 
-                           unit.vehicleType === 'Jeepney' ? <Truck size={14} /> : 
-                           <Bus size={14} />} 
+                          {unit.vehicleType === 'Tricycle' ? <Bike size={14} /> :
+                            unit.vehicleType === 'Jeepney' ? <Truck size={14} /> :
+                              <Bus size={14} />}
                           {' '}{unit.vehicleType} | {unit.zone ? `Zone: ${unit.zone}` : 'No Zone'}{unit.vehicleType !== 'Tricycle' ? ` | LTFRB: ${unit.ltfrbMchCaseNo || 'None'}` : ''}
                         </p>
                         <p>
                           Conductor: {
-                            unit.conductor ? 
-                            (typeof unit.conductor === 'object' ? `${unit.conductor.firstName} ${unit.conductor.lastName}` : unit.conductor) : 
-                            (unit.conductorName || 'None')
+                            unit.conductor ?
+                              (typeof unit.conductor === 'object' ? `${unit.conductor.firstName} ${unit.conductor.lastName}` : unit.conductor) :
+                              (unit.conductorName || 'None')
                           }
                         </p>
                       </div>
@@ -601,20 +601,20 @@ const OperatorsPage = () => {
                 <div className="form-grid" style={{ marginBottom: 0 }}>
                   <div className="form-group">
                     <label>Body No.</label>
-                    <input 
-                      required 
-                      type="text" 
-                      className="input-field" 
-                      value={newUnitData.bodyNo} 
+                    <input
+                      required
+                      type="text"
+                      className="input-field"
+                      value={newUnitData.bodyNo}
                       onChange={(e) => {
                         const val = e.target.value.toUpperCase();
                         const updated = { ...newUnitData, bodyNo: val };
-                        
+
                         const bn = val.toUpperCase();
                         if (/^[1-9]/.test(bn) || bn.startsWith('BB')) updated.vehicleType = 'Tricycle';
                         else if (bn.startsWith('J0') || /^J1[0-3]/.test(bn)) updated.vehicleType = 'Jeepney';
                         else if (bn.startsWith('OB') || bn.startsWith('O-B') || bn.startsWith('OZ') || bn.startsWith('O-Z')) updated.vehicleType = 'Mini Bus';
-                        
+
                         const vehicleType = updated.vehicleType || newUnitData.vehicleType;
                         const firstChar = val.charAt(0);
                         if (vehicleType === 'Tricycle') {
@@ -630,7 +630,7 @@ const OperatorsPage = () => {
                           if (val.toUpperCase().startsWith('OB') || val.toUpperCase().startsWith('O-B')) updated.zone = 'OB';
                           else if (val.toUpperCase().startsWith('OZ') || val.toUpperCase().startsWith('O-Z')) updated.zone = 'OZ';
                         }
-                        
+
                         const colorOpts = getColorOptions(val, vehicleType);
                         if (colorOpts.length === 1) {
                           updated.colorCode = colorOpts[0];
@@ -641,7 +641,7 @@ const OperatorsPage = () => {
                         }
 
                         setNewUnitData(updated);
-                      }} 
+                      }}
                     />
                   </div>
                   <div className="form-group">
@@ -651,9 +651,9 @@ const OperatorsPage = () => {
                   <div className="form-group">
                     <label>Color Code</label>
                     {getColorOptions(newUnitData.bodyNo, newUnitData.vehicleType).length > 1 ? (
-                      <select 
-                        className="input-field" 
-                        value={newUnitData.colorCode} 
+                      <select
+                        className="input-field"
+                        value={newUnitData.colorCode}
                         onChange={(e) => setNewUnitData({ ...newUnitData, colorCode: e.target.value })}
                       >
                         <option value="">-- Select Color --</option>
@@ -681,9 +681,9 @@ const OperatorsPage = () => {
                   </div>
                   <div className="form-group">
                     <label>Vehicle Category</label>
-                    <select 
-                      className="input-field" 
-                      value={newUnitData.vehicleType} 
+                    <select
+                      className="input-field"
+                      value={newUnitData.vehicleType}
                       onChange={(e) => {
                         const val = e.target.value;
                         const updated = { ...newUnitData, vehicleType: val };
@@ -702,7 +702,7 @@ const OperatorsPage = () => {
                           if (bodyNo.toUpperCase().startsWith('OB') || bodyNo.toUpperCase().startsWith('O-B')) updated.zone = 'OB';
                           else if (bodyNo.toUpperCase().startsWith('OZ') || bodyNo.toUpperCase().startsWith('O-Z')) updated.zone = 'OZ';
                         }
-                        
+
                         const colorOpts = getColorOptions(bodyNo, val);
                         if (colorOpts.length === 1) {
                           updated.colorCode = colorOpts[0];
@@ -720,10 +720,10 @@ const OperatorsPage = () => {
                       <option value="Mini Bus">Mini Bus</option>
                     </select>
                   </div>
-                    <div className="form-group">
-                      <label>Zone / Route</label>
-                      <input type="text" className="input-field" value={newUnitData.zone} onChange={(e) => setNewUnitData({ ...newUnitData, zone: e.target.value.toUpperCase() })} />
-                    </div>
+                  <div className="form-group">
+                    <label>Zone / Route</label>
+                    <input type="text" className="input-field" value={newUnitData.zone} onChange={(e) => setNewUnitData({ ...newUnitData, zone: e.target.value.toUpperCase() })} />
+                  </div>
                   {(newUnitData.vehicleType === 'Jeepney' || newUnitData.vehicleType === 'Mini Bus') && (
                     <div className="form-group" style={{ borderColor: 'var(--accent-color)' }}>
                       <label style={{ color: 'var(--accent-color)' }}>LTFRB Case No.</label>

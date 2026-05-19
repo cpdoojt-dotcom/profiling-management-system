@@ -29,6 +29,14 @@ const unitSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Driver',
   },
+  driverHistory: [{
+    driver: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Driver',
+    },
+    startDate: { type: Date },
+    endDate: { type: Date }
+  }]
 }, { timestamps: true });
 
 unitSchema.index({ operator: 1, bodyNo: 1 }, { unique: true });

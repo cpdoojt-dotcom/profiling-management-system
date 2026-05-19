@@ -58,6 +58,7 @@ const UnitMonitoring = () => {
   const [history, setHistory] = useState([]);
   const [assignedDrivers, setAssignedDrivers] = useState([]);
   const [assignedConductors, setAssignedConductors] = useState([]);
+  const [driverHistoryList, setDriverHistoryList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
@@ -135,6 +136,7 @@ const UnitMonitoring = () => {
       setHistory(res.data.history || []);
       setAssignedDrivers(res.data.drivers || []);
       setAssignedConductors(res.data.conductors || []);
+      setDriverHistoryList(res.data.driverHistory || []);
     } catch (err) {
       setError('Failed to load history.');
     } finally {
@@ -217,6 +219,20 @@ const UnitMonitoring = () => {
       case 'Mini Bus': return <Bus size={size} />;
       default: return <Truck size={size} />;
     }
+  };
+
+  const formatDuration = (start, end) => {
+    if (!start || !end) return '';
+    const diffTime = Math.abs(new Date(end) - new Date(start));
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return 'Same day';
+    if (diffDays === 1) return '1 day';
+    if (diffDays < 30) return `${diffDays} days`;
+    const diffMonths = Math.floor(diffDays / 30);
+    if (diffMonths === 1) return '1 month';
+    if (diffMonths < 12) return `${diffMonths} months`;
+    const diffYears = Math.floor(diffMonths / 12);
+    return `${diffYears} year(s)`;
   };
 
   return (
@@ -346,9 +362,8 @@ const UnitMonitoring = () => {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
                 {assignedDrivers.map(drv => (
                   <div key={drv._id} className="driver-mini-card" style={{ padding: '0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    <strong style={{ display: 'block', fontSize: '1rem', color: '#fff' }}>{getFullName(drv)}</strong>
+                    <strong style={{ display: 'block', fontSize: '1rem', color: 'var(--text-primary)' }}>{getFullName(drv)}</strong>
                     <span style={{ fontSize: '0.85rem', opacity: 0.7 }}>License: {drv.licenseNo}</span>
-                    <div style={{ fontSize: '0.85rem', marginTop: '0.4rem', color: 'var(--accent-color)', fontWeight: '600' }}>Status: {drv.status || 'Active'}</div>
                   </div>
                 ))}
               </div>
@@ -363,10 +378,55 @@ const UnitMonitoring = () => {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
                 {assignedConductors.map(cond => (
                   <div key={cond._id} className="driver-mini-card" style={{ padding: '0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    <strong style={{ display: 'block', fontSize: '1rem', color: '#fff' }}>{getFullName(cond)}</strong>
-                    <div style={{ fontSize: '0.85rem', marginTop: '0.4rem', color: 'var(--accent-color)', fontWeight: '600' }}>Status: {cond.status || 'Active'}</div>
+                    <strong style={{ display: 'block', fontSize: '1rem', color: 'var(--text-primary)' }}>{getFullName(cond)}</strong>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {driverHistoryList.length > 0 && (
+            <div className="driver-history-list glass-panel" style={{ marginBottom: '2rem', padding: '1.5rem' }}>
+              <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.1rem' }}>
+                <History size={18} /> Driver Assignment History
+              </h3>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', textAlign: 'left' }}>
+                      <th style={{ padding: '0.8rem' }}>Driver Name</th>
+                      <th style={{ padding: '0.8rem' }}>First Date (Start)</th>
+                      <th style={{ padding: '0.8rem' }}>Last Date (End)</th>
+                      <th style={{ padding: '0.8rem' }}>Duration Active</th>
+                      <th style={{ padding: '0.8rem' }}>Gap Before Next Driver</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {driverHistoryList.sort((a, b) => new Date(a.startDate) - new Date(b.startDate)).map((dh, index, arr) => {
+                      const nextDh = arr[index + 1];
+                      let gapText = '';
+                      if (dh.endDate && nextDh && nextDh.startDate) {
+                        gapText = formatDuration(dh.endDate, nextDh.startDate);
+                      } else if (dh.endDate && !nextDh) {
+                        gapText = `Unassigned for ${formatDuration(dh.endDate, new Date())}`;
+                      }
+
+                      return (
+                        <tr key={dh._id || index} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                          <td style={{ padding: '0.8rem' }}>{dh.driver ? getFullName(dh.driver) : 'Unknown Driver'}</td>
+                          <td style={{ padding: '0.8rem' }}>{new Date(dh.startDate).toLocaleDateString()}</td>
+                          <td style={{ padding: '0.8rem' }}>{dh.endDate ? new Date(dh.endDate).toLocaleDateString() : <span style={{ color: 'var(--accent-color)' }}>Present</span>}</td>
+                          <td style={{ padding: '0.8rem' }}>
+                            {dh.endDate ? formatDuration(dh.startDate, dh.endDate) : formatDuration(dh.startDate, new Date())}
+                          </td>
+                          <td style={{ padding: '0.8rem', color: gapText.includes('Unassigned') ? '#ff6b6b' : 'var(--text-secondary)' }}>
+                            {gapText || '-'}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
@@ -448,14 +508,16 @@ const UnitMonitoring = () => {
                     <label>Current Driver</label>
                     <select className="input-field" value={editFormData.driver} onChange={e => setEditFormData({...editFormData, driver: e.target.value})}>
                       <option value="">-- No Driver Assigned --</option>
-                      {driversList.map(drv => {
-                        const isAssigned = assignedDrivers.some(ad => ad._id === drv._id);
-                        return (
-                          <option key={drv._id} value={drv._id}>
-                            {getFullName(drv)} {isAssigned ? '(Assigned to this Unit)' : ''}
-                          </option>
-                        );
-                      })}
+                      {driversList
+                        .filter(drv => String(drv.operator?._id || drv.operator) === String(editFormData.operator))
+                        .map(drv => {
+                          const isAssigned = assignedDrivers.some(ad => ad._id === drv._id);
+                          return (
+                            <option key={drv._id} value={drv._id}>
+                              {getFullName(drv)} {isAssigned ? '(Assigned to this Unit)' : ''}
+                            </option>
+                          );
+                        })}
                     </select>
                   </div>
                   <div className="form-group">
@@ -514,11 +576,13 @@ const UnitMonitoring = () => {
                       <label>Conductor Profile</label>
                       <select className="input-field" value={editFormData.conductor} onChange={e => setEditFormData({...editFormData, conductor: e.target.value})}>
                         <option value="">-- No Conductor Assigned --</option>
-                        {conductorsList.map(c => (
-                          <option key={c._id} value={c._id}>
-                            {getFullName(c)} (ID: {c.cpdoId})
-                          </option>
-                        ))}
+                        {conductorsList
+                          .filter(c => String(c.operator?._id || c.operator) === String(editFormData.operator))
+                          .map(c => (
+                            <option key={c._id} value={c._id}>
+                              {getFullName(c)} (ID: {c.cpdoId})
+                            </option>
+                          ))}
                       </select>
                     </div>
                   )}

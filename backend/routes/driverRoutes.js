@@ -77,7 +77,10 @@ router.post('/', upload.single('driverImage'), async (req, res) => {
     const newDriver = await driver.save();
 
     // AUTO-SYNC: Update the Unit profile to reflect this new driver
-    await Unit.findByIdAndUpdate(unitId, { driver: newDriver._id });
+    await Unit.findByIdAndUpdate(unitId, { 
+      driver: newDriver._id,
+      $push: { driverHistory: { driver: newDriver._id, startDate: new Date() } }
+    });
 
     const populatedDriver = await newDriver.populate('operator unit');
     await createAuditLog({
@@ -168,9 +171,35 @@ router.put('/:id', upload.single('driverImage'), async (req, res) => {
     Object.assign(driver, nextDriverData);
     const savedDriver = await driver.save();
 
-    // AUTO-SYNC: Update the Unit profile to point to this driver if it changed
-    if (driverData.unit) {
-      await Unit.findByIdAndUpdate(driverData.unit, { driver: savedDriver._id });
+    const oldUnitId = beforeSnapshot.unit;
+    const newUnitId = savedDriver.unit;
+    if (String(oldUnitId) !== String(newUnitId)) {
+      // 1. Clear the driver field of the old unit
+      if (oldUnitId) {
+        const oldUnit = await Unit.findById(oldUnitId);
+        if (oldUnit) {
+          const historyItem = oldUnit.driverHistory.find(h => String(h.driver) === String(savedDriver._id) && !h.endDate);
+          if (historyItem) historyItem.endDate = new Date();
+          oldUnit.driver = null;
+          await oldUnit.save();
+        }
+      }
+      // 2. Set the driver field of the new unit
+      if (newUnitId) {
+        // Also clear any other driver who was previously assigned to this new unit!
+        const targetUnit = await Unit.findById(newUnitId);
+        if (targetUnit) {
+          if (targetUnit.driver) {
+            const prevDriverId = targetUnit.driver;
+            await Driver.findByIdAndUpdate(prevDriverId, { unit: null });
+            const historyItem = targetUnit.driverHistory.find(h => String(h.driver) === String(prevDriverId) && !h.endDate);
+            if (historyItem) historyItem.endDate = new Date();
+          }
+          targetUnit.driver = savedDriver._id;
+          targetUnit.driverHistory.push({ driver: savedDriver._id, startDate: new Date() });
+          await targetUnit.save();
+        }
+      }
     }
 
     const updatedDriver = await Driver.findById(savedDriver._id).populate('operator unit');
@@ -194,6 +223,22 @@ router.delete('/:id', async (req, res) => {
   try {
     const driver = await Driver.findById(req.params.id);
     if (!driver) return res.status(404).json({ message: 'Driver not found' });
+    
+    // Cleanup unit driverHistory if driver was assigned to a unit
+    if (driver.unit) {
+      const unit = await Unit.findById(driver.unit);
+      if (unit) {
+        const historyItem = unit.driverHistory.find(h => String(h.driver) === String(driver._id) && !h.endDate);
+        if (historyItem) {
+          historyItem.endDate = new Date();
+        }
+        if (String(unit.driver) === String(driver._id)) {
+          unit.driver = null;
+        }
+        await unit.save();
+      }
+    }
+
     await Driver.findByIdAndDelete(req.params.id);
     await createAuditLog({
       req,

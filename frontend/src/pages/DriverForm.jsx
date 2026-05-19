@@ -104,7 +104,7 @@ const DriverForm = () => {
 
     const uppercaseFields = [
       'cpdoId', 'licenseNo', 'lastName', 'firstName', 'middleName', 'extensionName',
-      'civilStatus', 'barangay', 'cityMunicipality', 'street', 'purok', 'birthMonth', 'birthplace'
+      'civilStatus', 'barangay', 'cityMunicipality', 'street', 'purok', 'birthplace'
     ];
     if (uppercaseFields.includes(name)) {
       finalValue = finalValue.toUpperCase();

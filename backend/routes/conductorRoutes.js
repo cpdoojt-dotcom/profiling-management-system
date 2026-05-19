@@ -145,9 +145,22 @@ router.put('/:id', upload.single('conductorImage'), async (req, res) => {
     Object.assign(conductor, nextConductorData);
     const savedConductor = await conductor.save();
 
-    // AUTO-SYNC: Update the Unit profile to point to this conductor if it changed
-    if (conductorData.unit) {
-      await Unit.findByIdAndUpdate(conductorData.unit, { conductor: savedConductor._id });
+    const oldUnitId = beforeSnapshot.unit;
+    const newUnitId = savedConductor.unit;
+    if (String(oldUnitId) !== String(newUnitId)) {
+      // 1. Clear the conductor field of the old unit
+      if (oldUnitId) {
+        await Unit.findByIdAndUpdate(oldUnitId, { conductor: null });
+      }
+      // 2. Set the conductor field of the new unit
+      if (newUnitId) {
+        // Also clear any other conductor who was previously assigned to this new unit!
+        const targetUnit = await Unit.findById(newUnitId);
+        if (targetUnit && targetUnit.conductor) {
+          await Conductor.findByIdAndUpdate(targetUnit.conductor, { unit: null });
+        }
+        await Unit.findByIdAndUpdate(newUnitId, { conductor: savedConductor._id });
+      }
     }
 
     const updatedConductor = await Conductor.findById(savedConductor._id).populate('operator unit');

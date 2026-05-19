@@ -36,16 +36,22 @@ router.get('/history/:bodyNo', async (req, res) => {
     const history = await UnitHistory.find({ bodyNo: req.params.bodyNo })
       .sort({ createdAt: -1 });
     
-    // Also find all drivers/conductors currently linked to this unit by bodyNo
-    const unit = await Unit.findOne({ bodyNo: req.params.bodyNo });
+    // Find unit and populate current driver/conductor representing who is ACTUALLY active
+    const unit = await Unit.findOne({ bodyNo: req.params.bodyNo })
+      .populate('driver')
+      .populate('conductor')
+      .populate('driverHistory.driver');
+      
     let drivers = [];
     let conductors = [];
+    let driverHistory = [];
     if (unit) {
-      drivers = await Driver.find({ unit: unit._id });
-      conductors = await Conductor.find({ unit: unit._id });
+      if (unit.driver) drivers = [unit.driver];
+      if (unit.conductor) conductors = [unit.conductor];
+      if (unit.driverHistory) driverHistory = unit.driverHistory;
     }
     
-    res.json({ history, drivers, conductors });
+    res.json({ history, drivers, conductors, driverHistory });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -135,6 +141,9 @@ router.put('/:id', async (req, res) => {
       conductorName: getFullName(oldData.conductor)
     };
     
+    const oldDriverId = unit.driver ? unit.driver._id : null;
+    const oldConductorId = unit.conductor ? unit.conductor._id : null;
+
     // Update fields
     const fields = ['bodyNo', 'plateNo', 'colorCode', 'makeType', 'chassisNo', 'motorNo', 'yearModel', 'vehicleType', 'zone', 'conductor', 'operator', 'driver', 'ltfrbMchCaseNo'];
     fields.forEach(field => {
@@ -149,6 +158,56 @@ router.put('/:id', async (req, res) => {
     });
 
     const savedUnit = await unit.save();
+
+    const newDriverId = savedUnit.driver;
+    const newConductorId = savedUnit.conductor;
+
+    // 0. Update Driver History on the Unit
+    if (String(oldDriverId) !== String(newDriverId)) {
+      if (oldDriverId) {
+        const historyItem = savedUnit.driverHistory.find(h => String(h.driver) === String(oldDriverId) && !h.endDate);
+        if (historyItem) {
+          historyItem.endDate = new Date();
+        }
+      }
+      if (newDriverId) {
+        savedUnit.driverHistory.push({ driver: newDriverId, startDate: new Date() });
+      }
+      await savedUnit.save();
+    }
+
+    // 1. Sync Driver
+    if (String(oldDriverId) !== String(newDriverId)) {
+      if (oldDriverId) {
+        await Driver.findByIdAndUpdate(oldDriverId, { unit: null });
+      }
+      if (newDriverId) {
+        // Clear this driver from any other unit they were previously assigned to
+        await Unit.updateMany(
+          { _id: { $ne: savedUnit._id }, driver: newDriverId },
+          { driver: null }
+        );
+        // Also update this driver's unit reference in the Driver collection
+        await Driver.findByIdAndUpdate(newDriverId, { unit: savedUnit._id });
+      }
+    }
+
+    // 2. Sync Conductor
+    if (String(oldConductorId) !== String(newConductorId)) {
+      if (oldConductorId) {
+        await Conductor.findByIdAndUpdate(oldConductorId, { unit: null });
+      }
+      if (newConductorId) {
+        // Clear this conductor from any other unit they were previously assigned to
+        await Unit.updateMany(
+          { _id: { $ne: savedUnit._id }, conductor: newConductorId },
+          { conductor: null }
+        );
+        // Also update this conductor's unit reference in the Conductor collection
+        await Conductor.findByIdAndUpdate(newConductorId, { unit: savedUnit._id });
+      }
+    }
+
     const populatedUnit = await Unit.findById(savedUnit._id).populate('operator').populate('driver').populate('conductor');
     const newData = populatedUnit.toObject();
 

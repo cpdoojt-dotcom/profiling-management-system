@@ -92,7 +92,7 @@ const ConductorForm = () => {
     }
 
     // Standardize to uppercase for consistency
-    const uppercaseFields = ['lastName', 'firstName', 'middleName', 'extensionName', 'civilStatus', 'birthMonth', 'birthPlace', 'emergencyContactName', 'addressNo', 'street', 'purok', 'barangay', 'cityMunicipality'];
+    const uppercaseFields = ['lastName', 'firstName', 'middleName', 'extensionName', 'civilStatus', 'birthPlace', 'emergencyContactName', 'addressNo', 'street', 'purok', 'barangay', 'cityMunicipality'];
     if (uppercaseFields.includes(name)) {
       finalValue = finalValue.toUpperCase();
     }
