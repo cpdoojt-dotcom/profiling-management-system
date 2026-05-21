@@ -118,18 +118,20 @@ router.put('/:id', upload.single('conductorImage'), async (req, res) => {
     const beforeSnapshot = conductor.toObject();
 
     const conductorData = parsePayload(req.body);
-    if (conductorData.operator || conductorData.unit) {
-      const nextOperator = conductorData.operator || conductor.operator;
-      const nextUnit = conductorData.unit || conductor.unit;
+    if (conductorData.operator !== undefined || conductorData.unit !== undefined) {
+      const nextOperator = conductorData.operator === '' ? null : (conductorData.operator || conductor.operator);
+      const nextUnit = conductorData.unit === '' ? null : (conductorData.unit || conductor.unit);
 
-      const unit = await Unit.findById(nextUnit);
-      if (!unit || String(unit.operator) !== String(nextOperator)) {
-        return res.status(400).json({ message: 'Selected unit does not belong to the selected operator.' });
-      }
+      if (nextUnit && nextOperator) {
+        const unit = await Unit.findById(nextUnit);
+        if (!unit || String(unit.operator) !== String(nextOperator)) {
+          return res.status(400).json({ message: 'Selected unit does not belong to the selected operator.' });
+        }
 
-      // STRICT CHECK: Conductor can only be assigned to Mini Bus
-      if (unit.vehicleType !== 'Mini Bus') {
-        return res.status(400).json({ message: 'Conductors can only be assigned to Mini Bus units.' });
+        // STRICT CHECK: Conductor can only be assigned to Mini Bus
+        if (unit.vehicleType !== 'Mini Bus') {
+          return res.status(400).json({ message: 'Conductors can only be assigned to Mini Bus units.' });
+        }
       }
 
       conductor.operator = nextOperator;
@@ -157,7 +159,7 @@ router.put('/:id', upload.single('conductorImage'), async (req, res) => {
         // Also clear any other conductor who was previously assigned to this new unit!
         const targetUnit = await Unit.findById(newUnitId);
         if (targetUnit && targetUnit.conductor) {
-          await Conductor.findByIdAndUpdate(targetUnit.conductor, { unit: null });
+          await Conductor.findByIdAndUpdate(targetUnit.conductor, { unit: null, operator: null });
         }
         await Unit.findByIdAndUpdate(newUnitId, { conductor: savedConductor._id });
       }

@@ -150,13 +150,15 @@ router.put('/:id', upload.single('driverImage'), async (req, res) => {
     const beforeSnapshot = driver.toObject();
 
     const driverData = parsePayload(req.body);
-    if (driverData.operator || driverData.unit) {
-      const nextOperator = driverData.operator || driver.operator;
-      const nextUnit = driverData.unit || driver.unit;
+    if (driverData.operator !== undefined || driverData.unit !== undefined) {
+      const nextOperator = driverData.operator === '' ? null : (driverData.operator || driver.operator);
+      const nextUnit = driverData.unit === '' ? null : (driverData.unit || driver.unit);
 
-      const unit = await Unit.findById(nextUnit);
-      if (!unit || String(unit.operator) !== String(nextOperator)) {
-        return res.status(400).json({ message: 'Selected unit does not belong to the selected operator.' });
+      if (nextUnit && nextOperator) {
+        const unit = await Unit.findById(nextUnit);
+        if (!unit || String(unit.operator) !== String(nextOperator)) {
+          return res.status(400).json({ message: 'Selected unit does not belong to the selected operator.' });
+        }
       }
       driver.operator = nextOperator;
       driver.unit = nextUnit;
@@ -191,7 +193,7 @@ router.put('/:id', upload.single('driverImage'), async (req, res) => {
         if (targetUnit) {
           if (targetUnit.driver) {
             const prevDriverId = targetUnit.driver;
-            await Driver.findByIdAndUpdate(prevDriverId, { unit: null });
+            await Driver.findByIdAndUpdate(prevDriverId, { unit: null, operator: null });
             const historyItem = targetUnit.driverHistory.find(h => String(h.driver) === String(prevDriverId) && !h.endDate);
             if (historyItem) historyItem.endDate = new Date();
           }

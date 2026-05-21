@@ -4,12 +4,10 @@ const driverSchema = new mongoose.Schema({
   operator: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Operator',
-    required: true,
   },
   unit: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Unit',
-    required: true,
   },
   cpdoId: { type: String, required: true, unique: true, trim: true },
   licenseNo: { type: String, required: true, unique: true, trim: true },

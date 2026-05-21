@@ -4,7 +4,6 @@ const conductorSchema = new mongoose.Schema({
   operator: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Operator',
-    required: true,
   },
   unit: {
     type: mongoose.Schema.Types.ObjectId,

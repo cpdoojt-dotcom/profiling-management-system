@@ -509,7 +509,7 @@ const UnitMonitoring = () => {
                     <select className="input-field" value={editFormData.driver} onChange={e => setEditFormData({...editFormData, driver: e.target.value})}>
                       <option value="">-- No Driver Assigned --</option>
                       {driversList
-                        .filter(drv => String(drv.operator?._id || drv.operator) === String(editFormData.operator))
+                        .filter(drv => !drv.operator || String(drv.operator?._id || drv.operator) === String(editFormData.operator))
                         .map(drv => {
                           const isAssigned = assignedDrivers.some(ad => ad._id === drv._id);
                           return (
@@ -577,7 +577,7 @@ const UnitMonitoring = () => {
                       <select className="input-field" value={editFormData.conductor} onChange={e => setEditFormData({...editFormData, conductor: e.target.value})}>
                         <option value="">-- No Conductor Assigned --</option>
                         {conductorsList
-                          .filter(c => String(c.operator?._id || c.operator) === String(editFormData.operator))
+                          .filter(c => !c.operator || String(c.operator?._id || c.operator) === String(editFormData.operator))
                           .map(c => (
                             <option key={c._id} value={c._id}>
                               {getFullName(c)} (ID: {c.cpdoId})

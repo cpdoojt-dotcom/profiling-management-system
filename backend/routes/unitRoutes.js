@@ -177,9 +177,9 @@ router.put('/:id', async (req, res) => {
     }
 
     // 1. Sync Driver
-    if (String(oldDriverId) !== String(newDriverId)) {
-      if (oldDriverId) {
-        await Driver.findByIdAndUpdate(oldDriverId, { unit: null });
+    if (String(oldDriverId) !== String(newDriverId) || String(oldData.operator) !== String(savedUnit.operator)) {
+      if (String(oldDriverId) !== String(newDriverId) && oldDriverId) {
+        await Driver.findByIdAndUpdate(oldDriverId, { unit: null, operator: null });
       }
       if (newDriverId) {
         // Clear this driver from any other unit they were previously assigned to
@@ -187,15 +187,15 @@ router.put('/:id', async (req, res) => {
           { _id: { $ne: savedUnit._id }, driver: newDriverId },
           { driver: null }
         );
-        // Also update this driver's unit reference in the Driver collection
-        await Driver.findByIdAndUpdate(newDriverId, { unit: savedUnit._id });
+        // Also update this driver's unit and operator references in the Driver collection
+        await Driver.findByIdAndUpdate(newDriverId, { unit: savedUnit._id, operator: savedUnit.operator });
       }
     }
 
     // 2. Sync Conductor
-    if (String(oldConductorId) !== String(newConductorId)) {
-      if (oldConductorId) {
-        await Conductor.findByIdAndUpdate(oldConductorId, { unit: null });
+    if (String(oldConductorId) !== String(newConductorId) || String(oldData.operator) !== String(savedUnit.operator)) {
+      if (String(oldConductorId) !== String(newConductorId) && oldConductorId) {
+        await Conductor.findByIdAndUpdate(oldConductorId, { unit: null, operator: null });
       }
       if (newConductorId) {
         // Clear this conductor from any other unit they were previously assigned to
@@ -203,8 +203,8 @@ router.put('/:id', async (req, res) => {
           { _id: { $ne: savedUnit._id }, conductor: newConductorId },
           { conductor: null }
         );
-        // Also update this conductor's unit reference in the Conductor collection
-        await Conductor.findByIdAndUpdate(newConductorId, { unit: savedUnit._id });
+        // Also update this conductor's unit and operator references in the Conductor collection
+        await Conductor.findByIdAndUpdate(newConductorId, { unit: savedUnit._id, operator: savedUnit.operator });
       }
     }
 
