@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import AuditLog from '../models/AuditLog.js';
 import User from '../models/User.js';
 
-const EXCLUDED_FIELDS = new Set(['_id', '__v', 'createdAt', 'updatedAt']);
+const EXCLUDED_FIELDS = new Set(['_id', '__v', 'createdAt', 'updatedAt', 'driverHistory']);
 
 const toComparableString = (value) => {
   if (value === null || value === undefined) return '';
@@ -44,11 +44,17 @@ const toDisplayString = (value) => {
       .map((part) => (part || '').trim())
       .filter(Boolean);
     const fullName = parts.join(' ');
-    return fullName ? `${fullName} (${String(value._id)})` : String(value._id);
+    
+    // If it has a bodyNo (it's a unit), return that
+    if (value.bodyNo) {
+      return `Body #${value.bodyNo} ${value.plateNo ? `(${value.plateNo})` : ''}`.trim();
+    }
+    
+    return fullName || String(value._id);
   }
 
   try {
-    return JSON.stringify(value);
+    return JSON.stringify(value, null, 2);
   } catch {
     return String(value);
   }

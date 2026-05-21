@@ -61,7 +61,7 @@ const UnitMonitoring = () => {
   const [driverHistoryList, setDriverHistoryList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   const [showEditModal, setShowEditModal] = useState(false);
   const [operators, setOperators] = useState([]);
   const [driversList, setDriversList] = useState([]);
@@ -175,7 +175,7 @@ const UnitMonitoring = () => {
       const updatedUnit = { ...selectedUnit, ...res.data };
       const ops = operators.find(o => o._id === editFormData.operator);
       const drv = driversList.find(d => d._id === editFormData.driver);
-      updatedUnit.operator = ops; 
+      updatedUnit.operator = ops;
       updatedUnit.driver = drv;
       setSelectedUnit(updatedUnit);
       await viewHistory(updatedUnit);
@@ -245,9 +245,9 @@ const UnitMonitoring = () => {
       <div className="monitoring-search-wrap">
         <form style={{ display: 'flex', flexGrow: 1, gap: '1rem', position: 'relative' }} onSubmit={searchUnits}>
           <div style={{ position: 'relative', flexGrow: 1 }}>
-            <input 
-              type="text" 
-              placeholder="Enter Body Number or Plate Number..." 
+            <input
+              type="text"
+              placeholder="Enter Body Number or Plate Number..."
               className="input-field"
               style={{ paddingRight: '2.5rem' }}
               value={query}
@@ -257,8 +257,8 @@ const UnitMonitoring = () => {
               }}
             />
             {query && (
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="input-clear-btn"
                 onClick={() => { setQuery(''); setError(''); fetchInitialData(); }}
                 title="Clear search"
@@ -272,10 +272,10 @@ const UnitMonitoring = () => {
             {loading ? 'Searching...' : 'Search'}
           </button>
         </form>
-        <select 
-          className="input-field" 
-          style={{ maxWidth: '200px' }} 
-          value={filterType} 
+        <select
+          className="input-field"
+          style={{ maxWidth: '200px' }}
+          value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
         >
           <option value="all">All Unit Types</option>
@@ -305,29 +305,29 @@ const UnitMonitoring = () => {
                   {units
                     .filter(u => filterType === 'all' || u.vehicleType === filterType)
                     .map(unit => (
-                    <div key={unit._id} className="glass-panel unit-card" onClick={() => viewHistory(unit)}>
-                      <h3>Body #{unit.bodyNo}</h3>
-                      <p>{getVehicleIcon(unit.vehicleType)} {unit.vehicleType}</p>
-                      <p><User size={14} /> <strong>Owner:</strong> {getFullName(unit.operator)}</p>
-                      <p>
-                        <User size={14} style={{ color: 'var(--accent-color)' }} /> 
-                        <strong>Driver:</strong> {
-                          unit.driver ? getFullName(unit.driver) : 
-                          (unit.assignedDriverName ? unit.assignedDriverName : 'Unassigned')
-                        }
-                      </p>
-                      {unit.vehicleType === 'Mini Bus' && (
+                      <div key={unit._id} className="glass-panel unit-card" onClick={() => viewHistory(unit)}>
+                        <h3>Body #{unit.bodyNo}</h3>
+                        <p>{getVehicleIcon(unit.vehicleType)} {unit.vehicleType}</p>
+                        <p><User size={14} /> <strong>Owner:</strong> {getFullName(unit.operator)}</p>
                         <p>
-                          <User size={14} style={{ color: 'var(--accent-color)' }} /> 
-                          <strong>Conductor:</strong> {
-                            unit.conductor ? getFullName(unit.conductor) : 'Unassigned'
+                          <User size={14} style={{ color: 'var(--accent-color)' }} />
+                          <strong>Driver:</strong> {
+                            unit.driver ? getFullName(unit.driver) :
+                              (unit.assignedDriverName ? unit.assignedDriverName : 'Unassigned')
                           }
                         </p>
-                      )}
-                      <p><MapPin size={14} /> {unit.zone || 'No Zone'}</p>
-                      <p><MapPin size={14} style={{ color: 'var(--text-secondary)' }} /> <small>{formatAddress(unit.operator)}</small></p>
-                    </div>
-                  ))}
+                        {unit.vehicleType === 'Mini Bus' && (
+                          <p>
+                            <User size={14} style={{ color: 'var(--accent-color)' }} />
+                            <strong>Conductor:</strong> {
+                              unit.conductor ? getFullName(unit.conductor) : 'Unassigned'
+                            }
+                          </p>
+                        )}
+                        <p><MapPin size={14} /> {unit.zone || 'No Zone'}</p>
+                        <p><MapPin size={14} style={{ color: 'var(--text-secondary)' }} /> <small>{formatAddress(unit.operator)}</small></p>
+                      </div>
+                    ))}
                 </div>
               ) : (
                 <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center' }}>
@@ -487,9 +487,9 @@ const UnitMonitoring = () => {
                   </div>
                   <div className="form-group">
                     <label>Current Operator</label>
-                    <select 
-                      className="input-field" 
-                      value={editFormData.operator} 
+                    <select
+                      className="input-field"
+                      value={editFormData.operator}
                       onChange={e => {
                         const val = e.target.value.toUpperCase();
                         const opId = e.target.value;
@@ -506,7 +506,7 @@ const UnitMonitoring = () => {
                   </div>
                   <div className="form-group">
                     <label>Current Driver</label>
-                    <select className="input-field" value={editFormData.driver} onChange={e => setEditFormData({...editFormData, driver: e.target.value})}>
+                    <select className="input-field" value={editFormData.driver} onChange={e => setEditFormData({ ...editFormData, driver: e.target.value })}>
                       <option value="">-- No Driver Assigned --</option>
                       {driversList
                         .filter(drv => !drv.operator || String(drv.operator?._id || drv.operator) === String(editFormData.operator))
@@ -522,9 +522,9 @@ const UnitMonitoring = () => {
                   </div>
                   <div className="form-group">
                     <label>Vehicle Type</label>
-                    <select 
-                      className="input-field" 
-                      value={editFormData.vehicleType} 
+                    <select
+                      className="input-field"
+                      value={editFormData.vehicleType}
                       onChange={e => {
                         const val = e.target.value;
                         const updated = { ...editFormData, vehicleType: val };
@@ -543,7 +543,7 @@ const UnitMonitoring = () => {
                           if (bodyNo.toUpperCase().startsWith('OB') || bodyNo.toUpperCase().startsWith('O-B')) updated.zone = 'OB';
                           else if (bodyNo.toUpperCase().startsWith('OZ') || bodyNo.toUpperCase().startsWith('O-Z')) updated.zone = 'OZ';
                         }
-                        
+
                         const colorOpts = getColorOptions(bodyNo, val);
                         if (colorOpts.length === 1) {
                           updated.colorCode = colorOpts[0];
@@ -552,7 +552,7 @@ const UnitMonitoring = () => {
                             updated.colorCode = '';
                           }
                         }
-                        
+
                         setEditFormData(updated);
                       }}
                     >
@@ -561,20 +561,20 @@ const UnitMonitoring = () => {
                       <option value="Mini Bus">Mini Bus</option>
                     </select>
                   </div>
-                    <div className="form-group">
-                      <label>Zone / Route</label>
-                      <input type="text" className="input-field" value={editFormData.zone} onChange={e => setEditFormData({...editFormData, zone: e.target.value.toUpperCase()})} />
-                    </div>
+                  <div className="form-group">
+                    <label>Zone / Route</label>
+                    <input type="text" className="input-field" value={editFormData.zone} onChange={e => setEditFormData({ ...editFormData, zone: e.target.value.toUpperCase() })} />
+                  </div>
                   {(editFormData.vehicleType === 'Jeepney' || editFormData.vehicleType === 'Mini Bus') && (
                     <div className="form-group" style={{ borderColor: 'var(--accent-color)' }}>
                       <label style={{ color: 'var(--accent-color)' }}>LTFRB Case No.</label>
-                      <input type="text" className="input-field" style={{ borderColor: 'var(--accent-color)' }} value={editFormData.ltfrbMchCaseNo} onChange={e => setEditFormData({...editFormData, ltfrbMchCaseNo: e.target.value})} />
+                      <input type="text" className="input-field" style={{ borderColor: 'var(--accent-color)' }} value={editFormData.ltfrbMchCaseNo} onChange={e => setEditFormData({ ...editFormData, ltfrbMchCaseNo: e.target.value })} />
                     </div>
                   )}
                   {editFormData.vehicleType === 'Mini Bus' && (
                     <div className="form-group">
                       <label>Conductor Profile</label>
-                      <select className="input-field" value={editFormData.conductor} onChange={e => setEditFormData({...editFormData, conductor: e.target.value})}>
+                      <select className="input-field" value={editFormData.conductor} onChange={e => setEditFormData({ ...editFormData, conductor: e.target.value })}>
                         <option value="">-- No Conductor Assigned --</option>
                         {conductorsList
                           .filter(c => !c.operator || String(c.operator?._id || c.operator) === String(editFormData.operator))
@@ -588,38 +588,38 @@ const UnitMonitoring = () => {
                   )}
                   <div className="form-group">
                     <label>Plate Number</label>
-                    <input type="text" className="input-field" value={editFormData.plateNo} onChange={e => setEditFormData({...editFormData, plateNo: e.target.value.toUpperCase()})} />
+                    <input type="text" className="input-field" value={editFormData.plateNo} onChange={e => setEditFormData({ ...editFormData, plateNo: e.target.value.toUpperCase() })} />
                   </div>
                   <div className="form-group">
                     <label>Make/Type</label>
-                    <input type="text" className="input-field" value={editFormData.makeType} onChange={e => setEditFormData({...editFormData, makeType: e.target.value})} />
+                    <input type="text" className="input-field" value={editFormData.makeType} onChange={e => setEditFormData({ ...editFormData, makeType: e.target.value })} />
                   </div>
                   <div className="form-group">
                     <label>Year Model</label>
-                    <input type="text" className="input-field" value={editFormData.yearModel} onChange={e => setEditFormData({...editFormData, yearModel: e.target.value.toUpperCase()})} />
+                    <input type="text" className="input-field" value={editFormData.yearModel} onChange={e => setEditFormData({ ...editFormData, yearModel: e.target.value.toUpperCase() })} />
                   </div>
                   <div className="form-group">
                     <label>Color Code</label>
                     {getColorOptions(editFormData.bodyNo, editFormData.vehicleType).length > 1 ? (
-                      <select 
-                        className="input-field" 
-                        value={editFormData.colorCode} 
-                        onChange={e => setEditFormData({...editFormData, colorCode: e.target.value.toUpperCase()})}
+                      <select
+                        className="input-field"
+                        value={editFormData.colorCode}
+                        onChange={e => setEditFormData({ ...editFormData, colorCode: e.target.value.toUpperCase() })}
                       >
                         <option value="">-- Select Color --</option>
                         {getColorOptions(editFormData.bodyNo, editFormData.vehicleType).map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                     ) : (
-                      <input type="text" className="input-field" value={editFormData.colorCode} onChange={e => setEditFormData({...editFormData, colorCode: e.target.value.replace(/[^a-zA-Z\s]/g, '').toUpperCase()})} />
+                      <input type="text" className="input-field" value={editFormData.colorCode} onChange={e => setEditFormData({ ...editFormData, colorCode: e.target.value.replace(/[^a-zA-Z\s]/g, '').toUpperCase() })} />
                     )}
                   </div>
                   <div className="form-group">
                     <label>Chassis Number</label>
-                    <input type="text" className="input-field" value={editFormData.chassisNo} onChange={e => setEditFormData({...editFormData, chassisNo: e.target.value.toUpperCase()})} />
+                    <input type="text" className="input-field" value={editFormData.chassisNo} onChange={e => setEditFormData({ ...editFormData, chassisNo: e.target.value.toUpperCase() })} />
                   </div>
                   <div className="form-group">
                     <label>Motor Number</label>
-                    <input type="text" className="input-field" value={editFormData.motorNo} onChange={e => setEditFormData({...editFormData, motorNo: e.target.value.toUpperCase()})} />
+                    <input type="text" className="input-field" value={editFormData.motorNo} onChange={e => setEditFormData({ ...editFormData, motorNo: e.target.value.toUpperCase() })} />
                   </div>
                 </div>
               </div>

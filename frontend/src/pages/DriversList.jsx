@@ -39,7 +39,7 @@ const formatDateDisplay = (dateStr) => {
       return date.toLocaleDateString('en-US');
     }
   }
-  
+
   const d = new Date(dateStr);
   if (!isNaN(d.getTime())) {
     return d.toLocaleDateString('en-US');
@@ -52,9 +52,9 @@ const getFormattedBirthdate = (person) => {
   const monthStr = person.birthMonth.trim();
   const dateVal = person.birthDate;
   const yearVal = person.birthYear;
-  
+
   const month = monthStr.charAt(0).toUpperCase() + monthStr.slice(1).toLowerCase();
-  
+
   if (dateVal && yearVal) {
     return `${month} ${dateVal}, ${yearVal}`;
   }
@@ -393,7 +393,7 @@ const DriversList = () => {
       if (barangayFilter !== 'all') fileName += `-${barangayFilter}`;
       if (categoryFilter !== 'all') fileName += `-${categoryFilter}`;
       if (query.trim()) fileName += '-filtered';
-      
+
       fileName += `-${timestamp}.xlsx`;
 
       const buffer = await workbook.xlsx.writeBuffer();
@@ -441,8 +441,8 @@ const DriversList = () => {
             onChange={(e) => setQuery(e.target.value)}
           />
           {query && (
-            <button 
-              type="button" 
+            <button
+              type="button"
               className="input-clear-btn"
               onClick={() => setQuery('')}
               title="Clear search"
@@ -515,9 +515,9 @@ const DriversList = () => {
                     <td>{driver.unit?.zone || 'No Zone'}</td>
                     <td>
                       <span className={`status-type ${String(driver.driverType || 'Tricycle').toLowerCase().replace(' ', '-')}`}>
-                        {driver.driverType === 'Jeepney' ? <Truck size={14} /> : 
-                         driver.driverType === 'Mini Bus' ? <Bus size={14} /> : 
-                         <Bike size={14} />}
+                        {driver.driverType === 'Jeepney' ? <Truck size={14} /> :
+                          driver.driverType === 'Mini Bus' ? <Bus size={14} /> :
+                            <Bike size={14} />}
                         {' '}{driver.driverType || 'Tricycle'}
                       </span>
                     </td>
@@ -617,7 +617,7 @@ const DriversList = () => {
                       const opId = e.target.value;
                       const op = operators.find(o => o._id === opId);
                       const fallbackUnit = op?.units?.[0]?._id || '';
-                      setEditForm(prev => ({ ...prev, driver: { ...prev.driver, operator: opId, unit: fallbackUnit }}));
+                      setEditForm(prev => ({ ...prev, driver: { ...prev.driver, operator: opId, unit: fallbackUnit } }));
                     }}>
                       <option value="">Select Operator...</option>
                       {operators.map(op => <option key={op._id} value={op._id}>{op.firstName} {op.lastName}</option>)}

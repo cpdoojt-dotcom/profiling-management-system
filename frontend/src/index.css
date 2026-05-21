@@ -11,7 +11,7 @@
   --accent-color: #3b82f6;
   --accent-hover: #2563eb;
   --accent-glow: rgba(59, 130, 246, 0.5);
-  
+
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
@@ -125,8 +125,13 @@ button {
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .animate-fade-in {
@@ -204,7 +209,8 @@ button {
   background-color: rgba(15, 23, 42, 0.75);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  z-index: 9999; /* Ensure modal is always on top of all other elements */
+  z-index: 9999;
+  /* Ensure modal is always on top of all other elements */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -217,12 +223,14 @@ button {
   border-radius: 16px;
   width: 100%;
   max-width: 550px;
-  max-height: 90vh; /* Strictly bound to screen height */
+  max-height: 90vh;
+  /* Strictly bound to screen height */
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
   position: relative;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Prevent content clipping and let scroll handle it */
+  overflow: hidden;
+  /* Prevent content clipping and let scroll handle it */
   animation: modalEnter 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
@@ -231,6 +239,7 @@ button {
     transform: scale(0.95) translateY(10px);
     opacity: 0;
   }
+
   to {
     transform: scale(1) translateY(0);
     opacity: 1;
@@ -243,7 +252,8 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-shrink: 0; /* Header stays locked */
+  flex-shrink: 0;
+  /* Header stays locked */
 }
 
 .modal-header h3 {
@@ -273,7 +283,8 @@ button {
 
 .modal-body {
   padding: 1.5rem;
-  overflow-y: auto; /* Clean internal vertical scrolling only */
+  overflow-y: auto;
+  /* Clean internal vertical scrolling only */
   flex-grow: 1;
 }
 
@@ -290,13 +301,15 @@ button {
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
-  flex-shrink: 0; /* Footer stays locked */
+  flex-shrink: 0;
+  /* Footer stays locked */
 }
 
 /* Modal Responsive overrides */
 @media (max-width: 768px) {
   .modal-content {
-    max-width: 90%; /* Center nicely with 5% side margins on tablet */
+    max-width: 90%;
+    /* Center nicely with 5% side margins on tablet */
   }
 }
 
@@ -304,9 +317,10 @@ button {
   .modal-overlay {
     padding: 0.5rem;
   }
-  
+
   .modal-content {
-    max-width: 100%; /* Take full width minus padding on mobile */
+    max-width: 100%;
+    /* Take full width minus padding on mobile */
     max-height: 95vh;
     border-radius: 12px;
   }
@@ -332,4 +346,3 @@ button {
     justify-content: center;
   }
 }
-
