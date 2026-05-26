@@ -709,7 +709,7 @@ const DriversList = () => {
                 <div><span>CPDO ID:</span><strong>{selectedDriver.cpdoId}</strong></div>
                 <div><span>Name:</span><strong>{getFullName(selectedDriver)}</strong></div>
                 <div><span>License:</span><strong>{selectedDriver.licenseNo}</strong></div>
-                <div><span>Drivers License Expiry:</span><strong>{formatDateDisplay(selectedDriver.licenseExpiryDate)}</strong></div>
+                <div><span>License Expiry:</span><strong>{formatDateDisplay(selectedDriver.licenseExpiryDate)}</strong></div>
                 <div><span>Civil Status:</span><strong>{selectedDriver.civilStatus || '-'}</strong></div>
                 <div><span>Body No:</span><strong>{selectedDriver.unit?.bodyNo || '-'}</strong></div>
                 <div><span>Plate No:</span><strong>{selectedDriver.unit?.plateNo || '-'}</strong></div>

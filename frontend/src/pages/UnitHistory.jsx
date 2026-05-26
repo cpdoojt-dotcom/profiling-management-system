@@ -243,13 +243,22 @@ const UnitHistory = () => {
       </div>
 
       <div className="history-search-wrap">
-        <form style={{ display: 'flex', flexGrow: 1, gap: '1rem', position: 'relative' }} onSubmit={searchUnits}>
-          <div style={{ position: 'relative', flexGrow: 1 }}>
+        <form className="history-search-form" onSubmit={searchUnits}>
+          <select
+            className="input-field filter-select"
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+          >
+            <option value="all">All Unit Types</option>
+            <option value="Tricycle">Tricycle</option>
+            <option value="Jeepney">Jeepney</option>
+            <option value="Mini Bus">Mini Bus</option>
+          </select>
+          <div className="search-input-wrapper">
             <input
               type="text"
               placeholder="Enter Body Number or Plate Number..."
               className="input-field"
-              style={{ paddingRight: '2.5rem' }}
               value={query}
               onChange={(e) => {
                 setQuery(e.target.value);
@@ -272,17 +281,6 @@ const UnitHistory = () => {
             {loading ? 'Searching...' : 'Search'}
           </button>
         </form>
-        <select
-          className="input-field"
-          style={{ maxWidth: '200px' }}
-          value={filterType}
-          onChange={(e) => setFilterType(e.target.value)}
-        >
-          <option value="all">All Unit Types</option>
-          <option value="Tricycle">Tricycle</option>
-          <option value="Jeepney">Jeepney</option>
-          <option value="Mini Bus">Mini Bus</option>
-        </select>
       </div>
 
       {error && <p className="action-error">{error}</p>}
