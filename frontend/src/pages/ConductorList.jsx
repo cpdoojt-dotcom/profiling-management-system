@@ -82,7 +82,7 @@ const ConductorList = () => {
   const [direction, setDirection] = useState('desc');
   const [selectedConductorId, setSelectedConductorId] = useState('');
   const [query, setQuery] = useState('');
-  const [zoneFilter, setZoneFilter] = useState('all');
+  const [zoneFilter, setZoneFilter] = useState('');
   const [page, setPage] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
   const [editImageFile, setEditImageFile] = useState(null);
@@ -129,13 +129,8 @@ const ConductorList = () => {
 
   const zoneOptions = useMemo(() => {
     const dynamicZones = new Set(conductors.map((c) => c.unit?.zone).filter(Boolean));
-    const predefined = [
-      'Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6', 'Zone 7', 'Zone 8', 'Zone 9',
-      'BB',
-      'J01', 'J02', 'J03', 'J04', 'J05', 'J06', 'J07', 'J08', 'J09', 'J10', 'J11', 'J12', 'J13',
-      'OB', 'OZ'
-    ];
-    predefined.forEach((z) => dynamicZones.add(z));
+    const conductorZones = ['OZ', 'OB'];
+    conductorZones.forEach((z) => dynamicZones.add(z));
     return [...dynamicZones].sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
   }, [conductors]);
 
@@ -147,7 +142,7 @@ const ConductorList = () => {
         || fullName.includes(normalizedQuery)
         || String(c.unit?.plateNo || '').toLowerCase().includes(normalizedQuery)
         || String(c.unit?.bodyNo || '').toLowerCase().includes(normalizedQuery);
-      const matchesZone = zoneFilter === 'all' || c.unit?.zone === zoneFilter;
+      const matchesZone = !zoneFilter || c.unit?.zone === zoneFilter;
       return matchesQuery && matchesZone;
     });
   }, [conductors, query, zoneFilter]);
@@ -437,7 +432,7 @@ const ConductorList = () => {
           )}
         </div>
         <select className="input-field" value={zoneFilter} onChange={(e) => setZoneFilter(e.target.value)}>
-          <option value="all">All Zones</option>
+          <option value="">All Zones</option>
           {zoneOptions.map((zone) => (
             <option key={zone} value={zone}>{zone}</option>
           ))}
