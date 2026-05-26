@@ -717,7 +717,7 @@ const DriversList = () => {
                 <div><span>Operator Area:</span><strong>{selectedDriver.operator?.barangay || '-'}, {selectedDriver.operator?.cityMunicipality || '-'}</strong></div>
                 <div><span>Birthplace:</span><strong>{selectedDriver.birthplace || '-'}</strong></div>
                 <div><span>Birthdate:</span><strong>{getFormattedBirthdate(selectedDriver)}</strong></div>
-                <div><span>Age:</span><strong>{selectedDriver.age || '-'}</strong></div>
+                <div><span>Age:</span><strong>{computeAge(selectedDriver.birthMonth, selectedDriver.birthDate, selectedDriver.birthYear) || '-'}</strong></div>
                 <div><span>Contact:</span><strong>{selectedDriver.contactNo || '-'}</strong></div>
                 <div className="details-full"><span>Driver Address:</span><strong>{formatAddress(selectedDriver)}</strong></div>
               </div>

@@ -681,7 +681,7 @@ const ConductorList = () => {
                 <div><span>Plate No:</span><strong>{selectedConductor.unit?.plateNo || '-'}</strong></div>
                 <div><span>Birth Place:</span><strong>{selectedConductor.birthPlace || '-'}</strong></div>
                 <div><span>Birthdate:</span><strong>{getFormattedBirthdate(selectedConductor)}</strong></div>
-                <div><span>Age:</span><strong>{selectedConductor.age || '-'}</strong></div>
+                <div><span>Age:</span><strong>{computeAge(selectedConductor.birthMonth, selectedConductor.birthDate, selectedConductor.birthYear) || '-'}</strong></div>
                 <div><span>Civil Status:</span><strong>{selectedConductor.civilStatus || '-'}</strong></div>
                 <div><span>Contact:</span><strong>{selectedConductor.contactNo || '-'}</strong></div>
                 <div className="details-full"><span>Complete Address:</span><strong>{formatAddress(selectedConductor)}</strong></div>
