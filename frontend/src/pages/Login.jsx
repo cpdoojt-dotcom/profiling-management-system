@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Mail, Lock, LogIn, Shield } from 'lucide-react';
+import { Mail, Lock, LogIn, Shield, Bus, Truck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Login.css';
 
@@ -30,12 +30,30 @@ const Login = () => {
 
   return (
     <div className="login-container">
-      <div className="login-background">
-        <div className="blob"></div>
-        <div className="blob"></div>
-        <div className="blob"></div>
+      <div className="login-background"></div>
+
+      <div className="login-info">
+        <h1>PUV Profiling Management System</h1>
+        <p>
+          A comprehensive platform for modernizing Public Utility Vehicle management.
+          Centralized database for drivers, operators, conductors, and vehicle information.
+        </p>
+        <div className="info-features">
+          <div className="feature-item">
+            <Shield size={24} />
+            <span>Secure & Reliable</span>
+          </div>
+          <div className="feature-item">
+            <Bus size={24} />
+            <span>Vehicle Management</span>
+          </div>
+          <div className="feature-item">
+            <Truck size={24} />
+            <span>Driver Profiling</span>
+          </div>
+        </div>
       </div>
-      
+
       <div className="login-card glass-panel animate-fade-in">
         <div className="login-header">
           <div className="logo-icon">

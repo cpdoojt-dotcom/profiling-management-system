@@ -3,16 +3,12 @@
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   position: relative;
   overflow: hidden;
-  background: radial-gradient(circle at 10% 20%, rgba(15, 23, 42, 1) 0%, rgba(20, 20, 35, 1) 90.2%);
+  background: linear-gradient(135deg, var(--bg-color) 0%, var(--surface-color) 50%, var(--bg-color) 100%);
   padding: 2rem;
   font-family: var(--font-main);
-}
-
-[data-theme='light'] .login-container {
-  background: radial-gradient(circle at 10% 20%, rgba(241, 245, 249, 1) 0%, rgba(226, 232, 240, 1) 90.2%);
 }
 
 .login-background {
@@ -23,66 +19,106 @@
   height: 100%;
   z-index: 0;
   pointer-events: none;
+  background-image: url('/Olongapo_City_Hall.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
-.blob {
+.login-background::before {
+  content: '';
   position: absolute;
-  border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.45;
-  z-index: -1;
-  mix-blend-mode: screen;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 41, 59, 0.75) 50%, rgba(15, 23, 42, 0.85) 100%);
 }
 
-[data-theme='light'] .blob {
-  mix-blend-mode: multiply;
-  opacity: 0.15;
-  filter: blur(100px);
+[data-theme='light'] .login-background::before {
+  background: linear-gradient(135deg, rgba(241, 245, 249, 0.9) 0%, rgba(255, 255, 255, 0.85) 50%, rgba(241, 245, 249, 0.9) 100%);
 }
 
-.blob:nth-child(1) {
-  top: -10%;
-  left: -10%;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.8) 0%, rgba(37, 99, 235, 0) 70%);
-  animation: floatBlob1 25s infinite alternate ease-in-out;
+.login-info {
+  position: absolute;
+  left: 5%;
+  top: 50%;
+  transform: translateY(-50%);
+  max-width: 500px;
+  z-index: 5;
+  color: var(--text-primary);
+  animation: fadeIn 1s ease-out;
 }
 
-.blob:nth-child(2) {
-  bottom: -15%;
-  right: -10%;
-  width: 650px;
-  height: 650px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.7) 0%, rgba(79, 70, 229, 0) 70%);
-  animation: floatBlob2 30s infinite alternate ease-in-out;
+.login-info h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
-.blob:nth-child(3) {
-  top: 40%;
-  left: 50%;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.4) 0%, rgba(5, 150, 105, 0) 70%);
-  animation: floatBlob3 22s infinite alternate ease-in-out;
+.login-info p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin-bottom: 2rem;
+  opacity: 0.95;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
 }
 
-@keyframes floatBlob1 {
-  0% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(80px, 50px) scale(1.1); }
-  100% { transform: translate(-40px, 120px) scale(0.95); }
+.info-features {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-@keyframes floatBlob2 {
-  0% { transform: translate(0, 0) scale(0.9); }
-  50% { transform: translate(-100px, -60px) scale(1.15); }
-  100% { transform: translate(50px, -110px) scale(1.0); }
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
 }
 
-@keyframes floatBlob3 {
-  0% { transform: translate(0, 0) scale(1.05); }
-  50% { transform: translate(120px, -80px) scale(0.9); }
-  100% { transform: translate(-60px, 60px) scale(1.1); }
+.feature-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(10px);
+}
+
+[data-theme='light'] .feature-item {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='light'] .feature-item:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+@media (max-width: 1024px) {
+  .login-info {
+    display: none;
+  }
+
+  .login-container {
+    justify-content: center;
+  }
 }
 
 .login-card {
@@ -95,6 +131,7 @@
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-right: 5%;
   border-radius: 28px;
   box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.6);
   transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
