@@ -39,6 +39,22 @@ const getFullName = (person) => {
     .join(' ');
 };
 
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+const computeAge = (birthMonth, birthDate, birthYear) => {
+  if (!birthMonth || !birthYear) return '';
+  const monthIndex = MONTHS.findIndex(m => m.toLowerCase() === String(birthMonth).toLowerCase());
+  if (monthIndex === -1) return '';
+  const day = birthDate ? Number(birthDate) : 1;
+  const year = Number(birthYear);
+  const today = new Date();
+  const birth = new Date(year, monthIndex, day);
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age -= 1;
+  return age >= 0 ? String(age) : '';
+};
+
 const ConductorForm = () => {
   const navigate = useNavigate();
   const confirm = useConfirm();
@@ -49,7 +65,7 @@ const ConductorForm = () => {
   const [selectedOperatorId, setSelectedOperatorId] = useState('');
   const [selectedUnitId, setSelectedUnitId] = useState('');
   const [conductorImage, setConductorImage] = useState(null);
-  const [conductor, setConductor] = useState(initialConductor);
+  const [conductor, setConductor] = useState({ ...initialConductor, age: '' });
 
   useEffect(() => {
     const fetchOperators = async () => {
@@ -75,6 +91,14 @@ const ConductorForm = () => {
     const nextUnitId = miniBusUnits[0]?._id || '';
     setSelectedUnitId(nextUnitId);
   }, [selectedOperatorId, operators]);
+
+  // Auto-compute age from birth fields
+  useEffect(() => {
+    const computed = computeAge(conductor.birthMonth, conductor.birthDate, conductor.birthYear);
+    if (computed !== '') {
+      setConductor(prev => ({ ...prev, age: computed }));
+    }
+  }, [conductor.birthMonth, conductor.birthDate, conductor.birthYear]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -252,6 +276,15 @@ const ConductorForm = () => {
           <div className="form-group">
             <label>Birth Place</label>
             <input type="text" name="birthPlace" className="input-field" value={conductor.birthPlace} onChange={handleChange} />
+          </div>
+          <div className="form-group">
+            <label>Age {conductor.birthYear ? <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>(auto-computed)</span> : ''}</label>
+            <input
+              type="number" min="0" name="age" className="input-field" value={conductor.age || ''}
+              onChange={handleChange}
+              readOnly={!!(conductor.birthMonth && conductor.birthYear)}
+              style={conductor.birthMonth && conductor.birthYear ? { opacity: 0.7, background: 'var(--surface-bg)' } : {}}
+            />
           </div>
           <div className="form-group">
             <label>Address No.</label>

@@ -39,6 +39,22 @@ const getFullName = (person) => {
     .join(' ');
 };
 
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+const computeAge = (birthMonth, birthDate, birthYear) => {
+  if (!birthMonth || !birthYear) return '';
+  const monthIndex = MONTHS.findIndex(m => m.toLowerCase() === String(birthMonth).toLowerCase());
+  if (monthIndex === -1) return '';
+  const day = birthDate ? Number(birthDate) : 1;
+  const year = Number(birthYear);
+  const today = new Date();
+  const birth = new Date(year, monthIndex, day);
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age -= 1;
+  return age >= 0 ? String(age) : '';
+};
+
 const DriverForm = () => {
   const navigate = useNavigate();
   const confirm = useConfirm();
@@ -86,6 +102,14 @@ const DriverForm = () => {
       setDriver(prev => ({ ...prev, driverType: selectedUnit.vehicleType }));
     }
   }, [selectedUnitId, selectedOperatorId, operators]);
+
+  // Auto-compute age from birth fields
+  useEffect(() => {
+    const computed = computeAge(driver.birthMonth, driver.birthDate, driver.birthYear);
+    if (computed !== '') {
+      setDriver(prev => ({ ...prev, age: computed }));
+    }
+  }, [driver.birthMonth, driver.birthDate, driver.birthYear]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -251,8 +275,13 @@ const DriverForm = () => {
             <input type="text" name="civilStatus" className="input-field" value={driver.civilStatus} onChange={handleChange} />
           </div>
           <div className="form-group">
-            <label>Age</label>
-            <input type="number" min="0" name="age" className="input-field" value={driver.age} onChange={handleChange} />
+            <label>Age {driver.birthYear ? <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>(auto-computed)</span> : ''}</label>
+            <input
+              type="number" min="0" name="age" className="input-field" value={driver.age}
+              onChange={handleChange}
+              readOnly={!!(driver.birthMonth && driver.birthYear)}
+              style={driver.birthMonth && driver.birthYear ? { opacity: 0.7, background: 'var(--surface-bg)' } : {}}
+            />
           </div>
           <div className="form-group">
             <label>Address No.</label>

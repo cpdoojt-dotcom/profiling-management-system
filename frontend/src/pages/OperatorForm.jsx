@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Plus, Save, Trash2, X } from 'lucide-react';
@@ -78,6 +78,17 @@ const OperatorForm = () => {
   const [error, setError] = useState('');
   const [operator, setOperator] = useState(initialOperator);
   const [units, setUnits] = useState([{ ...initialUnit }]);
+
+  // Auto-compute age from birthdate
+  useEffect(() => {
+    if (!operator.birthdate) return;
+    const birth = new Date(operator.birthdate);
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age -= 1;
+    if (age >= 0) setOperator(prev => ({ ...prev, age: String(age) }));
+  }, [operator.birthdate]);
 
   const handleOperatorChange = (e) => {
     const { name, value } = e.target;
@@ -254,8 +265,13 @@ const OperatorForm = () => {
             <input type="text" name="birthplace" className="input-field" value={operator.birthplace} onChange={handleOperatorChange} />
           </div>
           <div className="form-group">
-            <label>Age</label>
-            <input type="number" min="0" name="age" className="input-field" value={operator.age} onChange={handleOperatorChange} />
+            <label>Age {operator.birthdate ? <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>(auto-computed)</span> : ''}</label>
+            <input
+              type="number" min="0" name="age" className="input-field" value={operator.age}
+              onChange={handleOperatorChange}
+              readOnly={!!operator.birthdate}
+              style={operator.birthdate ? { opacity: 0.7, background: 'var(--surface-bg)' } : {}}
+            />
           </div>
           <div className="form-group">
             <label>Contact No.</label>

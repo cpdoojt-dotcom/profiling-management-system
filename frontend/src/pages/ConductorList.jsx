@@ -52,6 +52,22 @@ const getFormattedBirthdate = (person) => {
 
 const sanitize = (value) => String(value ?? '').replace(/\r?\n|\r/g, ' ').trim();
 
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+const computeAge = (birthMonth, birthDate, birthYear) => {
+  if (!birthMonth || !birthYear) return '';
+  const monthIndex = MONTHS.findIndex(m => m.toLowerCase() === String(birthMonth).toLowerCase());
+  if (monthIndex === -1) return '';
+  const day = birthDate ? Number(birthDate) : 1;
+  const year = Number(birthYear);
+  const today = new Date();
+  const birth = new Date(year, monthIndex, day);
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age -= 1;
+  return age >= 0 ? String(age) : '';
+};
+
 const ConductorList = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -66,7 +82,7 @@ const ConductorList = () => {
   const [direction, setDirection] = useState('desc');
   const [selectedConductorId, setSelectedConductorId] = useState('');
   const [query, setQuery] = useState('');
-  const [barangayFilter, setBarangayFilter] = useState('all');
+  const [zoneFilter, setZoneFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
   const [editImageFile, setEditImageFile] = useState(null);
@@ -111,10 +127,17 @@ const ConductorList = () => {
     }
   }, [selectedFromQuery]);
 
-  const barangayOptions = useMemo(
-    () => [...new Set(conductors.map((c) => c.operator?.barangay).filter(Boolean))],
-    [conductors],
-  );
+  const zoneOptions = useMemo(() => {
+    const dynamicZones = new Set(conductors.map((c) => c.unit?.zone).filter(Boolean));
+    const predefined = [
+      'Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6', 'Zone 7', 'Zone 8', 'Zone 9',
+      'BB',
+      'J01', 'J02', 'J03', 'J04', 'J05', 'J06', 'J07', 'J08', 'J09', 'J10', 'J11', 'J12', 'J13',
+      'OB', 'OZ'
+    ];
+    predefined.forEach((z) => dynamicZones.add(z));
+    return [...dynamicZones].sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+  }, [conductors]);
 
   const filteredConductors = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -124,10 +147,10 @@ const ConductorList = () => {
         || fullName.includes(normalizedQuery)
         || String(c.unit?.plateNo || '').toLowerCase().includes(normalizedQuery)
         || String(c.unit?.bodyNo || '').toLowerCase().includes(normalizedQuery);
-      const matchesBarangay = barangayFilter === 'all' || c.operator?.barangay === barangayFilter;
-      return matchesQuery && matchesBarangay;
+      const matchesZone = zoneFilter === 'all' || c.unit?.zone === zoneFilter;
+      return matchesQuery && matchesZone;
     });
-  }, [conductors, query, barangayFilter]);
+  }, [conductors, query, zoneFilter]);
 
   const sortedConductors = useMemo(() => {
     if (sortBy === 'createdAt') {
@@ -147,7 +170,7 @@ const ConductorList = () => {
 
   useEffect(() => {
     setPage(1);
-  }, [query, barangayFilter]);
+  }, [query, zoneFilter]);
 
   const selectedConductor = useMemo(
     () => sortedConductors.find((c) => c._id === selectedConductorId) || null,
@@ -186,6 +209,16 @@ const ConductorList = () => {
     setEditImageFile(null);
     setActionError('');
   }, [selectedConductorId, selectedConductor]);
+
+  // Auto-compute age in edit form from birth fields
+  useEffect(() => {
+    const c = editForm.conductor;
+    const computed = computeAge(c.birthMonth, c.birthDate, c.birthYear);
+    if (computed !== '') {
+      setEditForm(prev => ({ ...prev, conductor: { ...prev.conductor, age: computed } }));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editForm.conductor.birthMonth, editForm.conductor.birthDate, editForm.conductor.birthYear]);
 
   const handleSort = (field) => {
     if (sortBy === field) {
@@ -388,7 +421,7 @@ const ConductorList = () => {
             type="text"
             className="input-field"
             style={{ paddingRight: '2.5rem' }}
-            placeholder="Search by name, body no, or plate..."
+            placeholder="Search by body number or conductor name..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -403,10 +436,10 @@ const ConductorList = () => {
             </button>
           )}
         </div>
-        <select className="input-field" value={barangayFilter} onChange={(e) => setBarangayFilter(e.target.value)}>
-          <option value="all">All Barangay</option>
-          {barangayOptions.map((barangay) => (
-            <option key={barangay} value={barangay}>{barangay}</option>
+        <select className="input-field" value={zoneFilter} onChange={(e) => setZoneFilter(e.target.value)}>
+          <option value="all">All Zones</option>
+          {zoneOptions.map((zone) => (
+            <option key={zone} value={zone}>{zone}</option>
           ))}
         </select>
       </div>
@@ -558,8 +591,13 @@ const ConductorList = () => {
                     <input name="birthPlace" className="input-field" value={editForm.conductor.birthPlace} onChange={handleEditChange('conductor')} />
                   </div>
                   <div className="edit-form-group">
-                    <label>Age</label>
-                    <input name="age" type="number" className="input-field" value={editForm.conductor.age} onChange={handleEditChange('conductor')} />
+                    <label>Age {editForm.conductor.birthYear ? <span style={{ fontSize: '0.72rem', opacity: 0.6 }}>(auto-computed)</span> : ''}</label>
+                    <input
+                      name="age" type="number" className="input-field" value={editForm.conductor.age}
+                      onChange={handleEditChange('conductor')}
+                      readOnly={!!(editForm.conductor.birthMonth && editForm.conductor.birthYear)}
+                      style={editForm.conductor.birthMonth && editForm.conductor.birthYear ? { opacity: 0.7, background: 'var(--surface-bg)' } : {}}
+                    />
                   </div>
                   <div className="edit-form-group">
                     <label>Birth Month</label>

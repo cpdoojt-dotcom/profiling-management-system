@@ -67,6 +67,22 @@ const getFormattedBirthdate = (person) => {
   return month;
 };
 
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+const computeAge = (birthMonth, birthDate, birthYear) => {
+  if (!birthMonth || !birthYear) return '';
+  const monthIndex = MONTHS.findIndex(m => m.toLowerCase() === String(birthMonth).toLowerCase());
+  if (monthIndex === -1) return '';
+  const day = birthDate ? Number(birthDate) : 1;
+  const year = Number(birthYear);
+  const today = new Date();
+  const birth = new Date(year, monthIndex, day);
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age -= 1;
+  return age >= 0 ? String(age) : '';
+};
+
 const DriversList = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -81,8 +97,6 @@ const DriversList = () => {
   const [direction, setDirection] = useState('desc');
   const [selectedDriverId, setSelectedDriverId] = useState('');
   const [query, setQuery] = useState('');
-  const [barangayFilter, setBarangayFilter] = useState('all');
-  const [categoryFilter, setCategoryFilter] = useState('all');
   const [zoneFilter, setZoneFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
@@ -98,7 +112,6 @@ const DriversList = () => {
   const pageSize = 8;
   const searchParams = new URLSearchParams(location.search);
   const selectedFromQuery = searchParams.get('driverId');
-  const typeFromQuery = searchParams.get('type');
 
   const fetchDrivers = async () => {
     const res = await axios.get('/api/drivers');
@@ -124,20 +137,19 @@ const DriversList = () => {
     if (selectedFromQuery) {
       setSelectedDriverId(selectedFromQuery);
     }
-    if (typeFromQuery) {
-      setCategoryFilter(typeFromQuery);
-    }
-  }, [selectedFromQuery, typeFromQuery]);
+  }, [selectedFromQuery]);
 
-  const barangayOptions = useMemo(
-    () => [...new Set(drivers.map((driver) => driver.operator?.barangay).filter(Boolean))].sort(),
-    [drivers],
-  );
-
-  const zoneOptions = useMemo(
-    () => [...new Set(drivers.map((driver) => driver.unit?.zone).filter(Boolean))].sort(),
-    [drivers],
-  );
+  const zoneOptions = useMemo(() => {
+    const dynamicZones = new Set(drivers.map((driver) => driver.unit?.zone).filter(Boolean));
+    const predefined = [
+      'Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6', 'Zone 7', 'Zone 8', 'Zone 9',
+      'BB',
+      'J01', 'J02', 'J03', 'J04', 'J05', 'J06', 'J07', 'J08', 'J09', 'J10', 'J11', 'J12', 'J13',
+      'OB', 'OZ'
+    ];
+    predefined.forEach((z) => dynamicZones.add(z));
+    return [...dynamicZones].sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+  }, [drivers]);
 
   const filteredDrivers = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -149,13 +161,10 @@ const DriversList = () => {
         || String(driver.licenseNo || '').toLowerCase().includes(normalizedQuery)
         || String(driver.unit?.plateNo || '').toLowerCase().includes(normalizedQuery)
         || String(driver.unit?.bodyNo || '').toLowerCase().includes(normalizedQuery);
-      const matchesBarangay = barangayFilter === 'all' || driver.operator?.barangay === barangayFilter;
-      const matchesCategory = categoryFilter === 'all'
-        || String(driver.driverType || 'Tricycle').toLowerCase() === categoryFilter.toLowerCase();
       const matchesZone = zoneFilter === 'all' || driver.unit?.zone === zoneFilter;
-      return matchesQuery && matchesBarangay && matchesCategory && matchesZone;
+      return matchesQuery && matchesZone;
     });
-  }, [drivers, query, barangayFilter, categoryFilter, zoneFilter]);
+  }, [drivers, query, zoneFilter]);
 
   const sortedDrivers = useMemo(() => {
     if (sortBy === 'createdAt') {
@@ -175,7 +184,7 @@ const DriversList = () => {
 
   useEffect(() => {
     setPage(1);
-  }, [query, barangayFilter, categoryFilter, zoneFilter]);
+  }, [query, zoneFilter]);
 
   useEffect(() => {
     if (page > totalPages) {
@@ -217,6 +226,16 @@ const DriversList = () => {
     setEditImageFile(null);
     setActionError('');
   }, [selectedDriverId, selectedDriver]);
+
+  // Auto-compute age in edit form from birth fields
+  useEffect(() => {
+    const d = editForm.driver;
+    const computed = computeAge(d.birthMonth, d.birthDate, d.birthYear);
+    if (computed !== '') {
+      setEditForm(prev => ({ ...prev, driver: { ...prev.driver, age: computed } }));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editForm.driver.birthMonth, editForm.driver.birthDate, editForm.driver.birthYear]);
 
   const handleSort = (field) => {
     if (sortBy === field) {
@@ -390,8 +409,6 @@ const DriversList = () => {
       const timestamp = new Date().toISOString().slice(0, 10);
       let fileName = 'drivers';
       if (zoneFilter !== 'all') fileName += `-${zoneFilter}`;
-      if (barangayFilter !== 'all') fileName += `-${barangayFilter}`;
-      if (categoryFilter !== 'all') fileName += `-${categoryFilter}`;
       if (query.trim()) fileName += '-filtered';
 
       fileName += `-${timestamp}.xlsx`;
@@ -436,7 +453,7 @@ const DriversList = () => {
             type="text"
             className="input-field"
             style={{ paddingRight: '2.5rem' }}
-            placeholder="Search by CPDO ID, name, body no, license, or plate..."
+            placeholder="Search by body number or driver name..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -451,18 +468,6 @@ const DriversList = () => {
             </button>
           )}
         </div>
-        <select className="input-field" value={barangayFilter} onChange={(e) => setBarangayFilter(e.target.value)}>
-          <option value="all">All Barangay</option>
-          {barangayOptions.map((barangay) => (
-            <option key={barangay} value={barangay}>{barangay}</option>
-          ))}
-        </select>
-        <select className="input-field" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
-          <option value="all">All Category</option>
-          <option value="Tricycle">Tricycle</option>
-          <option value="Jeepney">Jeepney</option>
-          <option value="Mini Bus">Mini Bus</option>
-        </select>
         <select className="input-field" value={zoneFilter} onChange={(e) => setZoneFilter(e.target.value)}>
           <option value="all">All Zones</option>
           {zoneOptions.map((zone) => (
@@ -637,8 +642,13 @@ const DriversList = () => {
                     <input name="birthplace" className="input-field" value={editForm.driver.birthplace} onChange={handleEditChange('driver')} />
                   </div>
                   <div className="edit-form-group">
-                    <label>Age</label>
-                    <input name="age" type="number" className="input-field" value={editForm.driver.age} onChange={handleEditChange('driver')} />
+                    <label>Age {editForm.driver.birthYear ? <span style={{ fontSize: '0.72rem', opacity: 0.6 }}>(auto-computed)</span> : ''}</label>
+                    <input
+                      name="age" type="number" className="input-field" value={editForm.driver.age}
+                      onChange={handleEditChange('driver')}
+                      readOnly={!!(editForm.driver.birthMonth && editForm.driver.birthYear)}
+                      style={editForm.driver.birthMonth && editForm.driver.birthYear ? { opacity: 0.7, background: 'var(--surface-bg)' } : {}}
+                    />
                   </div>
                   <div className="edit-form-group">
                     <label>Birth Month</label>

@@ -63,6 +63,7 @@ const OperatorsPage = () => {
   const [actionError, setActionError] = useState('');
   const [addingUnit, setAddingUnit] = useState(false);
   const [search, setSearch] = useState('');
+  const [zoneFilter, setZoneFilter] = useState('all');
   const [selectedOperatorId, setSelectedOperatorId] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -110,21 +111,32 @@ const OperatorsPage = () => {
     }
   };
 
+  const zoneOptions = useMemo(() => {
+    const dynamicZones = new Set();
+    operators.forEach((op) => {
+      (op.units || []).forEach((unit) => {
+        if (unit.zone) dynamicZones.add(unit.zone);
+      });
+    });
+    const predefined = [
+      'Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6', 'Zone 7', 'Zone 8', 'Zone 9',
+      'BB',
+      'J01', 'J02', 'J03', 'J04', 'J05', 'J06', 'J07', 'J08', 'J09', 'J10', 'J11', 'J12', 'J13',
+      'OB', 'OZ'
+    ];
+    predefined.forEach((z) => dynamicZones.add(z));
+    return [...dynamicZones].sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+  }, [operators]);
+
   const filteredOperators = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!query) return operators;
     return operators.filter((operator) => {
       const fullName = getFullName(operator).toLowerCase();
-      const unitMatches = (operator.units || []).some((unit) => (
-        String(unit.bodyNo || '').toLowerCase().includes(query)
-        || String(unit.plateNo || '').toLowerCase().includes(query)
-      ));
-      return (
-        fullName.includes(query)
-        || unitMatches
-      );
+      const matchesQuery = !query || fullName.includes(query);
+      const matchesZone = zoneFilter === 'all' || (operator.units || []).some((unit) => unit.zone === zoneFilter);
+      return matchesQuery && matchesZone;
     });
-  }, [operators, search]);
+  }, [operators, search, zoneFilter]);
 
   const selectedOperator = useMemo(
     () => filteredOperators.find((operator) => operator._id === selectedOperatorId) || null,
@@ -351,13 +363,13 @@ const OperatorsPage = () => {
         </div>
       </div>
 
-      <div className="glass-panel operators-search">
+      <div className="glass-panel operators-search" style={{ display: 'flex', gap: '0.8rem' }}>
         <div style={{ position: 'relative', flexGrow: 1 }}>
           <input
             type="text"
             className="input-field"
             style={{ paddingRight: '2.5rem' }}
-            placeholder="Search by operator name, body no, or plate no..."
+            placeholder="Search by operator name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -372,6 +384,12 @@ const OperatorsPage = () => {
             </button>
           )}
         </div>
+        <select className="input-field" style={{ maxWidth: '200px' }} value={zoneFilter} onChange={(e) => setZoneFilter(e.target.value)}>
+          <option value="all">All Zones</option>
+          {zoneOptions.map((zone) => (
+            <option key={zone} value={zone}>{zone}</option>
+          ))}
+        </select>
       </div>
 
       {loading ? (

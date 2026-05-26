@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Building2, LayoutDashboard, List, Users, Settings, History, ScrollText, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Building2, LayoutDashboard, List, Users, LogOut, History, ScrollText, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useConfirm } from '../context/ConfirmContext';
 import './Sidebar.css';
@@ -66,11 +66,11 @@ const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
           <span>Conductor List</span>
         </NavLink>
         <NavLink
-          to="/monitoring"
+          to="/unit-history"
           className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
         >
           <History size={20} />
-          <span>Unit Monitoring</span>
+          <span>Unit History</span>
         </NavLink>
         <NavLink
           to="/audit-logs"
@@ -84,7 +84,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
           className="nav-item logout-item"
           onClick={handleLogout}
         >
-          <Settings size={20} />
+          <LogOut size={20} />
           <span>Logout</span>
         </button>
       </nav>

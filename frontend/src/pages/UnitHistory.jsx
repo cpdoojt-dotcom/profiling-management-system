@@ -4,7 +4,7 @@ import { Search, History, ArrowRight, User, MapPin, Truck, Edit, X, Save, Bike, 
 import { useConfirm } from '../context/ConfirmContext';
 import { useToast } from '../context/ToastContext';
 import { formatAddress } from '../utils/formatUtils';
-import './UnitMonitoring.css';
+import './UnitHistory.css';
 
 const getColorOptions = (bodyNo, vehicleType) => {
   if (!bodyNo) return [];
@@ -49,7 +49,7 @@ const getFullName = (person) => {
     .join(' ');
 };
 
-const UnitMonitoring = () => {
+const UnitHistory = () => {
   const confirm = useConfirm();
   const toast = useToast();
   const [query, setQuery] = useState('');
@@ -103,7 +103,7 @@ const UnitMonitoring = () => {
       setDriversList(allDrivers);
       setConductorsList(conductorsRes.data);
     } catch (err) {
-      setError('Unable to load monitoring data.');
+      setError('Unable to load unit history data.');
     } finally {
       setLoading(false);
     }
@@ -236,13 +236,13 @@ const UnitMonitoring = () => {
   };
 
   return (
-    <div className="monitoring-page animate-fade-in">
-      <div className="monitoring-header">
-        <h1>Unit Monitoring & Lifecycle</h1>
+    <div className="history-page animate-fade-in">
+      <div className="history-header">
+        <h1>Unit History</h1>
         <p>Track the history and changes of any vehicle by its Body Number.</p>
       </div>
 
-      <div className="monitoring-search-wrap">
+      <div className="history-search-wrap">
         <form style={{ display: 'flex', flexGrow: 1, gap: '1rem', position: 'relative' }} onSubmit={searchUnits}>
           <div style={{ position: 'relative', flexGrow: 1 }}>
             <input
@@ -288,7 +288,7 @@ const UnitMonitoring = () => {
       {error && <p className="action-error">{error}</p>}
 
       {!selectedUnit && (
-        <div className="monitoring-content">
+        <div className="history-content">
           {loading ? (
             <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center' }}>
               <p>Loading units...</p>
@@ -638,4 +638,4 @@ const UnitMonitoring = () => {
   );
 };
 
-export default UnitMonitoring;
+export default UnitHistory;

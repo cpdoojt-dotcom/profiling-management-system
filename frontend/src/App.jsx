@@ -5,7 +5,7 @@ import DriversList from './pages/DriversList';
 import OperatorsPage from './pages/OperatorsPage';
 import DriverForm from './pages/DriverForm';
 import OperatorForm from './pages/OperatorForm';
-import UnitMonitoring from './pages/UnitMonitoring';
+import UnitHistory from './pages/UnitHistory';
 import ConductorList from './pages/ConductorList';
 import ConductorForm from './pages/ConductorForm';
 import Login from './pages/Login';
@@ -36,7 +36,7 @@ function App() {
             <Route path="drivers/new" element={<DriverForm />} />
             <Route path="conductors" element={<ConductorList />} />
             <Route path="conductors/new" element={<ConductorForm />} />
-            <Route path="monitoring" element={<UnitMonitoring />} />
+            <Route path="unit-history" element={<UnitHistory />} />
             <Route path="audit-logs" element={<AuditLogs />} />
           </Route>
         </Routes>

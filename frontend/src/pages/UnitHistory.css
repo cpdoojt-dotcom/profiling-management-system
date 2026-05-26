@@ -1,12 +1,12 @@
-.monitoring-page {
+.history-page {
   animation: fadeIn 0.4s ease;
 }
 
-.monitoring-header {
+.history-header {
   margin-bottom: 2rem;
 }
 
-.monitoring-search-wrap {
+.history-search-wrap {
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;
@@ -126,7 +126,7 @@
 }
 
 @media (max-width: 900px) {
-  .monitoring-search-wrap {
+  .history-search-wrap {
     flex-direction: column;
   }
 
