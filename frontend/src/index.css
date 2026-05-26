@@ -232,6 +232,7 @@ button {
   overflow: hidden;
   /* Prevent content clipping and let scroll handle it */
   animation: modalEnter 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  overflow-x: hidden;
 }
 
 @keyframes modalEnter {
@@ -316,17 +317,20 @@ button {
 @media (max-width: 640px) {
   .modal-overlay {
     padding: 0.5rem;
+    overflow-x: hidden;
   }
 
   .modal-content {
-    max-width: 100%;
+    max-width: 95%;
     /* Take full width minus padding on mobile */
     max-height: 95vh;
     border-radius: 12px;
+    overflow-x: hidden;
   }
 
   .modal-body {
     padding: 1rem;
+    overflow-x: hidden;
   }
 
   .modal-body .form-grid {

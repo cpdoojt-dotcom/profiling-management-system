@@ -473,14 +473,14 @@ const UnitHistory = () => {
 
       {showEditModal && (
         <div className="modal-overlay">
-          <div className="modal-content animate-fade-in" style={{ maxWidth: '600px' }}>
+          <div className="modal-content modal-content-large animate-fade-in">
             <div className="modal-header">
               <h3>Edit Unit Information</h3>
               <button className="modal-close" onClick={() => setShowEditModal(false)}><X size={20} /></button>
             </div>
             <form onSubmit={handleEditSubmit}>
               <div className="modal-body driver-form">
-                <div className="form-grid">
+                <div className="form-grid form-grid-responsive">
                   <div className="form-group">
                     <label>Body Number (Fixed)</label>
                     <input type="text" className="input-field" value={editFormData.bodyNo} disabled style={{ background: 'var(--surface-bg)', opacity: 0.7 }} />

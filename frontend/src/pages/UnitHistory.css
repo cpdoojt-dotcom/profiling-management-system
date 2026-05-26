@@ -125,6 +125,75 @@
   color: var(--text-secondary);
 }
 
+/* Modal responsiveness base styles */
+.modal-overlay {
+  padding: 1rem !important;
+  overflow-x: hidden !important;
+}
+
+.modal-content-large {
+  max-width: 700px !important;
+  width: 90vw !important;
+  max-height: 85vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.modal-body {
+  overflow-x: hidden !important;
+  width: 100% !important;
+  padding: 1.5rem !important;
+  box-sizing: border-box !important;
+}
+
+.modal-body.driver-form {
+  padding: 1.5rem !important;
+}
+
+.form-grid-responsive {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 1rem !important;
+  overflow-x: hidden !important;
+  width: 100% !important;
+  margin-bottom: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Override DriverForm.css form-grid styles for modal */
+.modal-body .form-grid.form-grid-responsive {
+  grid-template-columns: repeat(2, 1fr) !important;
+}
+
+.form-group {
+  min-width: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.input-field {
+  min-width: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+}
+
+select.input-field option {
+  max-width: 100% !important;
+  word-wrap: break-word !important;
+}
+
+@media (max-width: 768px) {
+  .modal-content-large {
+    max-width: 95vw !important;
+    width: 95vw !important;
+  }
+
+  .form-grid-responsive {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 @media (max-width: 900px) {
   .history-search-wrap {
     flex-direction: column;
@@ -139,6 +208,15 @@
   .details-header > div {
     width: 100%;
     flex-wrap: wrap;
+  }
+
+  .modal-content-large {
+    width: 90% !important;
+    max-width: none !important;
+  }
+
+  .form-grid-responsive {
+    grid-template-columns: 1fr !important;
   }
 }
 
@@ -174,5 +252,68 @@
   .diff-row td {
     padding: 0.4rem;
     font-size: 0.82rem;
+  }
+
+  /* Modal responsiveness */
+  .modal-content-large {
+    max-width: 95% !important;
+    width: 95% !important;
+    margin: 0.5rem !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+
+  .modal-body {
+    padding: 0.75rem !important;
+  }
+
+  .form-grid-responsive {
+    grid-template-columns: 1fr !important;
+    gap: 0.5rem !important;
+  }
+
+  .modal-header {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+
+  .modal-header h3 {
+    font-size: 1.1rem !important;
+  }
+
+  .modal-footer {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+
+  .modal-footer button {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-content-large {
+    width: 98% !important;
+    max-width: 98% !important;
+    margin: 0.25rem !important;
+  }
+
+  .modal-body {
+    padding: 0.5rem !important;
+  }
+
+  .form-grid-responsive {
+    grid-template-columns: 1fr !important;
+    gap: 0.5rem !important;
+  }
+
+  .form-group label {
+    font-size: 0.8rem !important;
+  }
+
+  .input-field {
+    font-size: 0.85rem !important;
+    padding: 0.5rem !important;
   }
 }
