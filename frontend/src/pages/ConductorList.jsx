@@ -83,6 +83,7 @@ const ConductorList = () => {
   const [selectedConductorId, setSelectedConductorId] = useState('');
   const [query, setQuery] = useState('');
   const [zoneFilter, setZoneFilter] = useState('');
+  const [vehicleTypeFilter, setVehicleTypeFilter] = useState('');
   const [page, setPage] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
   const [editImageFile, setEditImageFile] = useState(null);
@@ -100,6 +101,7 @@ const ConductorList = () => {
   const pageSize = 8;
   const searchParams = new URLSearchParams(location.search);
   const selectedFromQuery = searchParams.get('conductorId');
+  const typeFromQuery = searchParams.get('type');
 
   const fetchConductors = async () => {
     const res = await axios.get('/api/conductors');
@@ -125,7 +127,10 @@ const ConductorList = () => {
     if (selectedFromQuery) {
       setSelectedConductorId(selectedFromQuery);
     }
-  }, [selectedFromQuery]);
+    if (typeFromQuery) {
+      setVehicleTypeFilter(typeFromQuery);
+    }
+  }, [selectedFromQuery, typeFromQuery]);
 
   const zoneOptions = useMemo(() => {
     const dynamicZones = new Set(conductors.map((c) => c.unit?.zone).filter(Boolean));
@@ -143,9 +148,10 @@ const ConductorList = () => {
         || String(c.unit?.plateNo || '').toLowerCase().includes(normalizedQuery)
         || String(c.unit?.bodyNo || '').toLowerCase().includes(normalizedQuery);
       const matchesZone = !zoneFilter || c.unit?.zone === zoneFilter;
-      return matchesQuery && matchesZone;
+      const matchesVehicleType = !vehicleTypeFilter || c.unit?.vehicleType === vehicleTypeFilter;
+      return matchesQuery && matchesZone && matchesVehicleType;
     });
-  }, [conductors, query, zoneFilter]);
+  }, [conductors, query, zoneFilter, vehicleTypeFilter]);
 
   const sortedConductors = useMemo(() => {
     if (sortBy === 'createdAt') {

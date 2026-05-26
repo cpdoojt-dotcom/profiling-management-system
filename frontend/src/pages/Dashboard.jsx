@@ -450,7 +450,7 @@ const Dashboard = () => {
           <div className="category-action">View Directory →</div>
         </div>
 
-        <div className="category-stat-card glass-panel" onClick={() => navigate('/drivers?type=Mini%20Bus')}>
+        <div className="category-stat-card glass-panel" onClick={() => navigate('/conductors?type=Mini%20Bus')}>
           <div className="category-info">
             <span className="category-label"><Bus size={18} /> Mini Bus</span>
             <div style={{ display: 'flex', gap: '1rem', marginTop: '0.4rem' }}>

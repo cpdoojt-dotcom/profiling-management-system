@@ -98,6 +98,7 @@ const DriversList = () => {
   const [selectedDriverId, setSelectedDriverId] = useState('');
   const [query, setQuery] = useState('');
   const [zoneFilter, setZoneFilter] = useState('all');
+  const [vehicleTypeFilter, setVehicleTypeFilter] = useState('');
   const [page, setPage] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
   const [editImageFile, setEditImageFile] = useState(null);
@@ -112,6 +113,7 @@ const DriversList = () => {
   const pageSize = 8;
   const searchParams = new URLSearchParams(location.search);
   const selectedFromQuery = searchParams.get('driverId');
+  const typeFromQuery = searchParams.get('type');
 
   const fetchDrivers = async () => {
     const res = await axios.get('/api/drivers');
@@ -137,7 +139,10 @@ const DriversList = () => {
     if (selectedFromQuery) {
       setSelectedDriverId(selectedFromQuery);
     }
-  }, [selectedFromQuery]);
+    if (typeFromQuery) {
+      setVehicleTypeFilter(typeFromQuery);
+    }
+  }, [selectedFromQuery, typeFromQuery]);
 
   const zoneOptions = useMemo(() => {
     const dynamicZones = new Set(drivers.map((driver) => driver.unit?.zone).filter(Boolean));
@@ -162,9 +167,10 @@ const DriversList = () => {
         || String(driver.unit?.plateNo || '').toLowerCase().includes(normalizedQuery)
         || String(driver.unit?.bodyNo || '').toLowerCase().includes(normalizedQuery);
       const matchesZone = zoneFilter === 'all' || driver.unit?.zone === zoneFilter;
-      return matchesQuery && matchesZone;
+      const matchesVehicleType = !vehicleTypeFilter || driver.driverType === vehicleTypeFilter;
+      return matchesQuery && matchesZone && matchesVehicleType;
     });
-  }, [drivers, query, zoneFilter]);
+  }, [drivers, query, zoneFilter, vehicleTypeFilter]);
 
   const sortedDrivers = useMemo(() => {
     if (sortBy === 'createdAt') {
