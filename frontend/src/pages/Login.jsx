@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Mail, Lock, LogIn, Shield, Bus, Truck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -9,10 +9,21 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const redirectTo = location.state?.from?.pathname || '/';
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('rememberedEmail');
+    const savedPassword = localStorage.getItem('rememberedPassword');
+    if (savedEmail && savedPassword) {
+      setEmail(savedEmail);
+      setPassword(savedPassword);
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,10 +32,26 @@ const Login = () => {
 
     try {
       await login(email, password);
+      if (rememberMe) {
+        localStorage.setItem('rememberedEmail', email);
+        localStorage.setItem('rememberedPassword', password);
+      } else {
+        localStorage.removeItem('rememberedEmail');
+        localStorage.removeItem('rememberedPassword');
+      }
       navigate(redirectTo, { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || 'Unable to login. Please try again.');
       setIsSubmitting(false);
+    }
+  };
+
+  const handleRememberMeChange = (e) => {
+    const checked = e.target.checked;
+    setRememberMe(checked);
+    if (!checked) {
+      localStorage.removeItem('rememberedEmail');
+      localStorage.removeItem('rememberedPassword');
     }
   };
 
@@ -80,6 +107,7 @@ const Login = () => {
                 placeholder="admin@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                autoComplete={rememberMe ? 'on' : 'off'}
                 required
               />
             </div>
@@ -96,6 +124,7 @@ const Login = () => {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete={rememberMe ? 'on' : 'off'}
                 required
               />
             </div>
@@ -103,7 +132,7 @@ const Login = () => {
 
           <div className="form-options">
             <label className="checkbox-container">
-              <input type="checkbox" />
+              <input type="checkbox" checked={rememberMe} onChange={handleRememberMeChange} />
               <span className="checkmark"></span>
               Remember me
             </label>
