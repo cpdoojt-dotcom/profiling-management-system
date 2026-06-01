@@ -87,6 +87,8 @@ const ConductorList = () => {
   const [page, setPage] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
   const [editImageFile, setEditImageFile] = useState(null);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [modalImageUrl, setModalImageUrl] = useState('');
   const [operators, setOperators] = useState([]);
   const [editForm, setEditForm] = useState({
     conductor: {
@@ -480,7 +482,23 @@ const ConductorList = () => {
                     className={selectedConductorId === c._id ? 'selected-row' : ''}
                   >
                     <td style={{ fontWeight: '700', color: 'var(--accent-color)' }}>{c.unit?.bodyNo || '-'}</td>
-                    <td>{getFullName(c)}</td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        {c.photoUrl ? (
+                          <img 
+                            src={c.photoUrl} 
+                            alt={getFullName(c)} 
+                            style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--accent-color)', cursor: 'pointer' }} 
+                            onClick={(e) => { e.stopPropagation(); setModalImageUrl(c.photoUrl); setImageModalOpen(true); }}
+                          />
+                        ) : (
+                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--accent-glow)', border: '1px solid var(--accent-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: '700', color: 'var(--accent-color)' }}>
+                            {(c.firstName?.[0] || '').toUpperCase()}
+                          </div>
+                        )}
+                        {getFullName(c)}
+                      </div>
+                    </td>
                     <td>
                       <span className={`status-type mini-bus`}>
                         <Bus size={14} /> {' '}{c.status}
@@ -534,6 +552,8 @@ const ConductorList = () => {
                       src={editImageFile ? URL.createObjectURL(editImageFile) : selectedConductor.photoUrl}
                       alt="Conductor preview"
                       className="details-photo"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => { setModalImageUrl(editImageFile ? URL.createObjectURL(editImageFile) : selectedConductor.photoUrl); setImageModalOpen(true); }}
                     />
                   )}
                 </div>
@@ -678,7 +698,13 @@ const ConductorList = () => {
               <div className="details-grid">
                 {selectedConductor.photoUrl ? (
                   <div className="details-photo-wrap">
-                    <img src={selectedConductor.photoUrl} alt={`${selectedConductor.firstName} ${selectedConductor.lastName}`} className="details-photo" />
+                    <img 
+                      src={selectedConductor.photoUrl} 
+                      alt={`${selectedConductor.firstName} ${selectedConductor.lastName}`} 
+                      className="details-photo" 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => { setModalImageUrl(selectedConductor.photoUrl); setImageModalOpen(true); }}
+                    />
                   </div>
                 ) : null}
                 <div><span>Name:</span><strong>{getFullName(selectedConductor)}</strong></div>
@@ -700,6 +726,60 @@ const ConductorList = () => {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Image Modal */}
+      {imageModalOpen && (
+        <div 
+          className="image-modal-overlay" 
+          onClick={() => setImageModalOpen(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2000,
+            cursor: 'pointer'
+          }}
+        >
+          <img 
+            src={modalImageUrl} 
+            alt="Full size" 
+            style={{
+              maxWidth: '90vw',
+              maxHeight: '90vh',
+              objectFit: 'contain',
+              borderRadius: '8px'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button 
+            onClick={() => setImageModalOpen(false)}
+            style={{
+              position: 'absolute',
+              top: '20px',
+              right: '20px',
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              cursor: 'pointer',
+              fontSize: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            ×
+          </button>
         </div>
       )}
     </div>

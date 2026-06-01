@@ -136,7 +136,8 @@
 }
 
 .details-photo-wrap {
-  display: block !important;
+  display: flex !important;
+  justify-content: center;
   margin-bottom: 0.6rem;
 }
 

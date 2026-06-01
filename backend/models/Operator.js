@@ -21,6 +21,7 @@ const operatorSchema = new mongoose.Schema({
     required: true,
     default: 'FOR HIRE'
   },
+  photoUrl: { type: String, trim: true },
 }, { timestamps: true });
 
 const Operator = mongoose.model('Operator', operatorSchema);

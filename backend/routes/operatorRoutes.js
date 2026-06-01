@@ -1,12 +1,15 @@
 import express from 'express';
+import multer from 'multer';
 import Operator from '../models/Operator.js';
 import Driver from '../models/Driver.js';
 import Unit from '../models/Unit.js';
 import UnitHistory from '../models/UnitHistory.js';
 import Conductor from '../models/Conductor.js';
+import { uploadImageBuffer } from '../config/cloudinary.js';
 import { createAuditLog } from '../utils/auditLog.js';
 
 const router = express.Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
 const getFullName = (person) => {
   if (!person) return '';
@@ -35,6 +38,7 @@ const normalizeOperatorData = (operatorData) => ({
   contactNo: operatorData.contactNo,
   ltfrbMchCaseNo: operatorData.ltfrbMchCaseNo,
   operatorType: operatorData.operatorType || 'FOR HIRE',
+  photoUrl: operatorData.photoUrl,
 });
 
 const normalizeUnitData = (unitData) => ({
@@ -66,13 +70,19 @@ const logUnitHistory = async (unitId, bodyNo, oldData, newData, changeType = 'Up
 };
 
 // Create or Update operator record with units and optional drivers/conductors
-router.post('/', async (req, res) => {
+router.post('/', upload.single('operatorImage'), async (req, res) => {
   try {
-    const operatorData = req.body.operator || req.body;
+    let operatorData = req.body.operator || req.body;
     const unitsData = Array.isArray(req.body.units) ? req.body.units : [];
 
     if (unitsData.length === 0) {
       return res.status(400).json({ message: 'At least one unit is required.' });
+    }
+
+    // Handle image upload
+    if (req.file?.buffer) {
+      const uploadResult = await uploadImageBuffer(req.file.buffer);
+      operatorData.photoUrl = uploadResult.secure_url;
     }
 
     // Upsert Operator (Find by Full Name)
@@ -190,14 +200,32 @@ router.post('/:id/units', async (req, res) => {
 });
 
 // Update operator details
-router.put('/:id', async (req, res) => {
+router.put('/:id', upload.single('operatorImage'), async (req, res) => {
   try {
     const operator = await Operator.findById(req.params.id);
     if (!operator) return res.status(404).json({ message: 'Operator not found' });
     const beforeSnapshot = operator.toObject();
 
-    const updatedData = normalizeOperatorData(req.body);
+    let operatorData;
+    if (req.body.operator) {
+      operatorData = typeof req.body.operator === 'string' ? JSON.parse(req.body.operator) : req.body.operator;
+    } else {
+      operatorData = req.body;
+    }
+
+    const updatedData = normalizeOperatorData(operatorData);
     Object.assign(operator, updatedData);
+
+    // Only update photoUrl if a new image is uploaded
+    if (req.file?.buffer) {
+      const uploadResult = await uploadImageBuffer(req.file.buffer);
+      operator.photoUrl = uploadResult.secure_url;
+    } else {
+      // Preserve existing photoUrl if no new image is uploaded
+      if (operatorData.photoUrl === undefined || operatorData.photoUrl === null) {
+        operator.photoUrl = beforeSnapshot.photoUrl;
+      }
+    }
     
     await operator.save();
     await createAuditLog({

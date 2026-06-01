@@ -78,6 +78,8 @@ const getFullName = (person) => {
 
 const Dashboard = () => {
   const [drivers, setDrivers] = useState([]);
+  const [operators, setOperators] = useState([]);
+  const [conductors, setConductors] = useState([]);
   const [summary, setSummary] = useState({ 
     drivers: 0, 
     operators: 0, 
@@ -101,12 +103,16 @@ const Dashboard = () => {
 
   const fetchDriversData = async () => {
     try {
-      const [driversRes, summaryRes] = await Promise.all([
+      const [driversRes, summaryRes, operatorsRes, conductorsRes] = await Promise.all([
         axios.get('/api/drivers'),
         axios.get('/api/drivers/meta/summary'),
+        axios.get('/api/operators'),
+        axios.get('/api/conductors'),
       ]);
       setDrivers(driversRes.data);
       setSummary(summaryRes.data);
+      setOperators(operatorsRes.data);
+      setConductors(conductorsRes.data);
     } catch (err) {
       setError(err.response?.data?.message || 'Unable to load dashboard data.');
     } finally {
@@ -349,6 +355,8 @@ const Dashboard = () => {
   };
 
   const recentDrivers = useMemo(() => drivers.slice(0, 5), [drivers]);
+  const recentOperators = useMemo(() => operators.slice(0, 5), [operators]);
+  const recentConductors = useMemo(() => conductors.slice(0, 5), [conductors]);
 
   return (
     <div className="dashboard animate-fade-in">
@@ -463,44 +471,118 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="recent-section glass-panel">
-        <div className="recent-header">
-          <h2>Recently Added Drivers</h2>
-          <Link to="/drivers" className="drivers-link">View all</Link>
+      <div className="recent-sections">
+        <div className="recent-section glass-panel">
+          <div className="recent-header">
+            <h2>Recently Added Drivers</h2>
+            <Link to="/drivers" className="drivers-link">View all</Link>
+          </div>
+          {loading ? (
+            <div className="empty-state">
+              <p>Loading latest drivers...</p>
+            </div>
+          ) : error ? (
+            <div className="empty-state">
+              <p>{error}</p>
+            </div>
+          ) : recentDrivers.length === 0 ? (
+            <div className="empty-state">
+              <p>No drivers added yet.</p>
+            </div>
+          ) : (
+            <div className="recent-list">
+              {recentDrivers.map((driver) => (
+                <Link className="recent-item" key={driver._id} to={`/drivers?driverId=${driver._id}`}>
+                  <div className="recent-left">
+                    {driver.photoUrl ? (
+                      <img src={driver.photoUrl} alt={`${driver.firstName} ${driver.lastName}`} className="driver-thumb" />
+                    ) : (
+                      <div className="driver-thumb-placeholder">
+                        {(driver.firstName?.[0] || '').toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div className="recent-center">
+                    <h3>{getFullName(driver)}</h3>
+                    <p>{driver.licenseNo} | Body #{driver.unit?.bodyNo || '-'} | Plate {driver.unit?.plateNo || '-'}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
-        {loading ? (
-          <div className="empty-state">
-            <p>Loading latest drivers...</p>
+
+        <div className="recent-section glass-panel">
+          <div className="recent-header">
+            <h2>Recently Added Operators</h2>
+            <Link to="/operators" className="drivers-link">View all</Link>
           </div>
-        ) : error ? (
-          <div className="empty-state">
-            <p>{error}</p>
+          {loading ? (
+            <div className="empty-state">
+              <p>Loading latest operators...</p>
+            </div>
+          ) : recentOperators.length === 0 ? (
+            <div className="empty-state">
+              <p>No operators added yet.</p>
+            </div>
+          ) : (
+            <div className="recent-list">
+              {recentOperators.map((operator) => (
+                <Link className="recent-item" key={operator._id} to={`/operators`}>
+                  <div className="recent-left">
+                    {operator.photoUrl ? (
+                      <img src={operator.photoUrl} alt={getFullName(operator)} className="driver-thumb" />
+                    ) : (
+                      <div className="driver-thumb-placeholder">
+                        {(operator.firstName?.[0] || '').toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div className="recent-center">
+                    <h3>{getFullName(operator)}</h3>
+                    <p>{operator.contactNo || '-'} | {operator.unitCount || 0} unit(s) | {operator.driverCount || 0} driver(s)</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="recent-section glass-panel">
+          <div className="recent-header">
+            <h2>Recently Added Conductors</h2>
+            <Link to="/conductors" className="drivers-link">View all</Link>
           </div>
-        ) : recentDrivers.length === 0 ? (
-          <div className="empty-state">
-            <p>No drivers added yet.</p>
-          </div>
-        ) : (
-          <div className="recent-list">
-            {recentDrivers.map((driver) => (
-              <Link className="recent-item" key={driver._id} to={`/drivers?driverId=${driver._id}`}>
-                <div className="recent-left">
-                  {driver.photoUrl ? (
-                    <img src={driver.photoUrl} alt={`${driver.firstName} ${driver.lastName}`} className="driver-thumb" />
-                  ) : (
-                    <div className="driver-thumb-placeholder">
-                      {(driver.firstName?.[0] || '').toUpperCase()}
-                    </div>
-                  )}
-                </div>
-                <div className="recent-center">
-                  <h3>{getFullName(driver)}</h3>
-                  <p>{driver.licenseNo} | Body #{driver.unit?.bodyNo || '-'} | Plate {driver.unit?.plateNo || '-'}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+          {loading ? (
+            <div className="empty-state">
+              <p>Loading latest conductors...</p>
+            </div>
+          ) : recentConductors.length === 0 ? (
+            <div className="empty-state">
+              <p>No conductors added yet.</p>
+            </div>
+          ) : (
+            <div className="recent-list">
+              {recentConductors.map((conductor) => (
+                <Link className="recent-item" key={conductor._id} to={`/conductors?conductorId=${conductor._id}`}>
+                  <div className="recent-left">
+                    {conductor.photoUrl ? (
+                      <img src={conductor.photoUrl} alt={`${conductor.firstName} ${conductor.lastName}`} className="driver-thumb" />
+                    ) : (
+                      <div className="driver-thumb-placeholder">
+                        {(conductor.firstName?.[0] || '').toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div className="recent-center">
+                    <h3>{getFullName(conductor)}</h3>
+                    <p>Body #{conductor.unit?.bodyNo || '-'} | Plate {conductor.unit?.plateNo || '-'} | {conductor.status || 'Active'}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Modern, premium glassmorphism importing overlay */}

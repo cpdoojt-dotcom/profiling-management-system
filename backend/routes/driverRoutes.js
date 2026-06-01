@@ -168,6 +168,11 @@ router.put('/:id', upload.single('driverImage'), async (req, res) => {
     if (req.file?.buffer) {
       const uploadResult = await uploadImageBuffer(req.file.buffer);
       nextDriverData.photoUrl = uploadResult.secure_url;
+    } else {
+      // Preserve existing photoUrl if no new image is uploaded
+      if (nextDriverData.photoUrl === undefined || nextDriverData.photoUrl === null) {
+        nextDriverData.photoUrl = beforeSnapshot.photoUrl;
+      }
     }
 
     Object.assign(driver, nextDriverData);

@@ -112,12 +112,20 @@
   transform: translateX(0);
 }
 
+.recent-sections {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
 .recent-section {
+  display: flex;
+  flex-direction: column;
   padding: 1.5rem;
 }
 
 .recent-section h2 {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
 }
 
 .recent-header {

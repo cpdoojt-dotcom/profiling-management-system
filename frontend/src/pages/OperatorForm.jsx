@@ -78,6 +78,7 @@ const OperatorForm = () => {
   const [error, setError] = useState('');
   const [operator, setOperator] = useState(initialOperator);
   const [units, setUnits] = useState([{ ...initialUnit }]);
+  const [operatorImageFile, setOperatorImageFile] = useState(null);
 
   // Auto-compute age from birthdate
   useEffect(() => {
@@ -200,10 +201,14 @@ const OperatorForm = () => {
         ...unit,
       }));
 
-      await axios.post('/api/operators', {
-        operator: normalizedOperator,
-        units: normalizedUnits,
-      });
+      const payload = new FormData();
+      payload.append('operator', JSON.stringify(normalizedOperator));
+      payload.append('units', JSON.stringify(normalizedUnits));
+      if (operatorImageFile) {
+        payload.append('operatorImage', operatorImageFile);
+      }
+
+      await axios.post('/api/operators', payload);
       toast.success('Operator and unit(s) registered successfully!');
       navigate('/operators');
     } catch (err) {
@@ -231,6 +236,29 @@ const OperatorForm = () => {
 
         <h2 className="section-title">Operator Information</h2>
         <div className="form-grid">
+          <div className="form-group" style={{ gridColumn: 'span 2' }}>
+            <label>Operator Photo</label>
+            <input
+              type="file"
+              accept="image/*"
+              className="input-field"
+              onChange={(e) => setOperatorImageFile(e.target.files?.[0] || null)}
+            />
+            {operatorImageFile && (
+              <img
+                src={URL.createObjectURL(operatorImageFile)}
+                alt="Operator preview"
+                style={{
+                  width: '100px',
+                  height: '100px',
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  marginTop: '0.5rem',
+                  border: '2px solid var(--accent-color)'
+                }}
+              />
+            )}
+          </div>
           <div className="form-group">
             <label>Last Name</label>
             <input required type="text" name="lastName" className="input-field" value={operator.lastName} onChange={handleOperatorChange} />
@@ -399,7 +427,7 @@ const OperatorForm = () => {
         ))}
 
         <div className="form-actions">
-          <button type="button" className="btn-secondary" onClick={() => navigate('/operators')}>
+          <button type="button" className="btn-secondary" onClick={() => { navigate('/operators'); setOperatorImageFile(null); }}>
             <X size={18} />
             Cancel
           </button>

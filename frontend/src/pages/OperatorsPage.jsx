@@ -76,6 +76,9 @@ const OperatorsPage = () => {
   const [zoneFilter, setZoneFilter] = useState('all');
   const [selectedOperatorId, setSelectedOperatorId] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  const [editImageFile, setEditImageFile] = useState(null);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [modalImageUrl, setModalImageUrl] = useState('');
   const [editForm, setEditForm] = useState({
     lastName: '', firstName: '', middleName: '', extensionName: '', civilStatus: '', age: '',
     addressNo: '', street: '', purok: '', barangay: '', cityMunicipality: '',
@@ -226,6 +229,7 @@ const OperatorsPage = () => {
       contactNo: selectedOperator.contactNo || '',
       operatorType: selectedOperator.operatorType || 'FOR HIRE',
     });
+    setEditImageFile(null);
     setIsEditing(true);
     setActionError('');
   };
@@ -271,8 +275,15 @@ const OperatorsPage = () => {
     setAddingUnit(true);
     setActionError('');
     try {
-      const res = await axios.put(`/api/operators/${selectedOperatorId}`, editForm);
+      const payload = new FormData();
+      payload.append('operator', JSON.stringify(editForm));
+      if (editImageFile) {
+        payload.append('operatorImage', editImageFile);
+      }
+
+      const res = await axios.put(`/api/operators/${selectedOperatorId}`, payload);
       setOperators(prev => prev.map(op => op._id === selectedOperatorId ? { ...op, ...res.data } : op));
+      setEditImageFile(null);
       toast.success('Operator profile updated successfully!');
       setIsEditing(false);
     } catch (err) {
@@ -432,8 +443,23 @@ const OperatorsPage = () => {
                     className={`operator-card ${selectedOperatorId === operator._id ? 'active' : ''}`}
                     onClick={() => setSelectedOperatorId(operator._id)}
                   >
-                    <div className="operator-card-title">
-                      {getFullName(operator)}
+                    <div className="operator-card-header">
+                      {operator.photoUrl ? (
+                        <img 
+                          src={operator.photoUrl} 
+                          alt={getFullName(operator)} 
+                          className="operator-card-photo" 
+                          style={{ cursor: 'pointer' }}
+                          onClick={(e) => { e.stopPropagation(); setModalImageUrl(operator.photoUrl); setImageModalOpen(true); }}
+                        />
+                      ) : (
+                        <div className="operator-card-photo-placeholder">
+                          {(operator.firstName?.[0] || '').toUpperCase()}
+                        </div>
+                      )}
+                      <div className="operator-card-title">
+                        {getFullName(operator)}
+                      </div>
                     </div>
                     <p>{operator.unitCount || 0} unit(s) | {operator.driverCount} driver(s) | {operator.conductorCount || 0} conductor(s)</p>
                     <span>Contact: {operator.contactNo || '-'}</span>
@@ -461,6 +487,24 @@ const OperatorsPage = () => {
               <p className="operators-state">Select an operator to view details and assigned drivers.</p>
             ) : isEditing ? (
               <form onSubmit={handleUpdateOperator} className="edit-form">
+                <div className="edit-photo-group">
+                  <label>Replace Operator Photo</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="input-field"
+                    onChange={(e) => setEditImageFile(e.target.files?.[0] || null)}
+                  />
+                  {(editImageFile || selectedOperator.photoUrl) && (
+                    <img
+                      src={editImageFile ? URL.createObjectURL(editImageFile) : selectedOperator.photoUrl}
+                      alt="Operator preview"
+                      className="details-photo"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => { setModalImageUrl(editImageFile ? URL.createObjectURL(editImageFile) : selectedOperator.photoUrl); setImageModalOpen(true); }}
+                    />
+                  )}
+                </div>
                 <div className="form-grid-2col">
                   <div className="edit-form-group">
                     <label>First Name</label>
@@ -539,7 +583,7 @@ const OperatorsPage = () => {
                   </div>
                 </div>
                 <div className="form-actions">
-                  <button type="button" className="btn-secondary" onClick={() => setIsEditing(false)}>Cancel</button>
+                  <button type="button" className="btn-secondary" onClick={() => { setIsEditing(false); setEditImageFile(null); }}>Cancel</button>
                   <button type="submit" className="btn-primary" disabled={addingUnit}>
                     {addingUnit ? 'Saving...' : 'Save Changes'}
                   </button>
@@ -548,11 +592,22 @@ const OperatorsPage = () => {
             ) : (
               <>
                 <div className="operator-details-controls">
-                  <button className="btn-secondary" type="button" onClick={handleAddUnitClick} disabled={addingUnit}>
+                  <button className="btn-primary" type="button" onClick={handleAddUnitClick} disabled={addingUnit}>
                     <Plus size={16} /> Add Unit
                   </button>
                 </div>
                 <div className="operator-meta">
+                  {selectedOperator.photoUrl ? (
+                    <div className="details-photo-wrap">
+                      <img 
+                        src={selectedOperator.photoUrl} 
+                        alt={getFullName(selectedOperator)} 
+                        className="details-photo" 
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => { setModalImageUrl(selectedOperator.photoUrl); setImageModalOpen(true); }}
+                      />
+                    </div>
+                  ) : null}
                   <div><span>Name:</span><strong>{getFullName(selectedOperator)}</strong></div>
                   <div><span>Classification:</span><strong>{selectedOperator.operatorType || '-'}</strong></div>
                   <div><span>Total Units:</span><strong>{selectedOperator.unitCount || 0}</strong></div>
@@ -788,6 +843,60 @@ const OperatorsPage = () => {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* Image Modal */}
+      {imageModalOpen && (
+        <div 
+          className="image-modal-overlay" 
+          onClick={() => setImageModalOpen(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2000,
+            cursor: 'pointer'
+          }}
+        >
+          <img 
+            src={modalImageUrl} 
+            alt="Full size" 
+            style={{
+              maxWidth: '90vw',
+              maxHeight: '90vh',
+              objectFit: 'contain',
+              borderRadius: '8px'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button 
+            onClick={() => setImageModalOpen(false)}
+            style={{
+              position: 'absolute',
+              top: '20px',
+              right: '20px',
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              cursor: 'pointer',
+              fontSize: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            ×
+          </button>
         </div>
       )}
     </div>

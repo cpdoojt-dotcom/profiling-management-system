@@ -142,6 +142,11 @@ router.put('/:id', upload.single('conductorImage'), async (req, res) => {
     if (req.file?.buffer) {
       const uploadResult = await uploadImageBuffer(req.file.buffer);
       nextConductorData.photoUrl = uploadResult.secure_url;
+    } else {
+      // Preserve existing photoUrl if no new image is uploaded
+      if (nextConductorData.photoUrl === undefined || nextConductorData.photoUrl === null) {
+        nextConductorData.photoUrl = beforeSnapshot.photoUrl;
+      }
     }
 
     Object.assign(conductor, nextConductorData);
