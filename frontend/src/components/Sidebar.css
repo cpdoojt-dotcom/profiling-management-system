@@ -36,6 +36,12 @@
   min-width: 0;
 }
 
+.sidebar-logo {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
 .sidebar-toggle {
   width: 30px;
   height: 30px;

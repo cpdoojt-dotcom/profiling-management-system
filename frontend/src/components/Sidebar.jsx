@@ -20,7 +20,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
     <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-brand">
         <div className="sidebar-brand-main">
-          <Users size={24} />
+          <img src="/favicon.svg" alt="PUV Profiling Logo" className="sidebar-logo" />
           <span>PUV Profiling</span>
         </div>
         <button
