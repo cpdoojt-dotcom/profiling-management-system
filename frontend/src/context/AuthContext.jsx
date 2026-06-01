@@ -7,12 +7,12 @@ const API_URL = '/api/auth';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(sessionStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
     delete axios.defaults.headers.common['Authorization'];
     setToken(null);
     setUser(null);
@@ -20,10 +20,12 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // If we have a token stored, restore the user session
-    const storedUser = localStorage.getItem('user');
-    if (token && storedUser) {
+    const storedUser = sessionStorage.getItem('user');
+    const storedToken = sessionStorage.getItem('token');
+
+    if (storedToken && storedUser) {
       setUser(JSON.parse(storedUser));
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
     }
     setLoading(false);
 
@@ -48,8 +50,8 @@ export const AuthProvider = ({ children }) => {
     const res = await axios.post(`${API_URL}/login`, { email, password });
     const { token: newToken, user: userData } = res.data;
 
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(userData));
+    sessionStorage.setItem('token', newToken);
+    sessionStorage.setItem('user', JSON.stringify(userData));
     axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
 
     setToken(newToken);
