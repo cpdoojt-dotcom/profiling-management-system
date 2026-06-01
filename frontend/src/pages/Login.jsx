@@ -84,10 +84,33 @@ const Login = () => {
       <div className="login-card glass-panel animate-fade-in">
         <div className="login-header">
           <div className="logo-icon">
-            <Shield size={32} />
+            <svg viewBox="0 0 32 32" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ overflow: 'visible' }}>
+              {/* Shield base representing security/profiling */}
+              <path d="M16 2 L28 6 L28 17 C28 24 22 28 16 30 C10 28 4 24 4 17 L4 6 Z" strokeWidth="1.8" opacity="0.8" />
+              
+              {/* PUV vehicle silhouette inside the shield */}
+              {/* Destination board */}
+              <rect x="12" y="8" width="8" height="3" rx="0.5" strokeWidth="1.2" fill="currentColor" fillOpacity="0.1" />
+              
+              {/* Windshield */}
+              <rect x="10" y="12" width="12" height="6" rx="1.2" strokeWidth="1.5" />
+              
+              {/* Vehicle body */}
+              <path d="M9 19 h14 v5 H9 Z" strokeWidth="1.5" fill="currentColor" fillOpacity="0.2" />
+              
+              {/* Headlights (Cyan glow to match modern styling) */}
+              <circle cx="12" cy="21.5" r="0.8" fill="#06b6d4" stroke="none" />
+              <circle cx="20" cy="21.5" r="0.8" fill="#06b6d4" stroke="none" />
+              
+              {/* Wheels / Bumper */}
+              <path d="M11 24 v1.5 M21 24 v1.5" strokeWidth="1.5" />
+              
+              {/* Scanning Profiler bar - bright glowing neon emerald color */}
+              <line x1="5" y1="15" x2="27" y2="15" stroke="#10b981" strokeWidth="2.2" />
+            </svg>
           </div>
-          <h1>PUV-GO</h1>
-          <p>PUV Profiler</p>
+          <h1>PUV Profiling</h1>
+          <p>Profiling Management System</p>
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
