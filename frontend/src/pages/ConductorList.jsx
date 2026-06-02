@@ -424,7 +424,6 @@ const ConductorList = () => {
             type="text"
             className="input-field"
             style={{ paddingRight: '2.5rem' }}
-            placeholder="Search by body number or conductor name..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -484,18 +483,12 @@ const ConductorList = () => {
                     <td style={{ fontWeight: '700', color: 'var(--accent-color)' }}>{c.unit?.bodyNo || '-'}</td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        {c.photoUrl ? (
-                          <img 
-                            src={c.photoUrl} 
-                            alt={getFullName(c)} 
-                            style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--accent-color)', cursor: 'pointer' }} 
-                            onClick={(e) => { e.stopPropagation(); setModalImageUrl(c.photoUrl); setImageModalOpen(true); }}
-                          />
-                        ) : (
-                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--accent-glow)', border: '1px solid var(--accent-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: '700', color: 'var(--accent-color)' }}>
-                            {(c.firstName?.[0] || '').toUpperCase()}
-                          </div>
-                        )}
+                        <img 
+                          src={c.photoUrl || '/default.jpg'}
+                          alt={getFullName(c)} 
+                          style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--accent-color)', cursor: 'pointer' }} 
+                          onClick={(e) => { e.stopPropagation(); setModalImageUrl(c.photoUrl || '/default.jpg'); setImageModalOpen(true); }}
+                        />
                         {getFullName(c)}
                       </div>
                     </td>
@@ -572,7 +565,7 @@ const ConductorList = () => {
                   </div>
                   <div className="edit-form-group">
                     <label>Extension Name (Jr., Sr., III)</label>
-                    <input name="extensionName" className="input-field" value={editForm.conductor.extensionName} onChange={handleEditChange('conductor')} placeholder="e.g. JR, SR, III" />
+                    <input name="extensionName" className="input-field" value={editForm.conductor.extensionName} onChange={handleEditChange('conductor')} />
                   </div>
                   <div className="edit-form-group">
                     <label>Gender</label>
@@ -631,11 +624,11 @@ const ConductorList = () => {
                   </div>
                   <div className="edit-form-group">
                     <label>Birth Date (Day)</label>
-                    <input name="birthDate" type="number" min="1" max="31" className="input-field" value={editForm.conductor.birthDate} onChange={handleEditChange('conductor')} placeholder="DD" />
+                    <input name="birthDate" type="number" min="1" max="31" className="input-field" value={editForm.conductor.birthDate} onChange={handleEditChange('conductor')} />
                   </div>
                   <div className="edit-form-group">
                     <label>Birth Year</label>
-                    <input name="birthYear" type="number" min="1900" max="2100" className="input-field" value={editForm.conductor.birthYear} onChange={handleEditChange('conductor')} placeholder="YYYY" />
+                    <input name="birthYear" type="number" min="1900" max="2100" className="input-field" value={editForm.conductor.birthYear} onChange={handleEditChange('conductor')} />
                   </div>
                   <div className="edit-form-group">
                     <label>Address No.</label>
@@ -696,17 +689,15 @@ const ConductorList = () => {
               </form>
             ) : (
               <div className="details-grid">
-                {selectedConductor.photoUrl ? (
-                  <div className="details-photo-wrap">
-                    <img 
-                      src={selectedConductor.photoUrl} 
-                      alt={`${selectedConductor.firstName} ${selectedConductor.lastName}`} 
-                      className="details-photo" 
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => { setModalImageUrl(selectedConductor.photoUrl); setImageModalOpen(true); }}
-                    />
-                  </div>
-                ) : null}
+                <div className="details-photo-wrap">
+                  <img 
+                    src={selectedConductor.photoUrl || '/default.jpg'}
+                    alt={`${selectedConductor.firstName} ${selectedConductor.lastName}`} 
+                    className="details-photo" 
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => { setModalImageUrl(selectedConductor.photoUrl || '/default.jpg'); setImageModalOpen(true); }}
+                  />
+                </div>
                 <div><span>Name:</span><strong>{getFullName(selectedConductor)}</strong></div>
                 <div><span>Gender:</span><strong>{selectedConductor.gender || '-'}</strong></div>
                 <div><span>Body No:</span><strong>{selectedConductor.unit?.bodyNo || '-'}</strong></div>

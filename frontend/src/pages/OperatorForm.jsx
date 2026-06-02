@@ -273,7 +273,7 @@ const OperatorForm = () => {
           </div>
           <div className="form-group">
             <label>Extension Name (Jr., Sr., III)</label>
-            <input type="text" name="extensionName" className="input-field" value={operator.extensionName} onChange={handleOperatorChange} placeholder="e.g. JR, SR, III" />
+            <input type="text" name="extensionName" className="input-field" value={operator.extensionName} onChange={handleOperatorChange} />
           </div>
           <div className="form-group">
             <label>Civil Status</label>
@@ -414,12 +414,12 @@ const OperatorForm = () => {
               </div>
               <div className="form-group animate-fade-in" style={{ borderColor: 'var(--accent-color)' }}>
                 <label style={{ color: 'var(--accent-color)' }}>Zone / Route</label>
-                <input required type="text" className="input-field" style={{ borderColor: 'var(--accent-color)' }} value={unit.zone} placeholder="Enter Zone Name..." onChange={(e) => handleUnitChange(index, 'zone', e.target.value)} />
+                <input required type="text" className="input-field" style={{ borderColor: 'var(--accent-color)' }} value={unit.zone} onChange={(e) => handleUnitChange(index, 'zone', e.target.value)} />
               </div>
               {(unit.vehicleType === 'Jeepney' || unit.vehicleType === 'Mini Bus') && (
                 <div className="form-group animate-fade-in" style={{ borderColor: 'var(--accent-color)' }}>
                   <label style={{ color: 'var(--accent-color)' }}>LTFRB/MCH Case No.</label>
-                  <input required type="text" className="input-field" style={{ borderColor: 'var(--accent-color)' }} value={unit.ltfrbMchCaseNo} placeholder="Enter Case Number..." onChange={(e) => handleUnitChange(index, 'ltfrbMchCaseNo', e.target.value)} />
+                  <input required type="text" className="input-field" style={{ borderColor: 'var(--accent-color)' }} value={unit.ltfrbMchCaseNo} onChange={(e) => handleUnitChange(index, 'ltfrbMchCaseNo', e.target.value)} />
                 </div>
               )}
             </div>

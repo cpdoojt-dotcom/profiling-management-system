@@ -261,6 +261,22 @@
   }
 }
 
+@media (max-width: 768px) {
+  .operator-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .operator-card {
+    padding: 0.75rem;
+  }
+
+  .operator-card-photo,
+  .operator-card-photo-placeholder {
+    width: 40px;
+    height: 40px;
+  }
+}
+
 @media (max-width: 640px) {
   .operators-header-actions {
     flex-direction: column;
@@ -276,6 +292,34 @@
     padding: 0.9rem;
   }
 
+  .operators-header h1 {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .operators-list,
+  .operator-details {
+    padding: 0.75rem;
+  }
+
+  .operator-card-header {
+    gap: 0.5rem;
+  }
+
+  .operator-card-photo,
+  .operator-card-photo-placeholder {
+    width: 36px;
+    height: 36px;
+  }
+
+  .operator-card-title {
+    font-size: 0.9rem;
+  }
+
+  .operator-card p {
+    font-size: 0.8rem;
+  }
 }
 
 /* Modal & Forms */

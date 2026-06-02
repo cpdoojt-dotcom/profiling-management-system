@@ -257,7 +257,6 @@ const UnitHistory = () => {
           <div className="search-input-wrapper">
             <input
               type="text"
-              placeholder="Enter Body Number or Plate Number..."
               className="input-field"
               value={query}
               onChange={(e) => {

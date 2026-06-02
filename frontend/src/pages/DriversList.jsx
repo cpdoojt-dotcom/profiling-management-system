@@ -461,7 +461,6 @@ const DriversList = () => {
             type="text"
             className="input-field"
             style={{ paddingRight: '2.5rem' }}
-            placeholder="Search by body number or driver name..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -526,18 +525,12 @@ const DriversList = () => {
                     <td style={{ fontWeight: '700', color: 'var(--accent-color)' }}>{driver.unit?.bodyNo || '-'}</td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        {driver.photoUrl ? (
-                          <img 
-                            src={driver.photoUrl} 
-                            alt={getFullName(driver)} 
-                            style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--accent-color)', cursor: 'pointer' }} 
-                            onClick={(e) => { e.stopPropagation(); setModalImageUrl(driver.photoUrl); setImageModalOpen(true); }}
-                          />
-                        ) : (
-                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--accent-glow)', border: '1px solid var(--accent-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: '700', color: 'var(--accent-color)' }}>
-                            {(driver.firstName?.[0] || '').toUpperCase()}
-                          </div>
-                        )}
+                        <img 
+                          src={driver.photoUrl || '/default.jpg'}
+                          alt={getFullName(driver)} 
+                          style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--accent-color)', cursor: 'pointer' }} 
+                          onClick={(e) => { e.stopPropagation(); setModalImageUrl(driver.photoUrl || '/default.jpg'); setImageModalOpen(true); }}
+                        />
                         {getFullName(driver)}
                       </div>
                     </td>
@@ -622,7 +615,7 @@ const DriversList = () => {
                   </div>
                   <div className="edit-form-group">
                     <label>Extension Name (Jr., Sr., III)</label>
-                    <input name="extensionName" className="input-field" value={editForm.driver.extensionName} onChange={handleEditChange('driver')} placeholder="e.g. JR, SR, III" />
+                    <input name="extensionName" className="input-field" value={editForm.driver.extensionName} onChange={handleEditChange('driver')} />
                   </div>
                   <div className="edit-form-group">
                     <label>License No.</label>
@@ -687,11 +680,11 @@ const DriversList = () => {
                   </div>
                   <div className="edit-form-group">
                     <label>Birth Date (Day)</label>
-                    <input name="birthDate" type="number" min="1" max="31" className="input-field" value={editForm.driver.birthDate} onChange={handleEditChange('driver')} placeholder="DD" />
+                    <input name="birthDate" type="number" min="1" max="31" className="input-field" value={editForm.driver.birthDate} onChange={handleEditChange('driver')} />
                   </div>
                   <div className="edit-form-group">
                     <label>Birth Year</label>
-                    <input name="birthYear" type="number" min="1900" max="2100" className="input-field" value={editForm.driver.birthYear} onChange={handleEditChange('driver')} placeholder="YYYY" />
+                    <input name="birthYear" type="number" min="1900" max="2100" className="input-field" value={editForm.driver.birthYear} onChange={handleEditChange('driver')} />
                   </div>
                   <div className="edit-form-group">
                     <label>Contact No.</label>
@@ -727,17 +720,15 @@ const DriversList = () => {
               </form>
             ) : (
               <div className="details-grid">
-                {selectedDriver.photoUrl ? (
-                  <div className="details-photo-wrap">
-                    <img 
-                      src={selectedDriver.photoUrl} 
-                      alt={getFullName(selectedDriver)} 
-                      className="details-photo" 
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => { setModalImageUrl(selectedDriver.photoUrl); setImageModalOpen(true); }}
-                    />
-                  </div>
-                ) : null}
+                <div className="details-photo-wrap">
+                  <img 
+                    src={selectedDriver.photoUrl || '/default.jpg'}
+                    alt={getFullName(selectedDriver)} 
+                    className="details-photo" 
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => { setModalImageUrl(selectedDriver.photoUrl || '/default.jpg'); setImageModalOpen(true); }}
+                  />
+                </div>
                 <div><span>CPDO ID:</span><strong>{selectedDriver.cpdoId}</strong></div>
                 <div><span>Name:</span><strong>{getFullName(selectedDriver)}</strong></div>
                 <div><span>License:</span><strong>{selectedDriver.licenseNo}</strong></div>

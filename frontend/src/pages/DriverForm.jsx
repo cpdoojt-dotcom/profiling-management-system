@@ -268,7 +268,7 @@ const DriverForm = () => {
           </div>
           <div className="form-group">
             <label>Extension Name (Jr., Sr., III)</label>
-            <input type="text" name="extensionName" className="input-field" value={driver.extensionName} onChange={handleChange} placeholder="e.g. JR, SR, III" />
+            <input type="text" name="extensionName" className="input-field" value={driver.extensionName} onChange={handleChange} />
           </div>
           <div className="form-group">
             <label>Civil Status</label>

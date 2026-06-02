@@ -144,3 +144,41 @@
     padding: 0.875rem 1rem;
   }
 }
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .sidebar-brand {
+    padding: 0 1rem;
+  }
+
+  .sidebar-nav {
+    padding: 1rem 0.75rem;
+  }
+
+  .nav-item {
+    padding: 0.75rem 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    max-width: 260px;
+  }
+
+  .sidebar-brand {
+    padding: 0 0.75rem;
+  }
+
+  .sidebar-nav {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .nav-item {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.9rem;
+  }
+}

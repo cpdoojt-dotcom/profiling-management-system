@@ -494,13 +494,7 @@ const Dashboard = () => {
               {recentDrivers.map((driver) => (
                 <Link className="recent-item" key={driver._id} to={`/drivers?driverId=${driver._id}`}>
                   <div className="recent-left">
-                    {driver.photoUrl ? (
-                      <img src={driver.photoUrl} alt={`${driver.firstName} ${driver.lastName}`} className="driver-thumb" />
-                    ) : (
-                      <div className="driver-thumb-placeholder">
-                        {(driver.firstName?.[0] || '').toUpperCase()}
-                      </div>
-                    )}
+                    <img src={driver.photoUrl || '/default.jpg'} alt={`${driver.firstName} ${driver.lastName}`} className="driver-thumb" />
                   </div>
                   <div className="recent-center">
                     <h3>{getFullName(driver)}</h3>
@@ -530,13 +524,7 @@ const Dashboard = () => {
               {recentOperators.map((operator) => (
                 <Link className="recent-item" key={operator._id} to={`/operators`}>
                   <div className="recent-left">
-                    {operator.photoUrl ? (
-                      <img src={operator.photoUrl} alt={getFullName(operator)} className="driver-thumb" />
-                    ) : (
-                      <div className="driver-thumb-placeholder">
-                        {(operator.firstName?.[0] || '').toUpperCase()}
-                      </div>
-                    )}
+                    <img src={operator.photoUrl || '/default.jpg'} alt={getFullName(operator)} className="driver-thumb" />
                   </div>
                   <div className="recent-center">
                     <h3>{getFullName(operator)}</h3>
@@ -566,13 +554,7 @@ const Dashboard = () => {
               {recentConductors.map((conductor) => (
                 <Link className="recent-item" key={conductor._id} to={`/conductors?conductorId=${conductor._id}`}>
                   <div className="recent-left">
-                    {conductor.photoUrl ? (
-                      <img src={conductor.photoUrl} alt={`${conductor.firstName} ${conductor.lastName}`} className="driver-thumb" />
-                    ) : (
-                      <div className="driver-thumb-placeholder">
-                        {(conductor.firstName?.[0] || '').toUpperCase()}
-                      </div>
-                    )}
+                    <img src={conductor.photoUrl || '/default.jpg'} alt={`${conductor.firstName} ${conductor.lastName}`} className="driver-thumb" />
                   </div>
                   <div className="recent-center">
                     <h3>{getFullName(conductor)}</h3>

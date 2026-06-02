@@ -401,7 +401,6 @@ const OperatorsPage = () => {
             type="text"
             className="input-field"
             style={{ paddingRight: '2.5rem' }}
-            placeholder="Search by operator name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -444,19 +443,13 @@ const OperatorsPage = () => {
                     onClick={() => setSelectedOperatorId(operator._id)}
                   >
                     <div className="operator-card-header">
-                      {operator.photoUrl ? (
-                        <img 
-                          src={operator.photoUrl} 
-                          alt={getFullName(operator)} 
-                          className="operator-card-photo" 
-                          style={{ cursor: 'pointer' }}
-                          onClick={(e) => { e.stopPropagation(); setModalImageUrl(operator.photoUrl); setImageModalOpen(true); }}
-                        />
-                      ) : (
-                        <div className="operator-card-photo-placeholder">
-                          {(operator.firstName?.[0] || '').toUpperCase()}
-                        </div>
-                      )}
+                      <img 
+                        src={operator.photoUrl || '/default.jpg'}
+                        alt={getFullName(operator)} 
+                        className="operator-card-photo" 
+                        style={{ cursor: 'pointer' }}
+                        onClick={(e) => { e.stopPropagation(); setModalImageUrl(operator.photoUrl || '/default.jpg'); setImageModalOpen(true); }}
+                      />
                       <div className="operator-card-title">
                         {getFullName(operator)}
                       </div>
@@ -520,7 +513,7 @@ const OperatorsPage = () => {
                   </div>
                   <div className="edit-form-group">
                     <label>Extension Name (Jr., Sr., III)</label>
-                    <input name="extensionName" className="input-field" value={editForm.extensionName} onChange={handleEditChange} placeholder="e.g. JR, SR, III" />
+                    <input name="extensionName" className="input-field" value={editForm.extensionName} onChange={handleEditChange} />
                   </div>
                   <div className="edit-form-group">
                     <label>Age {editForm.birthdate ? <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>(auto-computed)</span> : ''}</label>
@@ -597,17 +590,15 @@ const OperatorsPage = () => {
                   </button>
                 </div>
                 <div className="operator-meta">
-                  {selectedOperator.photoUrl ? (
-                    <div className="details-photo-wrap">
-                      <img 
-                        src={selectedOperator.photoUrl} 
-                        alt={getFullName(selectedOperator)} 
-                        className="details-photo" 
-                        style={{ cursor: 'pointer' }}
-                        onClick={() => { setModalImageUrl(selectedOperator.photoUrl); setImageModalOpen(true); }}
-                      />
-                    </div>
-                  ) : null}
+                  <div className="details-photo-wrap">
+                    <img 
+                      src={selectedOperator.photoUrl || '/default.jpg'}
+                      alt={getFullName(selectedOperator)} 
+                      className="details-photo" 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => { setModalImageUrl(selectedOperator.photoUrl || '/default.jpg'); setImageModalOpen(true); }}
+                    />
+                  </div>
                   <div><span>Name:</span><strong>{getFullName(selectedOperator)}</strong></div>
                   <div><span>Classification:</span><strong>{selectedOperator.operatorType || '-'}</strong></div>
                   <div><span>Total Units:</span><strong>{selectedOperator.unitCount || 0}</strong></div>

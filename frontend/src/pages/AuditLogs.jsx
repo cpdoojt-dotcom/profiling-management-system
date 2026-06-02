@@ -121,7 +121,6 @@ const AuditLogs = () => {
               id="user"
               type="text"
               className="input-field"
-              placeholder="e.g. admin@example.com"
               value={filters.user}
               onChange={(e) => handleFilterChange('user', e.target.value)}
             />

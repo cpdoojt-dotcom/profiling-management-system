@@ -51,3 +51,22 @@
   70% { box-shadow: 0 0 0 10px rgba(255, 184, 0, 0); }
   100% { box-shadow: 0 0 0 0 rgba(255, 184, 0, 0); }
 }
+
+@media (max-width: 640px) {
+  .confirm-modal-content {
+    padding: 1.75rem;
+    max-width: 90%;
+  }
+
+  .confirm-modal-content h3 {
+    font-size: 1.25rem;
+  }
+
+  .confirm-modal-content p {
+    font-size: 0.95rem;
+  }
+
+  .confirm-actions {
+    flex-direction: column;
+  }
+}

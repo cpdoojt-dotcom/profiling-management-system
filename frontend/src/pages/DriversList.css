@@ -296,6 +296,16 @@
   }
 }
 
+@media (max-width: 768px) {
+  .drivers-table-wrap {
+    overflow-x: auto;
+  }
+
+  .drivers-table {
+    min-width: 600px;
+  }
+}
+
 @media (max-width: 640px) {
   .drivers-header-actions {
     flex-direction: column;
@@ -329,6 +339,21 @@
   .edit-actions .btn-secondary,
   .edit-actions .btn-primary {
     width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .drivers-header h1 {
+    font-size: 1.2rem;
+  }
+
+  .driver-details {
+    padding: 0.75rem;
+  }
+
+  .details-photo {
+    width: 64px;
+    height: 64px;
   }
 }
 
