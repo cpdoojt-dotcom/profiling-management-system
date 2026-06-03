@@ -528,8 +528,8 @@ const ConductorList = () => {
                     </button>
                   </th>
                   <th scope="col">
-                    <button type="button" className="sort-btn" onClick={() => handleSort('status')} aria-label="Sort by status">
-                      Status <ArrowUpDown size={14} />
+                    <button type="button" className="sort-btn" onClick={() => handleSort('status')} aria-label="Sort by zone">
+                      Zone <ArrowUpDown size={14} />
                     </button>
                   </th>
                 </tr>
@@ -564,7 +564,7 @@ const ConductorList = () => {
                     </td>
                     <td>
                       <span className={`status-type mini-bus`}>
-                        <Bus size={14} aria-hidden="true" /> {' '}{c.status}
+                        {c.unit?.zone || '-'}
                       </span>
                     </td>
                   </tr>
