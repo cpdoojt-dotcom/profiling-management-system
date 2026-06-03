@@ -6,8 +6,6 @@ const operatorSchema = new mongoose.Schema({
   middleName: { type: String, trim: true },
   extensionName: { type: String, trim: true },
   civilStatus: { type: String, trim: true },
-  birthdate: { type: Date },
-  birthplace: { type: String, trim: true },
   age: { type: Number, min: 0 },
   addressNo: { type: String, trim: true },
   street: { type: String, trim: true },

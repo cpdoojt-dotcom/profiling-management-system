@@ -45,8 +45,6 @@ const initialOperator = {
   middleName: '',
   extensionName: '',
   civilStatus: 'Single',
-  birthdate: '',
-  birthplace: '',
   age: '',
   addressNo: '',
   street: '',
@@ -80,17 +78,6 @@ const OperatorForm = () => {
   const [units, setUnits] = useState([{ ...initialUnit }]);
   const [operatorImageFile, setOperatorImageFile] = useState(null);
   const [dragOver, setDragOver] = useState(false);
-
-  // Auto-compute age from birthdate
-  useEffect(() => {
-    if (!operator.birthdate) return;
-    const birth = new Date(operator.birthdate);
-    const today = new Date();
-    let age = today.getFullYear() - birth.getFullYear();
-    const m = today.getMonth() - birth.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age -= 1;
-    if (age >= 0) setOperator(prev => ({ ...prev, age: String(age) }));
-  }, [operator.birthdate]);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -127,7 +114,7 @@ const OperatorForm = () => {
     let finalValue = value;
     
     // Fields that should only contain letters and spaces
-    const letterOnlyFields = ['lastName', 'firstName', 'middleName', 'extensionName', 'civilStatus', 'birthplace', 'barangay', 'cityMunicipality'];
+    const letterOnlyFields = ['lastName', 'firstName', 'middleName', 'extensionName', 'civilStatus', 'barangay', 'cityMunicipality'];
     if (letterOnlyFields.includes(name)) {
       finalValue = value.replace(/[^a-zA-Z\s]/g, '');
     }
@@ -137,7 +124,7 @@ const OperatorForm = () => {
       finalValue = value.replace(/\D/g, '');
     }
 
-    const uppercaseFields = ['lastName', 'firstName', 'middleName', 'extensionName', 'barangay', 'cityMunicipality', 'street', 'purok', 'birthplace'];
+    const uppercaseFields = ['lastName', 'firstName', 'middleName', 'extensionName', 'barangay', 'cityMunicipality', 'street', 'purok'];
     if (uppercaseFields.includes(name)) {
       finalValue = finalValue.toUpperCase();
     }
@@ -333,20 +320,10 @@ const OperatorForm = () => {
             </select>
           </div>
           <div className="form-group">
-            <label>Birthdate</label>
-            <input type="date" name="birthdate" className="input-field" value={operator.birthdate} onChange={handleOperatorChange} />
-          </div>
-          <div className="form-group">
-            <label>Birthplace</label>
-            <input type="text" name="birthplace" className="input-field" value={operator.birthplace} onChange={handleOperatorChange} />
-          </div>
-          <div className="form-group">
-            <label>Age {operator.birthdate ? <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>(auto-computed)</span> : ''}</label>
+            <label>Age</label>
             <input
               type="number" min="0" name="age" className="input-field" value={operator.age}
               onChange={handleOperatorChange}
-              readOnly={!!operator.birthdate}
-              style={operator.birthdate ? { opacity: 0.7, background: 'var(--surface-bg)' } : {}}
             />
           </div>
           <div className="form-group">

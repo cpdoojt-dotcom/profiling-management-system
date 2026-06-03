@@ -53,15 +53,6 @@ const getFullName = (person) => {
 
 const sanitize = (value) => String(value ?? '').replace(/\r?\n|\r/g, ' ').trim();
 
-const computeAge = (birthdate) => {
-  if (!birthdate) return '';
-  const birth = new Date(birthdate);
-  const today = new Date();
-  let age = today.getFullYear() - birth.getFullYear();
-  const m = today.getMonth() - birth.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age -= 1;
-  return age >= 0 ? String(age) : '';
-};
 
 const OperatorsPage = () => {
   const navigate = useNavigate();
@@ -82,7 +73,7 @@ const OperatorsPage = () => {
   const [editForm, setEditForm] = useState({
     lastName: '', firstName: '', middleName: '', extensionName: '', civilStatus: '', age: '',
     addressNo: '', street: '', purok: '', barangay: '', cityMunicipality: '',
-    contactNo: ''
+    contactNo: '', operatorType: 'FOR HIRE'
   });
 
   const initialUnit = {
@@ -218,8 +209,6 @@ const OperatorsPage = () => {
       middleName: selectedOperator.middleName || '',
       extensionName: selectedOperator.extensionName || '',
       civilStatus: selectedOperator.civilStatus || 'Single',
-      birthdate: selectedOperator.birthdate || '',
-      birthplace: selectedOperator.birthplace || '',
       age: selectedOperator.age || '',
       addressNo: selectedOperator.addressNo || '',
       street: selectedOperator.street || '',
@@ -239,7 +228,7 @@ const OperatorsPage = () => {
     let finalValue = value;
 
     // Fields that should only contain letters and spaces
-    const letterOnlyFields = ['firstName', 'lastName', 'middleName', 'extensionName', 'barangay', 'cityMunicipality', 'birthplace', 'civilStatus'];
+    const letterOnlyFields = ['firstName', 'lastName', 'middleName', 'extensionName', 'barangay', 'cityMunicipality', 'civilStatus'];
     if (letterOnlyFields.includes(name)) {
       finalValue = value.replace(/[^a-zA-Z\s]/g, '');
     }
@@ -249,24 +238,13 @@ const OperatorsPage = () => {
       finalValue = value.replace(/\D/g, '');
     }
 
-    const uppercaseFields = ['firstName', 'lastName', 'middleName', 'extensionName', 'barangay', 'cityMunicipality', 'birthplace', 'street', 'purok'];
+    const uppercaseFields = ['firstName', 'lastName', 'middleName', 'extensionName', 'barangay', 'cityMunicipality', 'street', 'purok'];
     if (uppercaseFields.includes(name)) {
       finalValue = finalValue.toUpperCase();
     }
 
     setEditForm(prev => ({ ...prev, [name]: finalValue }));
   };
-
-  // Auto-compute age from birthdate in edit form
-  useEffect(() => {
-    if (editForm.birthdate) {
-      const computed = computeAge(editForm.birthdate);
-      if (computed !== '') {
-        setEditForm(prev => ({ ...prev, age: computed }));
-      }
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editForm.birthdate]);
 
   const handleUpdateOperator = async (e) => {
     e.preventDefault();
@@ -516,12 +494,10 @@ const OperatorsPage = () => {
                     <input name="extensionName" className="input-field" value={editForm.extensionName} onChange={handleEditChange} />
                   </div>
                   <div className="edit-form-group">
-                    <label>Age {editForm.birthdate ? <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>(auto-computed)</span> : ''}</label>
+                    <label>Age</label>
                     <input
                       name="age" type="number" className="input-field" value={editForm.age}
                       onChange={handleEditChange}
-                      readOnly={!!editForm.birthdate}
-                      style={editForm.birthdate ? { opacity: 0.7, background: 'var(--surface-bg)' } : {}}
                     />
                   </div>
                   <div className="edit-form-group">
@@ -532,14 +508,6 @@ const OperatorsPage = () => {
                       <option value="Widowed">Widowed</option>
                       <option value="Separated">Separated</option>
                     </select>
-                  </div>
-                  <div className="edit-form-group">
-                    <label>Birthdate</label>
-                    <input name="birthdate" type="date" className="input-field" value={editForm.birthdate ? editForm.birthdate.split('T')[0] : ''} onChange={handleEditChange} />
-                  </div>
-                  <div className="edit-form-group">
-                    <label>Birthplace</label>
-                    <input name="birthplace" type="text" className="input-field" value={editForm.birthplace} onChange={handleEditChange} />
                   </div>
                   <div className="edit-form-group">
                     <label>Contact No.</label>
@@ -602,10 +570,8 @@ const OperatorsPage = () => {
                   <div><span>Name:</span><strong>{getFullName(selectedOperator)}</strong></div>
                   <div><span>Classification:</span><strong>{selectedOperator.operatorType || '-'}</strong></div>
                   <div><span>Total Units:</span><strong>{selectedOperator.unitCount || 0}</strong></div>
-                  <div><span>Age:</span><strong>{computeAge(selectedOperator.birthdate) || '-'}</strong></div>
+                  <div><span>Age:</span><strong>{selectedOperator.age || '-'}</strong></div>
                   <div><span>Civil Status:</span><strong>{selectedOperator.civilStatus || '-'}</strong></div>
-                  <div><span>Birthdate:</span><strong>{selectedOperator.birthdate ? new Date(selectedOperator.birthdate).toLocaleDateString() : '-'}</strong></div>
-                  <div><span>Birthplace:</span><strong>{selectedOperator.birthplace || '-'}</strong></div>
                   <div><span>Contact:</span><strong>{selectedOperator.contactNo || '-'}</strong></div>
                   <div><span>Address:</span><strong>{formatAddress(selectedOperator)}</strong></div>
                 </div>

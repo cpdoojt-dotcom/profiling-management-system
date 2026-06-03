@@ -27,8 +27,6 @@ const normalizeOperatorData = (operatorData) => ({
   middleName: operatorData.middleName || '',
   extensionName: operatorData.extensionName || '',
   civilStatus: operatorData.civilStatus,
-  birthdate: operatorData.birthdate,
-  birthplace: operatorData.birthplace,
   age: operatorData.age,
   addressNo: operatorData.addressNo,
   street: operatorData.street,
@@ -72,8 +70,15 @@ const logUnitHistory = async (unitId, bodyNo, oldData, newData, changeType = 'Up
 // Create or Update operator record with units and optional drivers/conductors
 router.post('/', upload.single('operatorImage'), async (req, res) => {
   try {
-    let operatorData = req.body.operator || req.body;
-    const unitsData = Array.isArray(req.body.units) ? req.body.units : [];
+    let operatorData;
+    if (req.body.operator) {
+      operatorData = typeof req.body.operator === 'string' ? JSON.parse(req.body.operator) : req.body.operator;
+    } else {
+      operatorData = req.body;
+    }
+    const unitsData = Array.isArray(req.body.units) 
+      ? req.body.units 
+      : (typeof req.body.units === 'string' ? JSON.parse(req.body.units) : []);
 
     if (unitsData.length === 0) {
       return res.status(400).json({ message: 'At least one unit is required.' });
