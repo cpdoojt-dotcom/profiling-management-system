@@ -6,6 +6,9 @@ import ExcelJS from 'exceljs';
 import { useConfirm } from '../context/ConfirmContext';
 import { useToast } from '../context/ToastContext';
 import { formatAddress } from '../utils/formatUtils';
+import { TableSkeleton, CardSkeleton } from '../components/SkeletonLoader';
+import EmptyState from '../components/EmptyState';
+import ImageWithLoader from '../components/ImageWithLoader';
 import './DriversList.css'; // Reusing drivers list styles
 
 const sortConductors = (items, sortBy, direction) => {
@@ -90,6 +93,7 @@ const ConductorList = () => {
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [modalImageUrl, setModalImageUrl] = useState('');
   const [operators, setOperators] = useState([]);
+  const [formErrors, setFormErrors] = useState({});
   const [editForm, setEditForm] = useState({
     conductor: {
       firstName: '', lastName: '', middleName: '', extensionName: '', status: 'Active',
@@ -104,6 +108,42 @@ const ConductorList = () => {
   const searchParams = new URLSearchParams(location.search);
   const selectedFromQuery = searchParams.get('conductorId');
   const typeFromQuery = searchParams.get('type');
+
+  const validateForm = () => {
+    const errors = {};
+    const c = editForm.conductor;
+
+    if (!c.firstName.trim()) {
+      errors.firstName = 'First name is required';
+    } else if (c.firstName.trim().length < 2) {
+      errors.firstName = 'First name must be at least 2 characters';
+    }
+
+    if (!c.lastName.trim()) {
+      errors.lastName = 'Last name is required';
+    } else if (c.lastName.trim().length < 2) {
+      errors.lastName = 'Last name must be at least 2 characters';
+    }
+
+    if (c.contactNo && !/^[0-9]{11}$/.test(c.contactNo.replace(/\s/g, ''))) {
+      errors.contactNo = 'Contact number must be 11 digits';
+    }
+
+    if (c.emergencyContactNo && !/^[0-9]{11}$/.test(c.emergencyContactNo.replace(/\s/g, ''))) {
+      errors.emergencyContactNo = 'Emergency contact number must be 11 digits';
+    }
+
+    if (c.birthDate && (c.birthDate < 1 || c.birthDate > 31)) {
+      errors.birthDate = 'Birth date must be between 1 and 31';
+    }
+
+    if (c.birthYear && (c.birthYear < 1900 || c.birthYear > new Date().getFullYear())) {
+      errors.birthYear = `Birth year must be between 1900 and ${new Date().getFullYear()}`;
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const fetchConductors = async () => {
     const res = await axios.get('/api/conductors');
@@ -211,6 +251,7 @@ const ConductorList = () => {
     });
     setEditImageFile(null);
     setActionError('');
+    setFormErrors({});
   }, [selectedConductorId, selectedConductor]);
 
   // Auto-compute age in edit form from birth fields
@@ -245,11 +286,26 @@ const ConductorList = () => {
         [name]: finalValue,
       },
     }));
+    // Clear error for the field being edited
+    if (formErrors[name]) {
+      setFormErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
     if (!selectedConductorId) return;
+    
+    // Validate form before submission
+    if (!validateForm()) {
+      toast.error('Please fix the errors in the form');
+      return;
+    }
+    
     if (!await confirm('Are you sure you want to save changes to this conductor profile?')) return;
     setActionLoading(true);
     setActionError('');
@@ -263,6 +319,7 @@ const ConductorList = () => {
       const res = await axios.put(`/api/conductors/${selectedConductorId}`, payload);
       setConductors((prev) => prev.map((item) => (item._id === selectedConductorId ? res.data : item)));
       setEditImageFile(null);
+      setFormErrors({});
       toast.success('Conductor profile updated successfully!');
       setIsEditing(false);
     } catch (err) {
@@ -418,7 +475,7 @@ const ConductorList = () => {
         </div>
       </div>
 
-      <div className="glass-panel driver-filters">
+      <div className="glass-panel driver-filters" role="search" aria-label="Filter conductors">
         <div style={{ position: 'relative', flexGrow: 1 }}>
           <input
             type="text"
@@ -426,19 +483,21 @@ const ConductorList = () => {
             style={{ paddingRight: '2.5rem' }}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by name, body no, or plate no..."
+            aria-label="Search conductors"
           />
           {query && (
             <button 
               type="button" 
               className="input-clear-btn"
               onClick={() => setQuery('')}
-              title="Clear search"
+              aria-label="Clear search"
             >
               <X size={16} />
             </button>
           )}
         </div>
-        <select className="input-field" value={zoneFilter} onChange={(e) => setZoneFilter(e.target.value)}>
+        <select className="input-field" value={zoneFilter} onChange={(e) => setZoneFilter(e.target.value)} aria-label="Filter by zone">
           <option value="">All Zones</option>
           {zoneOptions.map((zone) => (
             <option key={zone} value={zone}>{zone}</option>
@@ -447,27 +506,29 @@ const ConductorList = () => {
       </div>
 
       {loading ? (
-        <div className="glass-panel drivers-state">Loading conductors...</div>
+        <div className="glass-panel">
+          <TableSkeleton rows={8} columns={3} />
+        </div>
       ) : error ? (
-        <div className="glass-panel drivers-state">{error}</div>
+        <div className="glass-panel drivers-state" role="alert">{error}</div>
       ) : (
         <div className="drivers-layout">
           <div className="glass-panel drivers-table-wrap">
-            <table className="drivers-table">
+            <table className="drivers-table" role="grid" aria-label="Conductors directory">
               <thead>
                 <tr>
-                  <th>
-                    <button type="button" className="sort-btn" onClick={() => handleSort('unit.bodyNo')}>
+                  <th scope="col">
+                    <button type="button" className="sort-btn" onClick={() => handleSort('unit.bodyNo')} aria-label="Sort by body number">
                       Body # <ArrowUpDown size={14} />
                     </button>
                   </th>
-                  <th>
-                    <button type="button" className="sort-btn" onClick={() => handleSort('lastName')}>
+                  <th scope="col">
+                    <button type="button" className="sort-btn" onClick={() => handleSort('lastName')} aria-label="Sort by conductor name">
                       Conductor Name <ArrowUpDown size={14} />
                     </button>
                   </th>
-                  <th>
-                    <button type="button" className="sort-btn" onClick={() => handleSort('status')}>
+                  <th scope="col">
+                    <button type="button" className="sort-btn" onClick={() => handleSort('status')} aria-label="Sort by status">
                       Status <ArrowUpDown size={14} />
                     </button>
                   </th>
@@ -479,13 +540,22 @@ const ConductorList = () => {
                     key={c._id}
                     onClick={() => setSelectedConductorId(c._id)}
                     className={selectedConductorId === c._id ? 'selected-row' : ''}
+                    tabIndex={0}
+                    role="button"
+                    aria-selected={selectedConductorId === c._id}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelectedConductorId(c._id);
+                      }
+                    }}
                   >
                     <td style={{ fontWeight: '700', color: 'var(--accent-color)' }}>{c.unit?.bodyNo || '-'}</td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <img 
+                        <ImageWithLoader 
                           src={c.photoUrl || '/default.jpg'}
-                          alt={getFullName(c)} 
+                          alt={`${getFullName(c)} profile photo`}
                           style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--accent-color)', cursor: 'pointer' }} 
                           onClick={(e) => { e.stopPropagation(); setModalImageUrl(c.photoUrl || '/default.jpg'); setImageModalOpen(true); }}
                         />
@@ -494,7 +564,7 @@ const ConductorList = () => {
                     </td>
                     <td>
                       <span className={`status-type mini-bus`}>
-                        <Bus size={14} /> {' '}{c.status}
+                        <Bus size={14} aria-hidden="true" /> {' '}{c.status}
                       </span>
                     </td>
                   </tr>
@@ -502,48 +572,53 @@ const ConductorList = () => {
               </tbody>
             </table>
             {sortedConductors.length === 0 && (
-              <p className="details-empty no-results">No conductors matched your filters.</p>
+              <EmptyState 
+                type={query || zoneFilter ? 'search' : 'no-users'}
+                message={query || zoneFilter ? 'No conductors matched your filters' : 'No conductors found'}
+              />
             )}
-            <div className="pagination">
-              <button type="button" className="btn-secondary" disabled={page === 1} onClick={() => setPage((p) => p - 1)}>
+            <div className="pagination" role="navigation" aria-label="Pagination">
+              <button type="button" className="btn-secondary" disabled={page === 1} onClick={() => setPage((p) => p - 1)} aria-label="Previous page">
                 Previous
               </button>
               <span>Page {page} of {totalPages}</span>
-              <button type="button" className="btn-secondary" disabled={page === totalPages} onClick={() => setPage((p) => p + 1)}>
+              <button type="button" className="btn-secondary" disabled={page === totalPages} onClick={() => setPage((p) => p + 1)} aria-label="Next page">
                 Next
               </button>
             </div>
           </div>
 
-          <div className="glass-panel driver-details">
+          <div className="glass-panel driver-details" role="region" aria-label="Conductor details panel">
             <div className="details-header">
               <h2>Conductor Details</h2>
               {selectedConductor && !isEditing && (
                 <div className="details-actions">
-                  <button type="button" className="btn-secondary" onClick={() => setIsEditing(true)}>Edit</button>
-                  <button type="button" className="btn-danger" onClick={handleDelete} disabled={actionLoading}>
+                  <button type="button" className="btn-secondary" onClick={() => setIsEditing(true)} aria-label="Edit conductor profile">Edit</button>
+                  <button type="button" className="btn-danger" onClick={handleDelete} disabled={actionLoading} aria-label="Delete conductor profile">
                     {actionLoading ? 'Deleting...' : 'Delete'}
                   </button>
                 </div>
               )}
             </div>
-            {actionError && <p className="action-error">{actionError}</p>}
+            {actionError && <p className="action-error" role="alert">{actionError}</p>}
             {!selectedConductor ? (
-              <p className="details-empty">Select a conductor to view full details.</p>
+              <EmptyState type="no-data" message="Select a conductor to view full details" />
             ) : isEditing ? (
-              <form className="edit-form" onSubmit={handleUpdate}>
+              <form className="edit-form" onSubmit={handleUpdate} aria-label="Edit conductor form">
                 <div className="edit-photo-group">
-                  <label>Replace Conductor Photo</label>
+                  <label htmlFor="conductor-photo">Replace Conductor Photo</label>
                   <input
+                    id="conductor-photo"
                     type="file"
                     accept="image/*"
                     className="input-field"
                     onChange={(e) => setEditImageFile(e.target.files?.[0] || null)}
+                    aria-label="Upload conductor photo"
                   />
                   {(editImageFile || selectedConductor.photoUrl) && (
-                    <img
+                    <ImageWithLoader
                       src={editImageFile ? URL.createObjectURL(editImageFile) : selectedConductor.photoUrl}
-                      alt="Conductor preview"
+                      alt={`${getFullName(selectedConductor)} profile photo preview`}
                       className="details-photo"
                       style={{ cursor: 'pointer' }}
                       onClick={() => { setModalImageUrl(editImageFile ? URL.createObjectURL(editImageFile) : selectedConductor.photoUrl); setImageModalOpen(true); }}
@@ -552,35 +627,37 @@ const ConductorList = () => {
                 </div>
                 <div className="edit-grid">
                   <div className="edit-form-group">
-                    <label>First Name</label>
-                    <input name="firstName" className="input-field" value={editForm.conductor.firstName} onChange={handleEditChange('conductor')} required />
+                    <label htmlFor="firstName">First Name</label>
+                    <input id="firstName" name="firstName" className={`input-field ${formErrors.firstName ? 'input-error' : ''}`} value={editForm.conductor.firstName} onChange={handleEditChange('conductor')} required aria-required="true" aria-invalid={!!formErrors.firstName} aria-describedby={formErrors.firstName ? 'firstName-error' : undefined} />
+                    {formErrors.firstName && <span id="firstName-error" className="field-error">{formErrors.firstName}</span>}
                   </div>
                   <div className="edit-form-group">
-                    <label>Middle Name</label>
-                    <input name="middleName" className="input-field" value={editForm.conductor.middleName} onChange={handleEditChange('conductor')} />
+                    <label htmlFor="middleName">Middle Name</label>
+                    <input id="middleName" name="middleName" className="input-field" value={editForm.conductor.middleName} onChange={handleEditChange('conductor')} />
                   </div>
                   <div className="edit-form-group">
-                    <label>Last Name</label>
-                    <input name="lastName" className="input-field" value={editForm.conductor.lastName} onChange={handleEditChange('conductor')} required />
+                    <label htmlFor="lastName">Last Name</label>
+                    <input id="lastName" name="lastName" className={`input-field ${formErrors.lastName ? 'input-error' : ''}`} value={editForm.conductor.lastName} onChange={handleEditChange('conductor')} required aria-required="true" aria-invalid={!!formErrors.lastName} aria-describedby={formErrors.lastName ? 'lastName-error' : undefined} />
+                    {formErrors.lastName && <span id="lastName-error" className="field-error">{formErrors.lastName}</span>}
                   </div>
                   <div className="edit-form-group">
-                    <label>Extension Name (Jr., Sr., III)</label>
-                    <input name="extensionName" className="input-field" value={editForm.conductor.extensionName} onChange={handleEditChange('conductor')} />
+                    <label htmlFor="extensionName">Extension Name (Jr., Sr., III)</label>
+                    <input id="extensionName" name="extensionName" className="input-field" value={editForm.conductor.extensionName} onChange={handleEditChange('conductor')} />
                   </div>
                   <div className="edit-form-group">
-                    <label>Gender</label>
-                    <select name="gender" className="input-field" value={editForm.conductor.gender} onChange={handleEditChange('conductor')}>
+                    <label htmlFor="gender">Gender</label>
+                    <select id="gender" name="gender" className="input-field" value={editForm.conductor.gender} onChange={handleEditChange('conductor')}>
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
                     </select>
                   </div>
                   <div className="edit-form-group">
-                    <label>Civil Status</label>
-                    <input name="civilStatus" className="input-field" value={editForm.conductor.civilStatus} onChange={handleEditChange('conductor')} />
+                    <label htmlFor="civilStatus">Civil Status</label>
+                    <input id="civilStatus" name="civilStatus" className="input-field" value={editForm.conductor.civilStatus} onChange={handleEditChange('conductor')} />
                   </div>
                   <div className="edit-form-group">
-                    <label>Operator</label>
-                    <select name="operator" className="input-field" value={editForm.conductor.operator} onChange={(e) => {
+                    <label htmlFor="operator">Operator</label>
+                    <select id="operator" name="operator" className="input-field" value={editForm.conductor.operator} onChange={(e) => {
                       const opId = e.target.value;
                       const op = operators.find(o => o._id === opId);
                       const miniBusUnits = (op?.units || []).filter(u => u.vehicleType === 'Mini Bus');
@@ -592,8 +669,8 @@ const ConductorList = () => {
                     </select>
                   </div>
                   <div className="edit-form-group">
-                    <label>Mini Bus Unit</label>
-                    <select name="unit" className="input-field" value={editForm.conductor.unit} onChange={handleEditChange('conductor')} disabled={!editForm.conductor.operator}>
+                    <label htmlFor="unit">Mini Bus Unit</label>
+                    <select id="unit" name="unit" className="input-field" value={editForm.conductor.unit} onChange={handleEditChange('conductor')} disabled={!editForm.conductor.operator}>
                       <option value="">Select Unit...</option>
                       {(operators.find(o => o._id === editForm.conductor.operator)?.units || []).filter(u => u.vehicleType === 'Mini Bus').map(u => (
                         <option key={u._id} value={u._id}>Body #{u.bodyNo} | Plate {u.plateNo || '-'}</option>
@@ -601,21 +678,22 @@ const ConductorList = () => {
                     </select>
                   </div>
                   <div className="edit-form-group">
-                    <label>Birth Place</label>
-                    <input name="birthPlace" className="input-field" value={editForm.conductor.birthPlace} onChange={handleEditChange('conductor')} />
+                    <label htmlFor="birthPlace">Birth Place</label>
+                    <input id="birthPlace" name="birthPlace" className="input-field" value={editForm.conductor.birthPlace} onChange={handleEditChange('conductor')} />
                   </div>
                   <div className="edit-form-group">
-                    <label>Age {editForm.conductor.birthYear ? <span style={{ fontSize: '0.72rem', opacity: 0.6 }}>(auto-computed)</span> : ''}</label>
+                    <label htmlFor="age">Age {editForm.conductor.birthYear ? <span style={{ fontSize: '0.72rem', opacity: 0.6 }}>(auto-computed)</span> : ''}</label>
                     <input
-                      name="age" type="number" className="input-field" value={editForm.conductor.age}
+                      id="age" name="age" type="number" className="input-field" value={editForm.conductor.age}
                       onChange={handleEditChange('conductor')}
                       readOnly={!!(editForm.conductor.birthMonth && editForm.conductor.birthYear)}
                       style={editForm.conductor.birthMonth && editForm.conductor.birthYear ? { opacity: 0.7, background: 'var(--surface-bg)' } : {}}
+                      aria-readonly={!!(editForm.conductor.birthMonth && editForm.conductor.birthYear)}
                     />
                   </div>
                   <div className="edit-form-group">
-                    <label>Birth Month</label>
-                    <select name="birthMonth" className="input-field" value={editForm.conductor.birthMonth} onChange={handleEditChange('conductor')}>
+                    <label htmlFor="birthMonth">Birth Month</label>
+                    <select id="birthMonth" name="birthMonth" className="input-field" value={editForm.conductor.birthMonth} onChange={handleEditChange('conductor')}>
                       <option value="">-- Month --</option>
                       {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map(m => (
                         <option key={m} value={m}>{m}</option>
@@ -623,40 +701,43 @@ const ConductorList = () => {
                     </select>
                   </div>
                   <div className="edit-form-group">
-                    <label>Birth Date (Day)</label>
-                    <input name="birthDate" type="number" min="1" max="31" className="input-field" value={editForm.conductor.birthDate} onChange={handleEditChange('conductor')} />
+                    <label htmlFor="birthDate">Birth Date (Day)</label>
+                    <input id="birthDate" name="birthDate" type="number" min="1" max="31" className={`input-field ${formErrors.birthDate ? 'input-error' : ''}`} value={editForm.conductor.birthDate} onChange={handleEditChange('conductor')} aria-invalid={!!formErrors.birthDate} aria-describedby={formErrors.birthDate ? 'birthDate-error' : undefined} />
+                    {formErrors.birthDate && <span id="birthDate-error" className="field-error">{formErrors.birthDate}</span>}
                   </div>
                   <div className="edit-form-group">
-                    <label>Birth Year</label>
-                    <input name="birthYear" type="number" min="1900" max="2100" className="input-field" value={editForm.conductor.birthYear} onChange={handleEditChange('conductor')} />
+                    <label htmlFor="birthYear">Birth Year</label>
+                    <input id="birthYear" name="birthYear" type="number" min="1900" max="2100" className={`input-field ${formErrors.birthYear ? 'input-error' : ''}`} value={editForm.conductor.birthYear} onChange={handleEditChange('conductor')} aria-invalid={!!formErrors.birthYear} aria-describedby={formErrors.birthYear ? 'birthYear-error' : undefined} />
+                    {formErrors.birthYear && <span id="birthYear-error" className="field-error">{formErrors.birthYear}</span>}
                   </div>
                   <div className="edit-form-group">
-                    <label>Address No.</label>
-                    <input name="addressNo" className="input-field" value={editForm.conductor.addressNo} onChange={handleEditChange('conductor')} />
+                    <label htmlFor="addressNo">Address No.</label>
+                    <input id="addressNo" name="addressNo" className="input-field" value={editForm.conductor.addressNo} onChange={handleEditChange('conductor')} />
                   </div>
                   <div className="edit-form-group">
-                    <label>Street</label>
-                    <input name="street" className="input-field" value={editForm.conductor.street} onChange={handleEditChange('conductor')} />
+                    <label htmlFor="street">Street</label>
+                    <input id="street" name="street" className="input-field" value={editForm.conductor.street} onChange={handleEditChange('conductor')} />
                   </div>
                   <div className="edit-form-group">
-                    <label>Purok</label>
-                    <input name="purok" className="input-field" value={editForm.conductor.purok} onChange={handleEditChange('conductor')} />
+                    <label htmlFor="purok">Purok</label>
+                    <input id="purok" name="purok" className="input-field" value={editForm.conductor.purok} onChange={handleEditChange('conductor')} />
                   </div>
                   <div className="edit-form-group">
-                    <label>Barangay</label>
-                    <input name="barangay" className="input-field" value={editForm.conductor.barangay} onChange={handleEditChange('conductor')} />
+                    <label htmlFor="barangay">Barangay</label>
+                    <input id="barangay" name="barangay" className="input-field" value={editForm.conductor.barangay} onChange={handleEditChange('conductor')} />
                   </div>
                   <div className="edit-form-group">
-                    <label>City/Municipality</label>
-                    <input name="cityMunicipality" className="input-field" value={editForm.conductor.cityMunicipality} onChange={handleEditChange('conductor')} />
+                    <label htmlFor="cityMunicipality">City/Municipality</label>
+                    <input id="cityMunicipality" name="cityMunicipality" className="input-field" value={editForm.conductor.cityMunicipality} onChange={handleEditChange('conductor')} />
                   </div>
                   <div className="edit-form-group">
-                    <label>Contact No.</label>
-                    <input name="contactNo" className="input-field" value={editForm.conductor.contactNo} onChange={handleEditChange('conductor')} />
+                    <label htmlFor="contactNo">Contact No.</label>
+                    <input id="contactNo" name="contactNo" className={`input-field ${formErrors.contactNo ? 'input-error' : ''}`} value={editForm.conductor.contactNo} onChange={handleEditChange('conductor')} aria-invalid={!!formErrors.contactNo} aria-describedby={formErrors.contactNo ? 'contactNo-error' : undefined} />
+                    {formErrors.contactNo && <span id="contactNo-error" className="field-error">{formErrors.contactNo}</span>}
                   </div>
                   <div className="edit-form-group">
-                    <label>Status</label>
-                    <select name="status" className="input-field" value={editForm.conductor.status} onChange={handleEditChange('conductor')}>
+                    <label htmlFor="status">Status</label>
+                    <select id="status" name="status" className="input-field" value={editForm.conductor.status} onChange={handleEditChange('conductor')}>
                       <option value="Active">Active</option>
                       <option value="Pending">Pending</option>
                       <option value="Inactive">Inactive</option>
@@ -667,22 +748,23 @@ const ConductorList = () => {
                 <h3 className="section-title" style={{ marginTop: '1.5rem' }}>Emergency Contact</h3>
                 <div className="edit-grid">
                   <div className="edit-form-group">
-                    <label>Person to Notify</label>
-                    <input name="emergencyContactName" className="input-field" value={editForm.conductor.emergencyContactName} onChange={handleEditChange('conductor')} />
+                    <label htmlFor="emergencyContactName">Person to Notify</label>
+                    <input id="emergencyContactName" name="emergencyContactName" className="input-field" value={editForm.conductor.emergencyContactName} onChange={handleEditChange('conductor')} />
                   </div>
                   <div className="edit-form-group">
-                    <label>Contact No.</label>
-                    <input name="emergencyContactNo" className="input-field" value={editForm.conductor.emergencyContactNo} onChange={handleEditChange('conductor')} />
+                    <label htmlFor="emergencyContactNo">Contact No.</label>
+                    <input id="emergencyContactNo" name="emergencyContactNo" className={`input-field ${formErrors.emergencyContactNo ? 'input-error' : ''}`} value={editForm.conductor.emergencyContactNo} onChange={handleEditChange('conductor')} aria-invalid={!!formErrors.emergencyContactNo} aria-describedby={formErrors.emergencyContactNo ? 'emergencyContactNo-error' : undefined} />
+                    {formErrors.emergencyContactNo && <span id="emergencyContactNo-error" className="field-error">{formErrors.emergencyContactNo}</span>}
                   </div>
                   <div className="edit-form-group" style={{ gridColumn: 'span 2' }}>
-                    <label>Emergency Contact Address</label>
-                    <input name="emergencyContactAddress" className="input-field" value={editForm.conductor.emergencyContactAddress} onChange={handleEditChange('conductor')} />
+                    <label htmlFor="emergencyContactAddress">Emergency Contact Address</label>
+                    <input id="emergencyContactAddress" name="emergencyContactAddress" className="input-field" value={editForm.conductor.emergencyContactAddress} onChange={handleEditChange('conductor')} />
                   </div>
                 </div>
 
                 <div className="edit-actions">
-                  <button type="button" className="btn-secondary" onClick={() => { setIsEditing(false); setEditImageFile(null); }}>Cancel</button>
-                  <button type="submit" className="btn-primary" disabled={actionLoading}>
+                  <button type="button" className="btn-secondary" onClick={() => { setIsEditing(false); setEditImageFile(null); setFormErrors({}); }}>Cancel</button>
+                  <button type="submit" className="btn-primary" disabled={actionLoading} aria-live="polite">
                     {actionLoading ? 'Saving...' : 'Save Changes'}
                   </button>
                 </div>
@@ -690,7 +772,7 @@ const ConductorList = () => {
             ) : (
               <div className="details-grid">
                 <div className="details-photo-wrap">
-                  <img 
+                  <ImageWithLoader 
                     src={selectedConductor.photoUrl || '/default.jpg'}
                     alt={`${selectedConductor.firstName} ${selectedConductor.lastName}`} 
                     className="details-photo" 

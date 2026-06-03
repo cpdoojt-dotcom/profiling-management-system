@@ -62,6 +62,12 @@ button {
   background: none;
 }
 
+button:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 /* Utilities */
 .glass-panel {
   background: var(--glass-bg);
@@ -114,11 +120,16 @@ button {
   border-radius: 8px;
   font-family: inherit;
   font-size: 0.95rem;
-  transition: border-color 0.3s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
   outline: none;
 }
 
 .input-field:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.input-field:focus-visible {
   border-color: var(--accent-color);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }

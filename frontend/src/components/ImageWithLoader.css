@@ -1,0 +1,52 @@
+.image-wrapper {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.image-skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--surface-bg) 25%, var(--surface-border) 50%, var(--surface-bg) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: inherit;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.image-content {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  filter: blur(10px);
+}
+
+.image-content.loaded {
+  opacity: 1;
+  filter: blur(0);
+}
+
+.image-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--surface-bg);
+  border: 1px dashed var(--surface-border);
+  border-radius: inherit;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  min-height: 84px;
+  min-width: 84px;
+}
+
+.image-error span {
+  text-align: center;
+  padding: 0.5rem;
+}

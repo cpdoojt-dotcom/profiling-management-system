@@ -80,14 +80,27 @@
   align-items: center;
   gap: 0.3rem;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sort-btn:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .drivers-table tbody tr {
   cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 .drivers-table tbody tr:hover {
   background: rgba(255, 255, 255, 0.03);
+}
+
+.drivers-table tbody tr:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: -2px;
 }
 
 .selected-row {
@@ -123,6 +136,12 @@
   border-radius: 8px;
   padding: 0.45rem 0.7rem;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-danger:focus-visible {
+  outline: 2px solid var(--danger);
+  outline-offset: 2px;
 }
 
 .btn-danger:disabled {
@@ -213,6 +232,34 @@
   color: var(--text-secondary);
   font-size: 0.85rem;
   font-weight: 500;
+}
+
+.input-error {
+  border-color: var(--danger) !important;
+}
+
+.input-error:focus,
+.input-error:focus-visible {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+}
+
+.field-error {
+  color: var(--danger);
+  font-size: 0.75rem;
+  margin-top: -0.2rem;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .edit-grid textarea {
