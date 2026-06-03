@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Save, X } from 'lucide-react';
+import { Save, X, Upload, X as RemoveIcon } from 'lucide-react';
 import { useConfirm } from '../context/ConfirmContext';
 import { useToast } from '../context/ToastContext';
 import './DriverForm.css'; // Reusing driver form styles
@@ -65,6 +65,7 @@ const ConductorForm = () => {
   const [selectedOperatorId, setSelectedOperatorId] = useState('');
   const [selectedUnitId, setSelectedUnitId] = useState('');
   const [conductorImage, setConductorImage] = useState(null);
+  const [dragOver, setDragOver] = useState(false);
   const [conductor, setConductor] = useState({ ...initialConductor, age: '' });
 
   useEffect(() => {
@@ -99,6 +100,36 @@ const ConductorForm = () => {
       setConductor(prev => ({ ...prev, age: computed }));
     }
   }, [conductor.birthMonth, conductor.birthDate, conductor.birthYear]);
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      setConductorImage(file);
+    }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setConductorImage(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setConductorImage(null);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -221,12 +252,43 @@ const ConductorForm = () => {
         <h2 className="section-title">Conductor Information</h2>
         <div className="form-group image-upload">
           <label>Conductor Photo</label>
-          <input
-            type="file"
-            accept="image/*"
-            className="input-field"
-            onChange={(e) => setConductorImage(e.target.files?.[0] || null)}
-          />
+          <div className="image-upload-wrapper">
+            <div
+              className={`image-upload-zone ${dragOver ? 'dragover' : ''}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => document.getElementById('conductor-photo-input').click()}
+            >
+              <input
+                id="conductor-photo-input"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+              />
+              {conductorImage ? (
+                <div className="image-preview">
+                  <img src={URL.createObjectURL(conductorImage)} alt="Conductor preview" />
+                  <button
+                    type="button"
+                    className="image-preview-remove"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveImage();
+                    }}
+                  >
+                    <RemoveIcon size={14} />
+                  </button>
+                </div>
+              ) : (
+                <div className="image-upload-placeholder">
+                  <Upload />
+                  <p>Click or drag image here</p>
+                  <span>PNG, JPG up to 5MB</span>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
         <div className="form-grid">
           <div className="form-group">

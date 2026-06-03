@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Plus, Save, Trash2, X } from 'lucide-react';
+import { Plus, Save, Trash2, X, Upload, X as RemoveIcon } from 'lucide-react';
 import { useConfirm } from '../context/ConfirmContext';
 import { useToast } from '../context/ToastContext';
 import './DriverForm.css';
@@ -79,6 +79,7 @@ const OperatorForm = () => {
   const [operator, setOperator] = useState(initialOperator);
   const [units, setUnits] = useState([{ ...initialUnit }]);
   const [operatorImageFile, setOperatorImageFile] = useState(null);
+  const [dragOver, setDragOver] = useState(false);
 
   // Auto-compute age from birthdate
   useEffect(() => {
@@ -90,6 +91,36 @@ const OperatorForm = () => {
     if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age -= 1;
     if (age >= 0) setOperator(prev => ({ ...prev, age: String(age) }));
   }, [operator.birthdate]);
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      setOperatorImageFile(file);
+    }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setOperatorImageFile(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setOperatorImageFile(null);
+  };
 
   const handleOperatorChange = (e) => {
     const { name, value } = e.target;
@@ -235,30 +266,47 @@ const OperatorForm = () => {
         )}
 
         <h2 className="section-title">Operator Information</h2>
-        <div className="form-grid">
-          <div className="form-group" style={{ gridColumn: 'span 2' }}>
-            <label>Operator Photo</label>
-            <input
-              type="file"
-              accept="image/*"
-              className="input-field"
-              onChange={(e) => setOperatorImageFile(e.target.files?.[0] || null)}
-            />
-            {operatorImageFile && (
-              <img
-                src={URL.createObjectURL(operatorImageFile)}
-                alt="Operator preview"
-                style={{
-                  width: '100px',
-                  height: '100px',
-                  borderRadius: '50%',
-                  objectFit: 'cover',
-                  marginTop: '0.5rem',
-                  border: '2px solid var(--accent-color)'
-                }}
+        <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+          <label>Operator Photo</label>
+          <div className="image-upload-wrapper" style={{ maxWidth: '300px' }}>
+            <div
+              className={`image-upload-zone ${dragOver ? 'dragover' : ''}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => document.getElementById('operator-photo-input').click()}
+            >
+              <input
+                id="operator-photo-input"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
               />
-            )}
+              {operatorImageFile ? (
+                <div className="image-preview">
+                  <img src={URL.createObjectURL(operatorImageFile)} alt="Operator preview" />
+                  <button
+                    type="button"
+                    className="image-preview-remove"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveImage();
+                    }}
+                  >
+                    <RemoveIcon size={14} />
+                  </button>
+                </div>
+              ) : (
+                <div className="image-upload-placeholder">
+                  <Upload />
+                  <p>Click or drag image here</p>
+                  <span>PNG, JPG up to 5MB</span>
+                </div>
+              )}
+            </div>
           </div>
+        </div>
+        <div className="form-grid">
           <div className="form-group">
             <label>Last Name</label>
             <input required type="text" name="lastName" className="input-field" value={operator.lastName} onChange={handleOperatorChange} />
