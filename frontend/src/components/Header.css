@@ -121,7 +121,7 @@
 
 @media (max-width: 640px) {
   .header-title {
-    font-size: 0.92rem;
+    display: none;
   }
 
   .ph-datetime {

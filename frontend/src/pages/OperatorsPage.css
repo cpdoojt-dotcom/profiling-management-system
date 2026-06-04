@@ -211,7 +211,7 @@
   padding: 1rem 0;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
   .operators-layout {
     grid-template-columns: 1fr;
   }

@@ -552,4 +552,22 @@
     flex-direction: row;
     align-items: center;
   }
+
+  .login-form .input-field {
+    font-size: 0.9rem;
+    padding-left: 2.75rem;
+    padding-right: 2.25rem;
+    height: 48px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  .input-icon {
+    left: 1rem;
+  }
+
+  .password-toggle-btn {
+    right: 0.5rem;
+  }
 }

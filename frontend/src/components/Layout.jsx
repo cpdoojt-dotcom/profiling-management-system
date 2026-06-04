@@ -9,8 +9,16 @@ const Layout = () => {
     return window.innerWidth <= 900;
   });
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 900;
+
   return (
     <div className="app-layout">
+      {!isSidebarCollapsed && isMobile && (
+        <div
+          className="sidebar-overlay active"
+          onClick={() => setIsSidebarCollapsed(true)}
+        />
+      )}
       <Sidebar
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}

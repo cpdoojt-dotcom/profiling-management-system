@@ -1,5 +1,8 @@
 .dashboard {
   animation: fadeIn 0.4s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 .dashboard-header {
@@ -218,6 +221,10 @@
     font-size: 1.5rem;
   }
 
+  .dashboard-header p {
+    display: none;
+  }
+
   .stats-categories-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -240,6 +247,26 @@
 
   .stats-categories-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .stat-card {
+    padding: 1rem;
+  }
+
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .stat-details p {
+    font-size: 1.25rem;
   }
 }
 

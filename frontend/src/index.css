@@ -178,6 +178,21 @@ button:focus-visible {
   min-height: 100vh;
 }
 
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 95;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
 .main-content {
   flex: 1;
   display: flex;
@@ -194,6 +209,16 @@ button:focus-visible {
   padding: 2rem;
   overflow-y: auto;
   height: calc(100vh - var(--header-height));
+}
+
+@media (max-width: 1200px) {
+  .main-content {
+    margin-left: var(--sidebar-collapsed-width);
+  }
+
+  .main-content.sidebar-collapsed {
+    margin-left: var(--sidebar-collapsed-width);
+  }
 }
 
 @media (max-width: 900px) {
@@ -359,5 +384,32 @@ button:focus-visible {
   .modal-footer .btn-primary {
     width: 100%;
     justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 0.25rem;
+  }
+
+  .modal-content {
+    max-width: 98%;
+    border-radius: 10px;
+  }
+
+  .modal-header {
+    padding: 1rem;
+  }
+
+  .modal-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .modal-body {
+    padding: 0.75rem;
+  }
+
+  .modal-footer {
+    padding: 0.75rem 1rem;
   }
 }
