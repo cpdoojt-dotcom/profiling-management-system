@@ -312,24 +312,71 @@ const OperatorsPage = () => {
         { header: 'Middle Name', key: 'middleName', width: 15 },
         { header: 'Extension', key: 'extensionName', width: 10 },
         { header: 'Classification', key: 'type', width: 15 },
-        { header: 'Units', key: 'units', width: 10 },
+        { header: 'Unit Body No', key: 'unitBodyNo', width: 12 },
+        { header: 'Unit Plate No', key: 'unitPlateNo', width: 12 },
+        { header: 'Vehicle Type', key: 'vehicleType', width: 12 },
+        { header: 'Zone', key: 'zone', width: 10 },
+        { header: 'Color Code', key: 'colorCode', width: 15 },
+        { header: 'Make/Type', key: 'makeType', width: 15 },
+        { header: 'Motor No', key: 'motorNo', width: 15 },
+        { header: 'Chassis No', key: 'chassisNo', width: 15 },
+        { header: 'Year Model', key: 'yearModel', width: 12 },
+        { header: 'LTFRB Case No', key: 'ltfrbMchCaseNo', width: 15 },
         { header: 'Address', key: 'address', width: 40 },
         { header: 'Contact', key: 'contact', width: 15 },
       ];
 
       operators.forEach(op => {
-        worksheet.addRow({
-          id: op._id,
-          name: getFullName(op),
-          lastName: op.lastName,
-          firstName: op.firstName,
-          middleName: op.middleName,
-          extensionName: op.extensionName || '',
-          type: op.operatorType,
-          units: op.unitCount || 0,
-          address: formatAddress(op),
-          contact: op.contactNo,
-        });
+        const units = op.units || [];
+        if (units.length === 0) {
+          // Add operator row even if no units
+          worksheet.addRow({
+            id: op._id,
+            name: getFullName(op),
+            lastName: op.lastName,
+            firstName: op.firstName,
+            middleName: op.middleName,
+            extensionName: op.extensionName || '',
+            type: op.operatorType,
+            unitBodyNo: '-',
+            unitPlateNo: '-',
+            vehicleType: '-',
+            zone: '-',
+            colorCode: '-',
+            makeType: '-',
+            motorNo: '-',
+            chassisNo: '-',
+            yearModel: '-',
+            ltfrbMchCaseNo: '-',
+            address: formatAddress(op),
+            contact: op.contactNo,
+          });
+        } else {
+          // Add a row for each unit
+          units.forEach(unit => {
+            worksheet.addRow({
+              id: op._id,
+              name: getFullName(op),
+              lastName: op.lastName,
+              firstName: op.firstName,
+              middleName: op.middleName,
+              extensionName: op.extensionName || '',
+              type: op.operatorType,
+              unitBodyNo: unit.bodyNo || '-',
+              unitPlateNo: unit.plateNo || '-',
+              vehicleType: unit.vehicleType || '-',
+              zone: unit.zone || '-',
+              colorCode: unit.colorCode || '-',
+              makeType: unit.makeType || '-',
+              motorNo: unit.motorNo || '-',
+              chassisNo: unit.chassisNo || '-',
+              yearModel: unit.yearModel || '-',
+              ltfrbMchCaseNo: unit.ltfrbMchCaseNo || '-',
+              address: formatAddress(op),
+              contact: op.contactNo,
+            });
+          });
+        }
       });
 
       worksheet.getRow(1).height = 22;
