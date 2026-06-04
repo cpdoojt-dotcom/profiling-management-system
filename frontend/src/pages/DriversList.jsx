@@ -370,7 +370,6 @@ const DriversList = () => {
 
     const sanitize = (value) => String(value ?? '').replace(/\r?\n|\r/g, ' ').trim();
     const headers = [
-      'NO.',
       'CPDO ID',
       'FIRST NAME',
       'MIDDLE NAME',
@@ -390,12 +389,16 @@ const DriversList = () => {
       'UNIT VEHICLE TYPE',
       'UNIT ZONE',
       'UNIT LTFRB CASE NO',
+      'UNIT COLOR CODE',
+      'UNIT MAKE/TYPE',
+      'UNIT MOTOR NO',
+      'UNIT CHASSIS NO',
+      'UNIT YEAR MODEL',
       'CREATED AT',
       'UPDATED AT',
     ];
 
-    const rows = sortedDrivers.map((driver, index) => ([
-      index + 1,
+    const rows = sortedDrivers.map((driver) => ([
       sanitize(driver.cpdoId),
       sanitize(driver.firstName),
       sanitize(driver.middleName),
@@ -415,6 +418,11 @@ const DriversList = () => {
       sanitize(driver.unit?.vehicleType),
       sanitize(driver.unit?.zone),
       sanitize(driver.unit?.ltfrbMchCaseNo),
+      sanitize(driver.unit?.colorCode),
+      sanitize(driver.unit?.makeType),
+      sanitize(driver.unit?.motorNo),
+      sanitize(driver.unit?.chassisNo),
+      sanitize(driver.unit?.yearModel),
       sanitize(driver.createdAt ? new Date(driver.createdAt).toLocaleString('en-PH') : ''),
       sanitize(driver.updatedAt ? new Date(driver.updatedAt).toLocaleString('en-PH') : ''),
     ]));
