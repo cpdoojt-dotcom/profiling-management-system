@@ -370,6 +370,7 @@ const DriversList = () => {
 
     const sanitize = (value) => String(value ?? '').replace(/\r?\n|\r/g, ' ').trim();
     const headers = [
+      'UNIT ZONE',
       'CPDO ID',
       'FIRST NAME',
       'MIDDLE NAME',
@@ -387,7 +388,6 @@ const DriversList = () => {
       'UNIT BODY NO',
       'UNIT PLATE NO',
       'UNIT VEHICLE TYPE',
-      'UNIT ZONE',
       'UNIT LTFRB CASE NO',
       'UNIT COLOR CODE',
       'UNIT MAKE/TYPE',
@@ -398,7 +398,14 @@ const DriversList = () => {
       'UPDATED AT',
     ];
 
-    const rows = sortedDrivers.map((driver) => ([
+    const sortedByZone = [...sortedDrivers].sort((a, b) => {
+      const zoneA = a.unit?.zone || '';
+      const zoneB = b.unit?.zone || '';
+      return zoneA.localeCompare(zoneB);
+    });
+
+    const rows = sortedByZone.map((driver) => ([
+      sanitize(driver.unit?.zone),
       sanitize(driver.cpdoId),
       sanitize(driver.firstName),
       sanitize(driver.middleName),
@@ -416,7 +423,6 @@ const DriversList = () => {
       sanitize(driver.unit?.bodyNo),
       sanitize(driver.unit?.plateNo),
       sanitize(driver.unit?.vehicleType),
-      sanitize(driver.unit?.zone),
       sanitize(driver.unit?.ltfrbMchCaseNo),
       sanitize(driver.unit?.colorCode),
       sanitize(driver.unit?.makeType),
