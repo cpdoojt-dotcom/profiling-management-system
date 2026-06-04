@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { Plus, X, Bike, Truck, Bus, FileSpreadsheet } from 'lucide-react';
 import ExcelJS from 'exceljs';
@@ -64,7 +65,10 @@ const OperatorsPage = () => {
   const [actionError, setActionError] = useState('');
   const [addingUnit, setAddingUnit] = useState(false);
   const [search, setSearch] = useState('');
-  const [zoneFilter, setZoneFilter] = useState('all');
+  const [zoneFilter, setZoneFilter] = useState(['all']);
+  const [zoneDropdownOpen, setZoneDropdownOpen] = useState(false);
+  const [zoneDropdownPosition, setZoneDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+  const zoneButtonRef = useRef(null);
   const [selectedOperatorId, setSelectedOperatorId] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editImageFile, setEditImageFile] = useState(null);
@@ -137,7 +141,7 @@ const OperatorsPage = () => {
     return operators.filter((operator) => {
       const fullName = getFullName(operator).toLowerCase();
       const matchesQuery = !query || fullName.includes(query);
-      const matchesZone = zoneFilter === 'all' || (operator.units || []).some((unit) => unit.zone === zoneFilter);
+      const matchesZone = zoneFilter.includes('all') || (operator.units || []).some((unit) => zoneFilter.includes(unit.zone));
       return matchesQuery && matchesZone;
     });
   }, [operators, search, zoneFilter]);
@@ -146,6 +150,35 @@ const OperatorsPage = () => {
     () => filteredOperators.find((operator) => operator._id === selectedOperatorId) || null,
     [filteredOperators, selectedOperatorId],
   );
+
+  const handleZoneToggle = (zone) => {
+    if (zone === 'all') {
+      setZoneFilter(['all']);
+    } else {
+      setZoneFilter(prev => {
+        if (prev.includes('all')) {
+          return [zone];
+        }
+        if (prev.includes(zone)) {
+          const newFilter = prev.filter(z => z !== zone);
+          return newFilter.length === 0 ? ['all'] : newFilter;
+        }
+        return [...prev, zone];
+      });
+    }
+  };
+
+  const handleZoneButtonClick = () => {
+    if (zoneButtonRef.current) {
+      const rect = zoneButtonRef.current.getBoundingClientRect();
+      setZoneDropdownPosition({
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width
+      });
+    }
+    setZoneDropdownOpen(!zoneDropdownOpen);
+  };
 
   const handleAddUnitClick = () => {
     setEditingUnitId(null);
@@ -295,7 +328,8 @@ const OperatorsPage = () => {
   };
 
   const handleExportExcel = async () => {
-    if (operators.length === 0) {
+    const dataToExport = filteredOperators;
+    if (dataToExport.length === 0) {
       toast.error('No operators available to export.');
       return;
     }
@@ -305,7 +339,6 @@ const OperatorsPage = () => {
       const worksheet = workbook.addWorksheet('Operators');
 
       worksheet.columns = [
-        { header: 'ID', key: 'id', width: 25 },
         { header: 'Full Name', key: 'name', width: 30 },
         { header: 'Last Name', key: 'lastName', width: 15 },
         { header: 'First Name', key: 'firstName', width: 15 },
@@ -326,12 +359,11 @@ const OperatorsPage = () => {
         { header: 'Contact', key: 'contact', width: 15 },
       ];
 
-      operators.forEach(op => {
+      dataToExport.forEach(op => {
         const units = op.units || [];
         if (units.length === 0) {
           // Add operator row even if no units
           worksheet.addRow({
-            id: op._id,
             name: getFullName(op),
             lastName: op.lastName,
             firstName: op.firstName,
@@ -355,7 +387,6 @@ const OperatorsPage = () => {
           // Add a row for each unit
           units.forEach(unit => {
             worksheet.addRow({
-              id: op._id,
               name: getFullName(op),
               lastName: op.lastName,
               firstName: op.firstName,
@@ -386,13 +417,19 @@ const OperatorsPage = () => {
       });
 
       const timestamp = new Date().toISOString().slice(0, 10);
+      let fileName = 'operators';
+      if (!zoneFilter.includes('all') && zoneFilter.length > 0) {
+        const zonesStr = zoneFilter.map(z => z.toLowerCase().replace(/\s+/g, '-')).join('-');
+        fileName = `${zonesStr}-${fileName}`;
+      }
+      fileName += `-${timestamp}.xlsx`;
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `operators-directory-${timestamp}.xlsx`;
+      link.download = fileName;
       link.click();
       URL.revokeObjectURL(link.href);
       toast.success('Operators exported to Excel successfully.');
@@ -440,12 +477,17 @@ const OperatorsPage = () => {
             </button>
           )}
         </div>
-        <select className="input-field" style={{ maxWidth: '200px' }} value={zoneFilter} onChange={(e) => setZoneFilter(e.target.value)}>
-          <option value="all">All Zones</option>
-          {zoneOptions.map((zone) => (
-            <option key={zone} value={zone}>{zone}</option>
-          ))}
-        </select>
+        <div style={{ position: 'relative', maxWidth: '200px' }}>
+          <button
+            ref={zoneButtonRef}
+            type="button"
+            className="input-field"
+            style={{ textAlign: 'left', cursor: 'pointer', maxWidth: '200px' }}
+            onClick={handleZoneButtonClick}
+          >
+            {zoneFilter.includes('all') ? 'All Zones' : zoneFilter.join(', ')}
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -902,6 +944,31 @@ const OperatorsPage = () => {
             ×
           </button>
         </div>
+      )}
+      {zoneDropdownOpen && createPortal(
+        <div style={{ position: 'fixed', top: zoneDropdownPosition.top, left: zoneDropdownPosition.left, width: zoneDropdownPosition.width, zIndex: 99999, background: 'var(--surface-bg)', border: '1px solid var(--border-color)', borderRadius: '0.5rem', maxHeight: '200px', overflowY: 'auto', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+          <div style={{ padding: '0.5rem' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.25rem 0' }}>
+              <input
+                type="checkbox"
+                checked={zoneFilter.includes('all')}
+                onChange={() => handleZoneToggle('all')}
+              />
+              All Zones
+            </label>
+            {zoneOptions.map((zone) => (
+              <label key={zone} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.25rem 0' }}>
+                <input
+                  type="checkbox"
+                  checked={zoneFilter.includes(zone)}
+                  onChange={() => handleZoneToggle(zone)}
+                />
+                {zone}
+              </label>
+            ))}
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );

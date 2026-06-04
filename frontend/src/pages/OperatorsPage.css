@@ -43,6 +43,10 @@
 .operators-search {
   padding: 0.9rem;
   margin-bottom: 1rem;
+  position: relative;
+  z-index: 99999;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .operators-layout {
@@ -74,6 +78,8 @@
 .details-actions {
   display: flex;
   gap: 0.5rem;
+  position: relative;
+  z-index: 10000;
 }
 
 .details-actions .btn-secondary {

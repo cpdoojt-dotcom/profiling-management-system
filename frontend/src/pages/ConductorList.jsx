@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import { ArrowUpDown, Plus, Bus, FileSpreadsheet, X } from 'lucide-react';
 import axios from 'axios';
 import ExcelJS from 'exceljs';
@@ -85,7 +86,10 @@ const ConductorList = () => {
   const [direction, setDirection] = useState('desc');
   const [selectedConductorId, setSelectedConductorId] = useState('');
   const [query, setQuery] = useState('');
-  const [zoneFilter, setZoneFilter] = useState('');
+  const [zoneFilter, setZoneFilter] = useState(['all']);
+  const [zoneDropdownOpen, setZoneDropdownOpen] = useState(false);
+  const [zoneDropdownPosition, setZoneDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+  const zoneButtonRef = useRef(null);
   const [vehicleTypeFilter, setVehicleTypeFilter] = useState('');
   const [page, setPage] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
@@ -189,7 +193,7 @@ const ConductorList = () => {
         || fullName.includes(normalizedQuery)
         || String(c.unit?.plateNo || '').toLowerCase().includes(normalizedQuery)
         || String(c.unit?.bodyNo || '').toLowerCase().includes(normalizedQuery);
-      const matchesZone = !zoneFilter || c.unit?.zone === zoneFilter;
+      const matchesZone = zoneFilter.includes('all') || zoneFilter.includes(c.unit?.zone);
       const matchesVehicleType = !vehicleTypeFilter || c.unit?.vehicleType === vehicleTypeFilter;
       return matchesQuery && matchesZone && matchesVehicleType;
     });
@@ -273,6 +277,35 @@ const ConductorList = () => {
     setDirection('asc');
   };
 
+  const handleZoneToggle = (zone) => {
+    if (zone === 'all') {
+      setZoneFilter(['all']);
+    } else {
+      setZoneFilter(prev => {
+        if (prev.includes('all')) {
+          return [zone];
+        }
+        if (prev.includes(zone)) {
+          const newFilter = prev.filter(z => z !== zone);
+          return newFilter.length === 0 ? ['all'] : newFilter;
+        }
+        return [...prev, zone];
+      });
+    }
+  };
+
+  const handleZoneButtonClick = () => {
+    if (zoneButtonRef.current) {
+      const rect = zoneButtonRef.current.getBoundingClientRect();
+      setZoneDropdownPosition({
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width
+      });
+    }
+    setZoneDropdownOpen(!zoneDropdownOpen);
+  };
+
   const handleEditChange = (section) => (e) => {
     const { name, value } = e.target;
     let finalValue = value;
@@ -353,8 +386,9 @@ const ConductorList = () => {
   };
 
   const handleExportExcel = async () => {
-    if (conductors.length === 0) {
-      toast.error('No conductors available to export.');
+    const dataToExport = sortedConductors;
+    if (dataToExport.length === 0) {
+      toast.error('No conductors matched your current filters to export.');
       return;
     }
 
@@ -385,7 +419,7 @@ const ConductorList = () => {
       'UPDATED AT',
     ];
 
-    const rows = conductors.map((conductor, index) => ([
+    const rows = dataToExport.map((conductor, index) => ([
       index + 1,
       sanitize(conductor.firstName),
       sanitize(conductor.middleName),
@@ -441,13 +475,19 @@ const ConductorList = () => {
       });
 
       const timestamp = new Date().toISOString().slice(0, 10);
+      let fileName = 'conductors';
+      if (!zoneFilter.includes('all') && zoneFilter.length > 0) {
+        const zonesStr = zoneFilter.map(z => z.toLowerCase().replace(/\s+/g, '-')).join('-');
+        fileName = `${zonesStr}-${fileName}`;
+      }
+      fileName += `-${timestamp}.xlsx`;
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `conductors-directory-${timestamp}.xlsx`;
+      link.download = fileName;
       link.click();
       URL.revokeObjectURL(link.href);
       toast.success('Conductors exported to Excel successfully.');
@@ -497,12 +537,18 @@ const ConductorList = () => {
             </button>
           )}
         </div>
-        <select className="input-field" value={zoneFilter} onChange={(e) => setZoneFilter(e.target.value)} aria-label="Filter by zone">
-          <option value="">All Zones</option>
-          {zoneOptions.map((zone) => (
-            <option key={zone} value={zone}>{zone}</option>
-          ))}
-        </select>
+        <div style={{ position: 'relative', maxWidth: '200px' }}>
+          <button
+            ref={zoneButtonRef}
+            type="button"
+            className="input-field"
+            style={{ textAlign: 'left', cursor: 'pointer', maxWidth: '200px' }}
+            onClick={handleZoneButtonClick}
+            aria-label="Filter by zone"
+          >
+            {zoneFilter.includes('all') ? 'All Zones' : zoneFilter.join(', ')}
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -854,6 +900,31 @@ const ConductorList = () => {
             ×
           </button>
         </div>
+      )}
+      {zoneDropdownOpen && createPortal(
+        <div style={{ position: 'fixed', top: zoneDropdownPosition.top, left: zoneDropdownPosition.left, width: zoneDropdownPosition.width, zIndex: 99999, background: 'var(--surface-bg)', border: '1px solid var(--border-color)', borderRadius: '0.5rem', maxHeight: '200px', overflowY: 'auto', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+          <div style={{ padding: '0.5rem' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.25rem 0' }}>
+              <input
+                type="checkbox"
+                checked={zoneFilter.includes('all')}
+                onChange={() => handleZoneToggle('all')}
+              />
+              All Zones
+            </label>
+            {zoneOptions.map((zone) => (
+              <label key={zone} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.25rem 0' }}>
+                <input
+                  type="checkbox"
+                  checked={zoneFilter.includes(zone)}
+                  onChange={() => handleZoneToggle(zone)}
+                />
+                {zone}
+              </label>
+            ))}
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );
