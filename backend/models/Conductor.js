@@ -33,6 +33,9 @@ const conductorSchema = new mongoose.Schema({
   status: { type: String, default: 'Active' },
 }, { timestamps: true });
 
+// Indexes for performance
+conductorSchema.index({ lastName: 1, firstName: 1 });
+
 const Conductor = mongoose.model('Conductor', conductorSchema);
 
 export default Conductor;

@@ -39,6 +39,10 @@ const driverSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
+// Indexes for performance
+// Note: cpdoId and licenseNo already have unique: true which creates indexes automatically
+driverSchema.index({ lastName: 1, firstName: 1 });
+
 const Driver = mongoose.model('Driver', driverSchema);
 
 export default Driver;

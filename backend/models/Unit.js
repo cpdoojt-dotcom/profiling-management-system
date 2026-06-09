@@ -39,7 +39,10 @@ const unitSchema = new mongoose.Schema({
   }]
 }, { timestamps: true });
 
+// Indexes for performance
 unitSchema.index({ operator: 1, bodyNo: 1 }, { unique: true });
+unitSchema.index({ bodyNo: 1 });
+unitSchema.index({ plateNo: 1 });
 
 const Unit = mongoose.model('Unit', unitSchema);
 

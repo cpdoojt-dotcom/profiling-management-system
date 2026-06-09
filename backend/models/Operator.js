@@ -22,6 +22,9 @@ const operatorSchema = new mongoose.Schema({
   photoUrl: { type: String, trim: true },
 }, { timestamps: true });
 
+// Indexes for performance
+operatorSchema.index({ lastName: 1, firstName: 1 });
+
 const Operator = mongoose.model('Operator', operatorSchema);
 
 export default Operator;
