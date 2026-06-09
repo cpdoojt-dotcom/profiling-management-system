@@ -894,8 +894,8 @@ const OperatorsPage = () => {
 
       {/* Image Modal */}
       {imageModalOpen && (
-        <div 
-          className="image-modal-overlay" 
+        <div
+          className="image-modal-overlay"
           onClick={() => setImageModalOpen(false)}
           style={{
             position: 'fixed',
@@ -907,7 +907,7 @@ const OperatorsPage = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 2000,
+            zIndex: 100000,
             cursor: 'pointer'
           }}
         >

@@ -818,7 +818,7 @@ const DriversList = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 2000,
+            zIndex: 100000,
             cursor: 'pointer'
           }}
         >
