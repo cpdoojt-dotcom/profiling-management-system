@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import axios from 'axios';
-import { Search, RefreshCw } from 'lucide-react';
+import { Search, RefreshCw, Calendar } from 'lucide-react';
 import './AuditLogs.css';
 
 const MODULE_OPTIONS = ['All', 'Driver', 'Conductor', 'Unit', 'Operator'];
@@ -33,6 +33,9 @@ const AuditLogs = () => {
     user: '',
     module: 'All',
   });
+
+  const startDateRef = useRef(null);
+  const endDateRef = useRef(null);
 
   const queryParams = useMemo(() => {
     const params = new URLSearchParams();
@@ -97,23 +100,43 @@ const AuditLogs = () => {
         <div className="filter-grid">
           <div className="form-group">
             <label htmlFor="startDate">Start Date</label>
-            <input
-              id="startDate"
-              type="date"
-              className="input-field"
-              value={filters.startDate}
-              onChange={(e) => handleFilterChange('startDate', e.target.value)}
-            />
+            <div className="date-input-wrapper">
+              <input
+                ref={startDateRef}
+                id="startDate"
+                type="date"
+                className="input-field"
+                value={filters.startDate}
+                onChange={(e) => handleFilterChange('startDate', e.target.value)}
+              />
+              <button
+                type="button"
+                className="calendar-icon-btn"
+                onClick={() => startDateRef.current?.showPicker?.() || startDateRef.current?.click()}
+              >
+                <Calendar size={18} />
+              </button>
+            </div>
           </div>
           <div className="form-group">
             <label htmlFor="endDate">End Date</label>
-            <input
-              id="endDate"
-              type="date"
-              className="input-field"
-              value={filters.endDate}
-              onChange={(e) => handleFilterChange('endDate', e.target.value)}
-            />
+            <div className="date-input-wrapper">
+              <input
+                ref={endDateRef}
+                id="endDate"
+                type="date"
+                className="input-field"
+                value={filters.endDate}
+                onChange={(e) => handleFilterChange('endDate', e.target.value)}
+              />
+              <button
+                type="button"
+                className="calendar-icon-btn"
+                onClick={() => endDateRef.current?.showPicker?.() || endDateRef.current?.click()}
+              >
+                <Calendar size={18} />
+              </button>
+            </div>
           </div>
           <div className="form-group">
             <label htmlFor="user">User Email</label>

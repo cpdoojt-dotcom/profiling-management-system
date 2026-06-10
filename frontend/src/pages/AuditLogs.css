@@ -30,6 +30,49 @@
   color: var(--text-secondary);
 }
 
+.date-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.date-input-wrapper .input-field {
+  padding-right: 2.5rem;
+}
+
+.date-input-wrapper .input-field::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+.calendar-icon-btn {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  z-index: 10;
+}
+
+.calendar-icon-btn:hover {
+  color: var(--accent-color);
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+[data-theme='light'] .calendar-icon-btn {
+  color: var(--text-secondary);
+}
+
+[data-theme='light'] .calendar-icon-btn:hover {
+  color: var(--accent-color);
+}
+
 .filter-actions {
   margin-top: 1rem;
   display: flex;
