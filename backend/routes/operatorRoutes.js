@@ -37,6 +37,7 @@ const normalizeOperatorData = (operatorData) => ({
   ltfrbMchCaseNo: operatorData.ltfrbMchCaseNo,
   operatorType: operatorData.operatorType || 'FOR HIRE',
   photoUrl: operatorData.photoUrl,
+  transferStatus: operatorData.transferStatus || 'None',
 });
 
 const normalizeUnitData = (unitData) => ({

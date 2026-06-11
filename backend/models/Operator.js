@@ -20,6 +20,11 @@ const operatorSchema = new mongoose.Schema({
     default: 'FOR HIRE'
   },
   photoUrl: { type: String, trim: true },
+  transferStatus: {
+    type: String,
+    enum: ['None', 'Transferred'],
+    default: 'None'
+  },
 }, { timestamps: true });
 
 // Indexes for performance

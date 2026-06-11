@@ -53,6 +53,7 @@ const initialOperator = {
   cityMunicipality: '',
   contactNo: '',
   operatorType: 'FOR HIRE',
+  transferStatus: 'None',
 };
 
 const initialUnit = {
@@ -352,12 +353,19 @@ const OperatorForm = () => {
           </div>
           <div className="form-group">
             <label>Classification</label>
-            <input 
-              readOnly 
-              className="input-field" 
-              style={{ background: 'var(--surface-bg)', opacity: 0.7 }} 
-              value={operator.operatorType} 
+            <input
+              readOnly
+              className="input-field"
+              style={{ background: 'var(--surface-bg)', opacity: 0.7 }}
+              value={operator.operatorType}
             />
+          </div>
+          <div className="form-group">
+            <label>Transfer Status</label>
+            <select name="transferStatus" className="input-field" value={operator.transferStatus} onChange={handleOperatorChange}>
+              <option value="None">None</option>
+              <option value="Transferred">Transferred</option>
+            </select>
           </div>
         </div>
 
