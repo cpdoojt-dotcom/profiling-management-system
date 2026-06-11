@@ -77,7 +77,7 @@ const OperatorsPage = () => {
   const [editForm, setEditForm] = useState({
     lastName: '', firstName: '', middleName: '', extensionName: '', civilStatus: '', age: '',
     addressNo: '', street: '', purok: '', barangay: '', cityMunicipality: '',
-    contactNo: '', operatorType: 'FOR HIRE', transferStatus: 'None'
+    contactNo: '', operatorType: 'FOR HIRE'
   });
 
   const initialUnit = {
@@ -250,7 +250,6 @@ const OperatorsPage = () => {
       cityMunicipality: selectedOperator.cityMunicipality || '',
       contactNo: selectedOperator.contactNo || '',
       operatorType: selectedOperator.operatorType || 'FOR HIRE',
-      transferStatus: selectedOperator.transferStatus || 'None',
     });
     setEditImageFile(null);
     setIsEditing(true);
@@ -636,13 +635,6 @@ const OperatorsPage = () => {
                       style={{ background: 'var(--surface-bg)', opacity: 0.7 }}
                       value={editForm.operatorType}
                     />
-                  </div>
-                  <div className="edit-form-group">
-                    <label>Transfer Status</label>
-                    <select name="transferStatus" className="input-field" value={editForm.transferStatus} onChange={handleEditChange}>
-                      <option value="None">None</option>
-                      <option value="Transferred">Transferred</option>
-                    </select>
                   </div>
                 </div>
                 <div className="form-actions">
