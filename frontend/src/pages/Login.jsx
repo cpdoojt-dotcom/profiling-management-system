@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Mail, Lock, LogIn, Shield, Bus, Truck, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import cpdoLogo from '../assets/cpdo_logo.jpg';
+import ocLogo from '../assets/OC-logo.png';
 import './Login.css';
 
 const Login = () => {
@@ -61,6 +63,10 @@ const Login = () => {
       <div className="login-background"></div>
 
       <div className="login-info">
+        <div className="logos-container">
+          <img src={ocLogo} alt="OC Logo" className="oc-logo" />
+          <img src={cpdoLogo} alt="CPDO Logo" className="cpdo-logo" />
+        </div>
         <h1>PUV Profiling Management System</h1>
         <p>
           A comprehensive platform for modernizing Public Utility Vehicle management.
