@@ -395,7 +395,7 @@ const Dashboard = () => {
 
       <div className="stats-grid">
         <div className="stat-card glass-panel">
-          <div className="stat-icon">
+          <div className="stat-icon" style={{color: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.15)'}}>
             <Users size={24} />
           </div>
           <div className="stat-details">
@@ -405,8 +405,8 @@ const Dashboard = () => {
         </div>
         
         <div className="stat-card glass-panel">
-          <div className="stat-icon" style={{color: 'var(--success)', backgroundColor: 'rgba(16, 185, 129, 0.15)'}}>
-            <ShieldCheck size={24} />
+          <div className="stat-icon" style={{color: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.15)'}}>
+            <Users size={24} />
           </div>
           <div className="stat-details">
             <h3>Total Operators</h3>
@@ -415,22 +415,22 @@ const Dashboard = () => {
         </div>
 
         <div className="stat-card glass-panel">
-          <div className="stat-icon" style={{color: 'var(--warning)', backgroundColor: 'rgba(245, 158, 11, 0.15)'}}>
-            <Bus size={24} />
-          </div>
-          <div className="stat-details">
-            <h3>Total PUV Units</h3>
-            <p>{summary.vehicles}</p>
-          </div>
-        </div>
-
-        <div className="stat-card glass-panel">
-          <div className="stat-icon" style={{color: 'var(--accent-color)', backgroundColor: 'rgba(59, 130, 246, 0.15)'}}>
+          <div className="stat-icon" style={{color: '#a855f7', backgroundColor: 'rgba(168, 85, 247, 0.15)'}}>
             <Users size={24} />
           </div>
           <div className="stat-details">
             <h3>Total Conductors</h3>
             <p>{summary.conductors || 0}</p>
+          </div>
+        </div>
+
+        <div className="stat-card glass-panel">
+          <div className="stat-icon" style={{color: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.15)'}}>
+            <Bus size={24} />
+          </div>
+          <div className="stat-details">
+            <h3>Total PUV Units</h3>
+            <p>{summary.vehicles}</p>
           </div>
         </div>
       </div>
