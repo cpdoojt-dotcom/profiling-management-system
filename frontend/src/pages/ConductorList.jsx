@@ -506,10 +506,12 @@ const ConductorList = () => {
           <p>View, sort, and inspect all saved Mini Bus conductor profiles.</p>
         </div>
         <div className="drivers-header-actions">
-          <button className="btn-secondary export-btn" type="button" onClick={handleExportExcel}>
-            <FileSpreadsheet size={18} />
-            Export Excel
-          </button>
+          {user?.role !== 'otmps' && (
+            <button className="btn-secondary export-btn" type="button" onClick={handleExportExcel}>
+              <FileSpreadsheet size={18} />
+              Export Excel
+            </button>
+          )}
           {user?.role !== 'otmps' && (
             <button className="btn-primary" type="button" onClick={() => navigate('/conductors/new')}>
               <Plus size={18} />

@@ -448,10 +448,12 @@ const OperatorsPage = () => {
           <p>Manage operators, their units, and all assigned drivers.</p>
         </div>
         <div className="operators-header-actions">
-          <button className="btn-secondary export-btn" type="button" onClick={handleExportExcel}>
-            <FileSpreadsheet size={18} />
-            Export Excel
-          </button>
+          {user?.role !== 'otmps' && (
+            <button className="btn-secondary export-btn" type="button" onClick={handleExportExcel}>
+              <FileSpreadsheet size={18} />
+              Export Excel
+            </button>
+          )}
           {user?.role !== 'otmps' && (
             <button className="btn-primary" type="button" onClick={() => navigate('/operators/new')}>
               <Plus size={18} />

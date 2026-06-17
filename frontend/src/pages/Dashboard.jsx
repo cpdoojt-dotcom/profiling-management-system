@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Users, AlertTriangle, ShieldCheck, Bike, Truck, Bus, Upload, CheckCircle2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 import trikeLogo from '../assets/trike.jpg';
 import jeepLogo from '../assets/jeep.jpg';
 import busLogo from '../assets/bus.png';
@@ -80,6 +81,7 @@ const getFullName = (person) => {
 };
 
 const Dashboard = () => {
+  const { user } = useAuth();
   const [drivers, setDrivers] = useState([]);
   const [operators, setOperators] = useState([]);
   const [conductors, setConductors] = useState([]);
@@ -369,31 +371,33 @@ const Dashboard = () => {
           <p>Real-time monitoring of PUV operators, vehicles, and drivers.</p>
         </div>
         
-        <div className="dashboard-actions" style={{ display: 'flex', gap: '0.75rem' }}>
-          <button 
-            className="btn-secondary" 
-            type="button" 
-            onClick={downloadTemplate}
-          >
-            Download Template
-          </button>
-          <input
-            type="file"
-            accept=".xlsx, .xls, .csv"
-            style={{ display: 'none' }}
-            ref={fileInputRef}
-            onChange={handleFileChange}
-          />
-          <button 
-            className="btn-primary" 
-            type="button" 
-            onClick={() => fileInputRef.current?.click()} 
-            disabled={importing}
-          >
-            <Upload size={18} />
-            {importing ? 'Importing...' : 'Import Data'}
-          </button>
-        </div>
+        {user?.role !== 'otmps' && (
+          <div className="dashboard-actions" style={{ display: 'flex', gap: '0.75rem' }}>
+            <button 
+              className="btn-secondary" 
+              type="button" 
+              onClick={downloadTemplate}
+            >
+              Download Template
+            </button>
+            <input
+              type="file"
+              accept=".xlsx, .xls, .csv"
+              style={{ display: 'none' }}
+              ref={fileInputRef}
+              onChange={handleFileChange}
+            />
+            <button 
+              className="btn-primary" 
+              type="button" 
+              onClick={() => fileInputRef.current?.click()} 
+              disabled={importing}
+            >
+              <Upload size={18} />
+              {importing ? 'Importing...' : 'Import Data'}
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="stats-grid">

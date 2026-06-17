@@ -495,10 +495,12 @@ const DriversList = () => {
           <p>View, sort, and inspect all saved PUV driver profiles.</p>
         </div>
         <div className="drivers-header-actions">
-          <button className="btn-secondary export-btn" type="button" onClick={handleExportExcel}>
-            <FileSpreadsheet size={18} />
-            Export Excel
-          </button>
+          {user?.role !== 'otmps' && (
+            <button className="btn-secondary export-btn" type="button" onClick={handleExportExcel}>
+              <FileSpreadsheet size={18} />
+              Export Excel
+            </button>
+          )}
           {user?.role !== 'otmps' && (
             <button className="btn-primary" type="button" onClick={() => navigate('/drivers/new')}>
               <Plus size={18} />
