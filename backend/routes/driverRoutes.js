@@ -6,6 +6,7 @@ import Unit from '../models/Unit.js';
 import Conductor from '../models/Conductor.js';
 import { uploadImageBuffer } from '../config/cloudinary.js';
 import { createAuditLog } from '../utils/auditLog.js';
+import { protect, canWrite } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -28,7 +29,7 @@ const parsePayload = (body) => {
 };
 
 // Get all drivers
-router.get('/', async (req, res) => {
+router.get('/', protect, async (req, res) => {
   try {
     const drivers = await Driver.find()
       .populate('operator')
@@ -41,7 +42,7 @@ router.get('/', async (req, res) => {
 });
 
 // Create a new driver
-router.post('/', upload.single('driverImage'), async (req, res) => {
+router.post('/', protect, canWrite, upload.single('driverImage'), async (req, res) => {
   try {
     const driverData = parsePayload(req.body);
     if (!driverData || Object.keys(driverData).length === 0) {
@@ -99,7 +100,7 @@ router.post('/', upload.single('driverImage'), async (req, res) => {
 });
 
 // Get operators summary data
-router.get('/meta/summary', async (_req, res) => {
+router.get('/meta/summary', protect, async (_req, res) => {
   try {
     const operators = await Operator.countDocuments();
     const totalVehicles = await Unit.countDocuments();
@@ -132,7 +133,7 @@ router.get('/meta/summary', async (_req, res) => {
 });
 
 // Get a single driver
-router.get('/:id', async (req, res) => {
+router.get('/:id', protect, async (req, res) => {
   try {
     const driver = await Driver.findById(req.params.id).populate('operator unit');
     if (!driver) return res.status(404).json({ message: 'Driver not found' });
@@ -143,7 +144,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Update a driver
-router.put('/:id', upload.single('driverImage'), async (req, res) => {
+router.put('/:id', protect, canWrite, upload.single('driverImage'), async (req, res) => {
   try {
     const driver = await Driver.findById(req.params.id);
     if (!driver) return res.status(404).json({ message: 'Driver not found' });
@@ -226,7 +227,7 @@ router.put('/:id', upload.single('driverImage'), async (req, res) => {
 });
 
 // Delete a driver
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', protect, canWrite, async (req, res) => {
   try {
     const driver = await Driver.findById(req.params.id);
     if (!driver) return res.status(404).json({ message: 'Driver not found' });

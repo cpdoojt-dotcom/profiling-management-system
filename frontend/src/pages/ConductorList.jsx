@@ -6,6 +6,7 @@ import axios from 'axios';
 import ExcelJS from 'exceljs';
 import { useConfirm } from '../context/ConfirmContext';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 import { formatAddress } from '../utils/formatUtils';
 import { TableSkeleton, CardSkeleton } from '../components/SkeletonLoader';
 import EmptyState from '../components/EmptyState';
@@ -77,6 +78,7 @@ const ConductorList = () => {
   const location = useLocation();
   const confirm = useConfirm();
   const toast = useToast();
+  const { user } = useAuth();
   const [conductors, setConductors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -508,10 +510,12 @@ const ConductorList = () => {
             <FileSpreadsheet size={18} />
             Export Excel
           </button>
-          <button className="btn-primary" type="button" onClick={() => navigate('/conductors/new')}>
-            <Plus size={18} />
-            Add Conductor
-          </button>
+          {user?.role !== 'otmps' && (
+            <button className="btn-primary" type="button" onClick={() => navigate('/conductors/new')}>
+              <Plus size={18} />
+              Add Conductor
+            </button>
+          )}
         </div>
       </div>
 
@@ -637,7 +641,7 @@ const ConductorList = () => {
           <div className="glass-panel driver-details" role="region" aria-label="Conductor details panel">
             <div className="details-header">
               <h2>Conductor Details</h2>
-              {selectedConductor && !isEditing && (
+              {selectedConductor && !isEditing && user?.role !== 'otmps' && (
                 <div className="details-actions">
                   <button type="button" className="btn-secondary" onClick={() => setIsEditing(true)} aria-label="Edit conductor profile">Edit</button>
                   <button type="button" className="btn-danger" onClick={handleDelete} disabled={actionLoading} aria-label="Delete conductor profile">

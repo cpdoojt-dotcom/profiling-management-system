@@ -6,6 +6,7 @@ import { Plus, X, Bike, Truck, Bus, FileSpreadsheet } from 'lucide-react';
 import ExcelJS from 'exceljs';
 import { useConfirm } from '../context/ConfirmContext';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 import { formatAddress } from '../utils/formatUtils';
 import './OperatorsPage.css';
 
@@ -59,6 +60,7 @@ const OperatorsPage = () => {
   const navigate = useNavigate();
   const confirm = useConfirm();
   const toast = useToast();
+  const { user } = useAuth();
   const [operators, setOperators] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -450,10 +452,12 @@ const OperatorsPage = () => {
             <FileSpreadsheet size={18} />
             Export Excel
           </button>
-          <button className="btn-primary" type="button" onClick={() => navigate('/operators/new')}>
-            <Plus size={18} />
-            Add Operator
-          </button>
+          {user?.role !== 'otmps' && (
+            <button className="btn-primary" type="button" onClick={() => navigate('/operators/new')}>
+              <Plus size={18} />
+              Add Operator
+            </button>
+          )}
         </div>
       </div>
 
@@ -538,7 +542,7 @@ const OperatorsPage = () => {
           <div className="glass-panel operator-details">
             <div className="details-header">
               <h2>Operator Details</h2>
-              {selectedOperator && !isEditing && (
+              {selectedOperator && !isEditing && user?.role !== 'otmps' && (
                 <div className="details-actions">
                   <button className="btn-secondary" type="button" onClick={handleEditOperator}>Edit</button>
                   <button className="btn-danger" type="button" onClick={handleDeleteOperator}>Delete</button>
@@ -646,11 +650,13 @@ const OperatorsPage = () => {
               </form>
             ) : (
               <>
-                <div className="operator-details-controls">
-                  <button className="btn-primary" type="button" onClick={handleAddUnitClick} disabled={addingUnit}>
-                    <Plus size={16} /> Add Unit
-                  </button>
-                </div>
+                {user?.role !== 'otmps' && (
+                  <div className="operator-details-controls">
+                    <button className="btn-primary" type="button" onClick={handleAddUnitClick} disabled={addingUnit}>
+                      <Plus size={16} /> Add Unit
+                    </button>
+                  </div>
+                )}
                 <div className="operator-meta">
                   <div className="details-photo-wrap">
                     <img 
@@ -677,7 +683,9 @@ const OperatorsPage = () => {
                       <div key={unit._id} className="operator-driver-item" style={{ position: 'relative' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <strong>Body #{unit.bodyNo}</strong>
-                          <button className="btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleEditUnitClick(unit)}>Edit</button>
+                          {user?.role !== 'otmps' && (
+                            <button className="btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleEditUnitClick(unit)}>Edit</button>
+                          )}
                         </div>
                         <p>Plate: {unit.plateNo || '-'}</p>
                         <p>

@@ -7,6 +7,7 @@ import UnitHistory from '../models/UnitHistory.js';
 import Conductor from '../models/Conductor.js';
 import { uploadImageBuffer } from '../config/cloudinary.js';
 import { createAuditLog } from '../utils/auditLog.js';
+import { protect, canWrite } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -69,7 +70,7 @@ const logUnitHistory = async (unitId, bodyNo, oldData, newData, changeType = 'Up
 };
 
 // Create or Update operator record with units and optional drivers/conductors
-router.post('/', upload.single('operatorImage'), async (req, res) => {
+router.post('/', protect, canWrite, upload.single('operatorImage'), async (req, res) => {
   try {
     let operatorData;
     if (req.body.operator) {
@@ -174,7 +175,7 @@ router.post('/', upload.single('operatorImage'), async (req, res) => {
 });
 
 // Add unit under an existing operator
-router.post('/:id/units', async (req, res) => {
+router.post('/:id/units', protect, canWrite, async (req, res) => {
   try {
     const operator = await Operator.findById(req.params.id);
     if (!operator) return res.status(404).json({ message: 'Operator not found' });
@@ -206,7 +207,7 @@ router.post('/:id/units', async (req, res) => {
 });
 
 // Update operator details
-router.put('/:id', upload.single('operatorImage'), async (req, res) => {
+router.put('/:id', protect, canWrite, upload.single('operatorImage'), async (req, res) => {
   try {
     const operator = await Operator.findById(req.params.id);
     if (!operator) return res.status(404).json({ message: 'Operator not found' });
@@ -251,7 +252,7 @@ router.put('/:id', upload.single('operatorImage'), async (req, res) => {
 });
 
 // Delete operator and related records
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', protect, canWrite, async (req, res) => {
   try {
     const operator = await Operator.findById(req.params.id);
     if (!operator) return res.status(404).json({ message: 'Operator not found' });
@@ -284,7 +285,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // Get all operators with linked units, drivers, and conductors
-router.get('/', async (_req, res) => {
+router.get('/', protect, async (_req, res) => {
   try {
     const operators = await Operator.find().sort({ createdAt: -1 }).lean();
     const operatorIds = operators.map((operator) => operator._id);

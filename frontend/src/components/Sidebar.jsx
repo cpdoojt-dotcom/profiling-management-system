@@ -5,7 +5,7 @@ import { useConfirm } from '../context/ConfirmContext';
 import './Sidebar.css';
 
 const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const confirm = useConfirm();
   const navigate = useNavigate();
 
@@ -72,13 +72,15 @@ const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
           <History size={20} />
           <span>Unit History</span>
         </NavLink>
-        <NavLink
-          to="/audit-logs"
-          className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
-        >
-          <ScrollText size={20} />
-          <span>Audit Logs</span>
-        </NavLink>
+        {user?.role !== 'otmps' && (
+          <NavLink
+            to="/audit-logs"
+            className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
+          >
+            <ScrollText size={20} />
+            <span>Audit Logs</span>
+          </NavLink>
+        )}
         <button
           type="button"
           className="nav-item logout-item"

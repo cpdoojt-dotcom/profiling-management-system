@@ -6,6 +6,7 @@ import axios from 'axios';
 import ExcelJS from 'exceljs';
 import { useConfirm } from '../context/ConfirmContext';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 import { formatAddress } from '../utils/formatUtils';
 import './DriversList.css';
 
@@ -89,6 +90,7 @@ const DriversList = () => {
   const location = useLocation();
   const confirm = useConfirm();
   const toast = useToast();
+  const { user } = useAuth();
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -497,10 +499,12 @@ const DriversList = () => {
             <FileSpreadsheet size={18} />
             Export Excel
           </button>
-          <button className="btn-primary" type="button" onClick={() => navigate('/drivers/new')}>
-            <Plus size={18} />
-            Add Driver
-          </button>
+          {user?.role !== 'otmps' && (
+            <button className="btn-primary" type="button" onClick={() => navigate('/drivers/new')}>
+              <Plus size={18} />
+              Add Driver
+            </button>
+          )}
         </div>
       </div>
 
@@ -618,7 +622,7 @@ const DriversList = () => {
           <div className="glass-panel driver-details">
             <div className="details-header">
               <h2>Driver Details</h2>
-              {selectedDriver && !isEditing && (
+              {selectedDriver && !isEditing && user?.role !== 'otmps' && (
                 <div className="details-actions">
                   <button type="button" className="btn-secondary" onClick={() => setIsEditing(true)}>Edit</button>
                   <button type="button" className="btn-danger" onClick={handleDelete} disabled={actionLoading}>

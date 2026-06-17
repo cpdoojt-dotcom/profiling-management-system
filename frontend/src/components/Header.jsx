@@ -69,7 +69,12 @@ const Header = ({ isSidebarCollapsed, onToggleSidebar }) => {
           <div className="avatar">
             <User size={20} />
           </div>
-          <span>{user?.name || user?.email || 'Admin'}</span>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+            <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{user?.name || user?.email || 'User'}</span>
+            <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '4px', background: user?.role === 'admin' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(16, 185, 129, 0.15)', color: user?.role === 'admin' ? '#60a5fa' : '#34d399', fontWeight: '500', marginTop: '2px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              {user?.role === 'admin' ? 'CPDO Admin' : 'OTMPS Patrol'}
+            </span>
+          </div>
         </div>
       </div>
     </header>

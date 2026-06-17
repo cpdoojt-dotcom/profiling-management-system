@@ -5,6 +5,7 @@ import Operator from '../models/Operator.js';
 import Unit from '../models/Unit.js';
 import { uploadImageBuffer } from '../config/cloudinary.js';
 import { createAuditLog } from '../utils/auditLog.js';
+import { protect, canWrite } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -27,7 +28,7 @@ const parsePayload = (body) => {
 };
 
 // Get all conductors
-router.get('/', async (req, res) => {
+router.get('/', protect, async (req, res) => {
   try {
     const conductors = await Conductor.find()
       .populate('operator')
@@ -40,7 +41,7 @@ router.get('/', async (req, res) => {
 });
 
 // Create a new conductor
-router.post('/', upload.single('conductorImage'), async (req, res) => {
+router.post('/', protect, canWrite, upload.single('conductorImage'), async (req, res) => {
   try {
     const conductorData = parsePayload(req.body);
     if (!conductorData || Object.keys(conductorData).length === 0) {
@@ -100,7 +101,7 @@ router.post('/', upload.single('conductorImage'), async (req, res) => {
 });
 
 // Get a single conductor
-router.get('/:id', async (req, res) => {
+router.get('/:id', protect, async (req, res) => {
   try {
     const conductor = await Conductor.findById(req.params.id).populate('operator unit');
     if (!conductor) return res.status(404).json({ message: 'Conductor not found' });
@@ -111,7 +112,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Update a conductor
-router.put('/:id', upload.single('conductorImage'), async (req, res) => {
+router.put('/:id', protect, canWrite, upload.single('conductorImage'), async (req, res) => {
   try {
     const conductor = await Conductor.findById(req.params.id);
     if (!conductor) return res.status(404).json({ message: 'Conductor not found' });
@@ -187,7 +188,7 @@ router.put('/:id', upload.single('conductorImage'), async (req, res) => {
 });
 
 // Delete a conductor
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', protect, canWrite, async (req, res) => {
   try {
     const conductor = await Conductor.findById(req.params.id);
     if (!conductor) return res.status(404).json({ message: 'Conductor not found' });
