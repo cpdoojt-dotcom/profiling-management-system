@@ -4,6 +4,9 @@ import axios from 'axios';
 import { Users, AlertTriangle, ShieldCheck, Bike, Truck, Bus, Upload, CheckCircle2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { useToast } from '../context/ToastContext';
+import trikeLogo from '../assets/trike.jpg';
+import jeepLogo from '../assets/jeep.jpg';
+import busLogo from '../assets/bus.png';
 import './Dashboard.css';
 
 const getColorOptions = (bodyNo, vehicleType) => {
@@ -438,7 +441,7 @@ const Dashboard = () => {
       <div className="stats-categories-grid">
         <div className="category-stat-card glass-panel" onClick={() => navigate('/drivers?type=Tricycle')}>
           <div className="category-info">
-            <span className="category-label"><Bike size={18} /> Tricycle</span>
+            <span className="category-label"><img src={trikeLogo} alt="Tricycle" style={{ width: '28px', height: '28px', marginRight: '0.5rem', background: 'transparent' }} /> Tricycle</span>
             <div style={{ display: 'flex', gap: '1rem', marginTop: '0.4rem' }}>
               <span className="category-value" style={{ fontSize: '1.2rem' }}>{summary.tricycleDrivers} Drivers</span>
               <span className="category-value" style={{ fontSize: '1.2rem', color: 'var(--warning)' }}>{summary.tricycleUnits} Units</span>
@@ -449,7 +452,7 @@ const Dashboard = () => {
         
         <div className="category-stat-card glass-panel" onClick={() => navigate('/drivers?type=Jeepney')}>
           <div className="category-info">
-            <span className="category-label"><Truck size={18} /> Jeepney</span>
+            <span className="category-label"><img src={jeepLogo} alt="Jeepney" style={{ width: '18px', height: '18px', marginRight: '0.5rem', background: 'transparent' }} /> Jeepney</span>
             <div style={{ display: 'flex', gap: '1rem', marginTop: '0.4rem' }}>
               <span className="category-value" style={{ fontSize: '1.2rem' }}>{summary.jeepneyDrivers} Drivers</span>
               <span className="category-value" style={{ fontSize: '1.2rem', color: 'var(--warning)' }}>{summary.jeepneyUnits} Units</span>
@@ -460,7 +463,7 @@ const Dashboard = () => {
 
         <div className="category-stat-card glass-panel" onClick={() => navigate('/conductors?type=Mini%20Bus')}>
           <div className="category-info">
-            <span className="category-label"><Bus size={18} /> Mini Bus</span>
+            <span className="category-label"><img src={busLogo} alt="Mini Bus" style={{ width: '28px', height: '28px', marginRight: '0.5rem', background: 'transparent' }} /> Mini Bus</span>
             <div style={{ display: 'flex', gap: '1rem', marginTop: '0.4rem' }}>
               <span className="category-value" style={{ fontSize: '1.2rem' }}>{summary.minibusDrivers} Drv.</span>
               <span className="category-value" style={{ fontSize: '1.2rem', color: 'var(--warning)' }}>{summary.minibusUnits} Units</span>
