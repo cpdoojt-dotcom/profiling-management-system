@@ -441,7 +441,7 @@ const Dashboard = () => {
       <div className="stats-categories-grid">
         <div className="category-stat-card glass-panel" onClick={() => navigate('/drivers?type=Tricycle')}>
           <div className="category-info">
-            <span className="category-label"><img src={trikeLogo} alt="Tricycle" style={{ width: '28px', height: '28px', marginRight: '0.5rem', background: 'transparent' }} /> Tricycle</span>
+            <span className="category-label" style={{ fontSize: '1.1rem' }}><img src={trikeLogo} alt="Tricycle" style={{ width: '28px', height: '28px', marginRight: '0.5rem', background: 'transparent', mixBlendMode: 'screen' }} /> Tricycle</span>
             <div style={{ display: 'flex', gap: '1rem', marginTop: '0.4rem' }}>
               <span className="category-value" style={{ fontSize: '1.2rem' }}>{summary.tricycleDrivers} Drivers</span>
               <span className="category-value" style={{ fontSize: '1.2rem', color: 'var(--warning)' }}>{summary.tricycleUnits} Units</span>
@@ -452,7 +452,7 @@ const Dashboard = () => {
         
         <div className="category-stat-card glass-panel" onClick={() => navigate('/drivers?type=Jeepney')}>
           <div className="category-info">
-            <span className="category-label"><img src={jeepLogo} alt="Jeepney" style={{ width: '18px', height: '18px', marginRight: '0.5rem', background: 'transparent' }} /> Jeepney</span>
+            <span className="category-label" style={{ fontSize: '1.1rem' }}><img src={jeepLogo} alt="Jeepney" style={{ width: '28px', height: '28px', marginRight: '0.5rem', background: 'transparent', mixBlendMode: 'screen' }} /> Jeepney</span>
             <div style={{ display: 'flex', gap: '1rem', marginTop: '0.4rem' }}>
               <span className="category-value" style={{ fontSize: '1.2rem' }}>{summary.jeepneyDrivers} Drivers</span>
               <span className="category-value" style={{ fontSize: '1.2rem', color: 'var(--warning)' }}>{summary.jeepneyUnits} Units</span>
@@ -463,7 +463,7 @@ const Dashboard = () => {
 
         <div className="category-stat-card glass-panel" onClick={() => navigate('/conductors?type=Mini%20Bus')}>
           <div className="category-info">
-            <span className="category-label"><img src={busLogo} alt="Mini Bus" style={{ width: '28px', height: '28px', marginRight: '0.5rem', background: 'transparent' }} /> Mini Bus</span>
+            <span className="category-label" style={{ fontSize: '1.1rem' }}><img src={busLogo} alt="Mini Bus" style={{ width: '28px', height: '28px', marginRight: '0.5rem', background: 'transparent', mixBlendMode: 'screen' }} /> Mini Bus</span>
             <div style={{ display: 'flex', gap: '1rem', marginTop: '0.4rem' }}>
               <span className="category-value" style={{ fontSize: '1.2rem' }}>{summary.minibusDrivers} Drv.</span>
               <span className="category-value" style={{ fontSize: '1.2rem', color: 'var(--warning)' }}>{summary.minibusUnits} Units</span>
