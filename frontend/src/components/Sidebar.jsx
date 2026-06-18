@@ -78,7 +78,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
             className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
           >
             <ScrollText size={20} />
-            <span>Audit Logs</span>
+            <span>System Logs</span>
           </NavLink>
         )}
         <button

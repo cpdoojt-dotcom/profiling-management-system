@@ -64,7 +64,7 @@ const AuditLogs = () => {
         setSelectedLog(latestSelected);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Unable to load audit logs.');
+      setError(err.response?.data?.message || 'Unable to load system logs.');
     } finally {
       setLoading(false);
     }
@@ -92,7 +92,7 @@ const AuditLogs = () => {
   return (
     <div className="audit-logs-page animate-fade-in">
       <div className="audit-header">
-        <h1>Audit Log Viewer</h1>
+        <h1>System Log Viewer</h1>
         <p>Human-readable timeline of who changed what and when.</p>
       </div>
 
@@ -197,7 +197,7 @@ const AuditLogs = () => {
               {!loading && logs.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="empty-row">
-                    No audit logs found for this filter.
+                    No system logs found for this filter.
                   </td>
                 </tr>
               ) : (
