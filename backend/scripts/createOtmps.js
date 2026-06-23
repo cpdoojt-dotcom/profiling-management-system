@@ -9,8 +9,8 @@ const createOtmps = async () => {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('Connected to MongoDB');
 
-    const otmpsEmail = 'OTMPS.user@gmail.com';
-    const otmpsPassword = 'Otmps@Secure2026';
+    const otmpsEmail = 'otmps.user@gmail.com';
+    const otmpsPassword = 'otmps@secure2026';
 
     const existingUser = await User.findOne({ email: otmpsEmail });
     if (existingUser) {
