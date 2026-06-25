@@ -13,6 +13,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { ConfirmProvider } from './context/ConfirmContext';
 import { ToastProvider } from './context/ToastContext';
 import AuditLogs from './pages/AuditLogs';
+import UserManagement from './pages/UserManagement';
 import './App.css';
 
 function App() {
@@ -63,6 +64,14 @@ function App() {
               element={
                 <ProtectedRoute requiredRole="admin">
                   <AuditLogs />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="user-management" 
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <UserManagement />
                 </ProtectedRoute>
               } 
             />

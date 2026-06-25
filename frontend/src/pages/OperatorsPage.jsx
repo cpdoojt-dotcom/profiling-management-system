@@ -55,6 +55,20 @@ const getFullName = (person) => {
 
 const sanitize = (value) => String(value ?? '').replace(/\r?\n|\r/g, ' ').trim();
 
+const formatBirthdate = (person) => {
+  if (!person || !person.birthMonth || !person.birthDate || !person.birthYear) return '-';
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const monthIndex = months.findIndex(m => m.toLowerCase() === person.birthMonth.toLowerCase());
+  if (monthIndex === -1) return '-';
+  return `${months[monthIndex]} ${person.birthDate}, ${person.birthYear}`;
+};
+
+const formatPersonAddress = (person) => {
+  if (!person) return '-';
+  const parts = [person.addressNo, person.street, person.purok, person.barangay, person.cityMunicipality];
+  return parts.filter(Boolean).join(' ') || '-';
+};
+
 
 const OperatorsPage = () => {
   const navigate = useNavigate();
@@ -341,12 +355,14 @@ const OperatorsPage = () => {
       const worksheet = workbook.addWorksheet('Operators');
 
       worksheet.columns = [
-        { header: 'Full Name', key: 'name', width: 30 },
-        { header: 'Last Name', key: 'lastName', width: 15 },
-        { header: 'First Name', key: 'firstName', width: 15 },
-        { header: 'Middle Name', key: 'middleName', width: 15 },
-        { header: 'Extension', key: 'extensionName', width: 10 },
+        { header: 'Operator Full Name', key: 'name', width: 30 },
+        { header: 'Operator Last Name', key: 'lastName', width: 15 },
+        { header: 'Operator First Name', key: 'firstName', width: 15 },
+        { header: 'Operator Middle Name', key: 'middleName', width: 15 },
+        { header: 'Operator Extension', key: 'extensionName', width: 10 },
         { header: 'Classification', key: 'type', width: 15 },
+        { header: 'Operator Address', key: 'address', width: 40 },
+        { header: 'Operator Contact', key: 'contact', width: 15 },
         { header: 'Unit Body No', key: 'unitBodyNo', width: 12 },
         { header: 'Unit Plate No', key: 'unitPlateNo', width: 12 },
         { header: 'Vehicle Type', key: 'vehicleType', width: 12 },
@@ -357,12 +373,37 @@ const OperatorsPage = () => {
         { header: 'Chassis No', key: 'chassisNo', width: 15 },
         { header: 'Year Model', key: 'yearModel', width: 12 },
         { header: 'LTFRB Case No', key: 'ltfrbMchCaseNo', width: 15 },
-        { header: 'Address', key: 'address', width: 40 },
-        { header: 'Contact', key: 'contact', width: 15 },
+        { header: 'Driver Full Name', key: 'driverName', width: 25 },
+        { header: 'Driver CPDO ID', key: 'driverCpdoId', width: 12 },
+        { header: 'Driver License No', key: 'driverLicense', width: 15 },
+        { header: 'Driver License Expiry', key: 'driverLicenseExpiry', width: 15 },
+        { header: 'Driver Type', key: 'driverType', width: 12 },
+        { header: 'Driver Status', key: 'driverStatus', width: 12 },
+        { header: 'Driver Civil Status', key: 'driverCivilStatus', width: 12 },
+        { header: 'Driver Age', key: 'driverAge', width: 8 },
+        { header: 'Driver Birthdate', key: 'driverBirthdate', width: 15 },
+        { header: 'Driver Birthplace', key: 'driverBirthplace', width: 20 },
+        { header: 'Driver Address', key: 'driverAddress', width: 40 },
+        { header: 'Driver Contact', key: 'driverContact', width: 15 },
+        { header: 'Conductor Full Name', key: 'conductorName', width: 25 },
+        { header: 'Conductor Status', key: 'conductorStatus', width: 12 },
+        { header: 'Conductor Civil Status', key: 'conductorCivilStatus', width: 12 },
+        { header: 'Conductor Gender', key: 'conductorGender', width: 10 },
+        { header: 'Conductor Age', key: 'conductorAge', width: 8 },
+        { header: 'Conductor Birthdate', key: 'conductorBirthdate', width: 15 },
+        { header: 'Conductor Birthplace', key: 'conductorBirthplace', width: 20 },
+        { header: 'Conductor Address', key: 'conductorAddress', width: 40 },
+        { header: 'Conductor Contact', key: 'conductorContact', width: 15 },
+        { header: 'Conductor Emergency Name', key: 'conductorEmergencyName', width: 25 },
+        { header: 'Conductor Emergency Contact', key: 'conductorEmergencyContact', width: 15 },
+        { header: 'Conductor Emergency Address', key: 'conductorEmergencyAddress', width: 40 },
       ];
 
       dataToExport.forEach(op => {
         const units = op.units || [];
+        const drivers = op.drivers || [];
+        const conductors = op.conductors || [];
+        
         if (units.length === 0) {
           // Add operator row even if no units
           worksheet.addRow({
@@ -372,6 +413,8 @@ const OperatorsPage = () => {
             middleName: op.middleName,
             extensionName: op.extensionName || '',
             type: op.operatorType,
+            address: formatAddress(op),
+            contact: op.contactNo,
             unitBodyNo: '-',
             unitPlateNo: '-',
             vehicleType: '-',
@@ -382,12 +425,39 @@ const OperatorsPage = () => {
             chassisNo: '-',
             yearModel: '-',
             ltfrbMchCaseNo: '-',
-            address: formatAddress(op),
-            contact: op.contactNo,
+            driverName: '-',
+            driverCpdoId: '-',
+            driverLicense: '-',
+            driverLicenseExpiry: '-',
+            driverType: '-',
+            driverStatus: '-',
+            driverCivilStatus: '-',
+            driverAge: '-',
+            driverBirthdate: '-',
+            driverBirthplace: '-',
+            driverAddress: '-',
+            driverContact: '-',
+            conductorName: '-',
+            conductorStatus: '-',
+            conductorCivilStatus: '-',
+            conductorGender: '-',
+            conductorAge: '-',
+            conductorBirthdate: '-',
+            conductorBirthplace: '-',
+            conductorAddress: '-',
+            conductorContact: '-',
+            conductorEmergencyName: '-',
+            conductorEmergencyContact: '-',
+            conductorEmergencyAddress: '-',
           });
         } else {
-          // Add a row for each unit
+          // Add a row for each unit with its assigned driver and conductor
           units.forEach(unit => {
+            // Find driver assigned to this unit
+            const assignedDriver = drivers.find(d => d.unit && String(d.unit._id) === String(unit._id));
+            // Find conductor assigned to this unit
+            const assignedConductor = conductors.find(c => c.unit && String(c.unit._id) === String(unit._id));
+            
             worksheet.addRow({
               name: getFullName(op),
               lastName: op.lastName,
@@ -395,6 +465,8 @@ const OperatorsPage = () => {
               middleName: op.middleName,
               extensionName: op.extensionName || '',
               type: op.operatorType,
+              address: formatAddress(op),
+              contact: op.contactNo,
               unitBodyNo: unit.bodyNo || '-',
               unitPlateNo: unit.plateNo || '-',
               vehicleType: unit.vehicleType || '-',
@@ -405,8 +477,30 @@ const OperatorsPage = () => {
               chassisNo: unit.chassisNo || '-',
               yearModel: unit.yearModel || '-',
               ltfrbMchCaseNo: unit.ltfrbMchCaseNo || '-',
-              address: formatAddress(op),
-              contact: op.contactNo,
+              driverName: assignedDriver ? getFullName(assignedDriver) : '-',
+              driverCpdoId: assignedDriver?.cpdoId || '-',
+              driverLicense: assignedDriver?.licenseNo || '-',
+              driverLicenseExpiry: assignedDriver?.licenseExpiryDate || '-',
+              driverType: assignedDriver?.driverType || '-',
+              driverStatus: assignedDriver?.status || '-',
+              driverCivilStatus: assignedDriver?.civilStatus || '-',
+              driverAge: assignedDriver?.age || '-',
+              driverBirthdate: assignedDriver ? formatBirthdate(assignedDriver) : '-',
+              driverBirthplace: assignedDriver?.birthplace || '-',
+              driverAddress: assignedDriver ? formatPersonAddress(assignedDriver) : '-',
+              driverContact: assignedDriver?.contactNo || '-',
+              conductorName: assignedConductor ? getFullName(assignedConductor) : '-',
+              conductorStatus: assignedConductor?.status || '-',
+              conductorCivilStatus: assignedConductor?.civilStatus || '-',
+              conductorGender: assignedConductor?.gender || '-',
+              conductorAge: assignedConductor?.age || '-',
+              conductorBirthdate: assignedConductor ? formatBirthdate(assignedConductor) : '-',
+              conductorBirthplace: assignedConductor?.birthPlace || '-',
+              conductorAddress: assignedConductor ? formatPersonAddress(assignedConductor) : '-',
+              conductorContact: assignedConductor?.contactNo || '-',
+              conductorEmergencyName: assignedConductor?.emergencyContactName || '-',
+              conductorEmergencyContact: assignedConductor?.emergencyContactNo || '-',
+              conductorEmergencyAddress: assignedConductor?.emergencyContactAddress || '-',
             });
           });
         }

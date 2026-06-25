@@ -1,0 +1,132 @@
+.user-management {
+  padding: 2rem;
+}
+
+.user-management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.user-management-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: var(--text-primary);
+}
+
+.user-management-header p {
+  margin: 0.5rem 0 0 0;
+  color: var(--text-secondary);
+}
+
+.users-list {
+  padding: 1.5rem;
+}
+
+.no-users {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 2rem;
+}
+
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.user-card {
+  background: var(--surface-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.user-card:hover {
+  border-color: var(--accent-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.user-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.user-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.user-role-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  background: var(--accent-color);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.user-card-body {
+  margin-bottom: 1rem;
+}
+
+.user-card-body h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.125rem;
+  color: var(--text-primary);
+  word-break: break-all;
+}
+
+.user-id,
+.user-created {
+  margin: 0.25rem 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.user-card-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.user-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.user-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.user-form label {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.user-form .form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
